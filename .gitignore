@@ -159,3 +159,4 @@ vite.config.ts.timestamp-*
 # Rec PM
 !.env.example
 *.tsbuildinfo
+dump.rdb

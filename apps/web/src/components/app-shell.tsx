@@ -179,6 +179,7 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
             <NotificationsBell />
           </div>
         </header>
+        {me.impersonating && <ImpersonationBanner me={me} />}
         <PlanBanner canManage={perms.has("tenant.billing")} />
         <main className="flex-1 p-4 md:p-8">{children}</main>
         <UpgradeDialog canManage={perms.has("tenant.billing")} />
@@ -265,6 +266,11 @@ function UserCard({ me, collapsed }: { me: Me; collapsed: boolean }) {
         <DropdownMenuItem onSelect={() => navigate({ to: "/workspaces" })}>
           <ArrowLeftRight /> {t("nav.switchWorkspace")}
         </DropdownMenuItem>
+        {me.user.platformRole === "super_admin" && !me.impersonating && (
+          <DropdownMenuItem onSelect={() => navigate({ to: "/plataforma" })}>
+            <Building2 /> {t("nav.platform")}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="flex items-center gap-2">
           <Languages className="size-3.5" /> {t("nav.language")}
@@ -282,6 +288,31 @@ function UserCard({ me, collapsed }: { me: Me; collapsed: boolean }) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+/** Faixa fixa enquanto o super_admin navega como outro usuário (sessão de 1 h, auditada). */
+function ImpersonationBanner({ me }: { me: Me }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const stop = async () => {
+    await authClient.admin.stopImpersonating();
+    qc.clear();
+    await navigate({ to: "/plataforma" });
+  };
+  return (
+    <div role="status" className="flex items-center gap-3 bg-amber-500 px-4 py-2 text-sm text-black">
+      <span>{t("platform.impersonatingAs", { name: me.user.name, tenant: me.tenant?.name ?? "" })}</span>
+      <Button
+        size="sm"
+        variant="outline"
+        className="ml-auto h-7 border-black/30 bg-transparent"
+        onClick={stop}
+      >
+        {t("platform.stopImpersonating")}
+      </Button>
+    </div>
   );
 }
 

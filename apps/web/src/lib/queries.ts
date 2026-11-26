@@ -46,3 +46,13 @@ export const billingQuery = queryOptions({
   queryKey: ["billing"],
   queryFn: () => unwrap(api.billing.$get()),
 });
+
+export const platformMetricsQuery = queryOptions({
+  queryKey: ["platform", "metrics"],
+  queryFn: () => unwrap(api.platform.metrics.$get()),
+});
+
+export const platformPlansQuery = queryOptions({
+  queryKey: ["platform", "plans"],
+  queryFn: () => unwrap(api.platform.plans.$get()),
+});

@@ -45,7 +45,8 @@
     "expand": "Expand menu",
     "openMenu": "Open menu",
     "userMenu": "User menu",
-    "billing": "Plan & billing"
+    "billing": "Plan & billing",
+    "platform": "Platform"
   },
   "roles": {
     "admin": "Admin",
@@ -300,5 +301,110 @@
       "member": "Ask a workspace admin to upgrade the plan.",
       "cta": "See plans"
     }
+  },
+  "platform": {
+    "title": "Platform",
+    "backToApp": "Back to app",
+    "tabs": {
+      "tenants": "Workspaces",
+      "planos": "Plans"
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "paying": "Paying",
+      "total": "Workspaces",
+      "trialing": "Trialing",
+      "trials7d": "Trials ending in 7 days",
+      "pastDue": "Past due",
+      "readOnly": "Read-only",
+      "suspended": "Suspended"
+    },
+    "search": "Search by name, slug or e-mail",
+    "filter": "Filter by status",
+    "allStatuses": "All statuses",
+    "status": {
+      "active": "Active",
+      "trialing": "Trialing",
+      "past_due": "Past due",
+      "read_only": "Read-only",
+      "suspended": "Suspended"
+    },
+    "cols": {
+      "tenant": "Workspace",
+      "plan": "Plan",
+      "usage": "Tasks this cycle",
+      "members": "Members",
+      "status": "Status",
+      "created": "Created"
+    },
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}",
+    "empty": "No workspaces found.",
+    "trialUntil": "trial until {{date}}",
+    "periodUntil": "cycle until {{date}}",
+    "impersonate": "Sign in as admin",
+    "assignPlan": "Assign plan",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{pages}}",
+    "reason": "Reason (recorded in the audit log)",
+    "plan": "Plan",
+    "months": "Months",
+    "done": {
+      "reactivate": "Workspace reactivated.",
+      "suspend": "Workspace suspended.",
+      "plan": "Plan updated."
+    },
+    "dialog": {
+      "suspend": {
+        "title": "Suspend {{name}}",
+        "text": "Nobody in the workspace can use the app until it is reactivated.",
+        "confirm": "Suspend"
+      },
+      "impersonate": {
+        "title": "Sign in as admin of {{name}}",
+        "text": "You browse as the workspace admin for up to 1 hour. Start and end are logged.",
+        "confirm": "Sign in"
+      },
+      "plan": {
+        "title": "Assign a plan to {{name}}",
+        "text": "Grants the plan without charging for the chosen period (e.g. Enterprise closed by sales).",
+        "confirm": "Assign"
+      }
+    },
+    "hidden": "Hidden",
+    "inactive": "Inactive",
+    "editPlan": "Edit",
+    "editPlanTitle": "Edit plan {{name}}",
+    "editPlanText": "Changes apply to new charges. Running subscriptions keep the provider's price.",
+    "fields": {
+      "monthly": "Monthly price (BRL)",
+      "yearly": "Yearly price (BRL)",
+      "blankNone": "Blank = no yearly plan",
+      "tasks": "Tasks per cycle",
+      "users": "Users",
+      "portalUsers": "Portal users",
+      "storage": "Storage (GB)",
+      "blankUnlimited": "Blank = unlimited",
+      "stripeMonthly": "Stripe price id (monthly)",
+      "stripeYearly": "Stripe price id (yearly)",
+      "features": "Features",
+      "startingAt": "\"Starting at\" price",
+      "isPublic": "Visible on plans page",
+      "active": "Active"
+    },
+    "feature": {
+      "clientPortal": "Client portal",
+      "eSignature": "E-signature",
+      "aiAssistant": "AI assistant",
+      "publicApi": "Public API",
+      "advancedReports": "Advanced reports",
+      "customDomain": "Custom domain",
+      "sso": "Single sign-on (SSO)"
+    },
+    "impersonatingAs": "You are browsing as {{name}} in {{tenant}}.",
+    "stopImpersonating": "Stop"
   }
 }
