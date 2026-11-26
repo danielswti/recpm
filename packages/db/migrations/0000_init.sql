@@ -62,7 +62,10 @@ CREATE TABLE "two_factors" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"user_id" uuid NOT NULL,
 	"secret" text NOT NULL,
-	"backup_codes" text NOT NULL
+	"backup_codes" text NOT NULL,
+	"verified" boolean DEFAULT true NOT NULL,
+	"failed_verification_count" integer DEFAULT 0 NOT NULL,
+	"locked_until" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "users" (

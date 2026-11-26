@@ -34,15 +34,10 @@ export const timeEntries = pgTable(
   (t) => [
     tenantUnique("time_entries_tenant_id_uq", t),
     tfk("time_entries_task_fk", t, t.taskId, tasks),
-    uniqueIndex("time_entries_one_running_uq")
-      .on(t.tenantId, t.userId)
-      .where(sql`${t.endedAt} IS NULL`),
+    uniqueIndex("time_entries_one_running_uq").on(t.tenantId, t.userId).where(sql`${t.endedAt} IS NULL`),
     index("time_entries_user_period_idx").on(t.tenantId, t.userId, t.startedAt),
     index("time_entries_task_idx").on(t.tenantId, t.taskId),
-    check(
-      "time_entries_range",
-      sql`${t.endedAt} IS NULL OR ${t.endedAt} >= ${t.startedAt}`,
-    ),
+    check("time_entries_range", sql`${t.endedAt} IS NULL OR ${t.endedAt} >= ${t.startedAt}`),
   ],
 );
 

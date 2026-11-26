@@ -28,11 +28,11 @@ import {
 } from "drizzle-orm/pg-core";
 import { cents, pk, tenantUnique, tfk, timestamps, tstz } from "./_columns";
 import { users } from "./auth";
-import { employmentType, seniorityLevel, tenantRole } from "./enums";
-import { tenantId, tenants } from "./tenants";
-import { clients } from "./clients";
 import { sectors, taskRoles } from "./catalogs";
+import { clients } from "./clients";
+import { employmentType, seniorityLevel, tenantRole } from "./enums";
 import { files } from "./files";
+import { tenantId, tenants } from "./tenants";
 
 /** Horário comercial: usado no cálculo de horas úteis (timer, SLA de cobrança). */
 export type BusinessHours = {
@@ -82,10 +82,7 @@ export const memberships = pgTable(
     tfk("memberships_sector_fk", t, t.sectorId, sectors),
     tfk("memberships_task_role_fk", t, t.defaultTaskRoleId, taskRoles),
     tfk("memberships_avatar_fk", t, t.avatarFileId, files),
-    check(
-      "memberships_cliente_has_client",
-      sql`(${t.role} = 'cliente') = (${t.clientId} IS NOT NULL)`,
-    ),
+    check("memberships_cliente_has_client", sql`(${t.role} = 'cliente') = (${t.clientId} IS NOT NULL)`),
   ],
 );
 

@@ -6,17 +6,7 @@
  * `billing_events` é global porque o webhook chega antes de sabermos o tenant.
  */
 import { sql } from "drizzle-orm";
-import {
-  boolean,
-  check,
-  index,
-  integer,
-  jsonb,
-  pgTable,
-  text,
-  uniqueIndex,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { boolean, check, index, integer, jsonb, pgTable, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { cents, createdAt, pk, timestamps, tstz } from "./_columns";
 import { billingInterval, billingProvider, subscriptionStatus } from "./enums";
 import { tenantId, tenants } from "./tenants";
@@ -80,10 +70,7 @@ export const coupons = pgTable(
   },
   (t) => [
     uniqueIndex("coupons_code_uq").on(sql`upper(${t.code})`),
-    check(
-      "coupons_one_discount",
-      sql`(${t.percentOff} IS NULL) <> (${t.amountOffCents} IS NULL)`,
-    ),
+    check("coupons_one_discount", sql`(${t.percentOff} IS NULL) <> (${t.amountOffCents} IS NULL)`),
   ],
 );
 

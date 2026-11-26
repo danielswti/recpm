@@ -11,7 +11,7 @@
  * O papel da aplicação (`recpm_app`) só pode LER `users` (nome/avatar de colegas do mesmo tenant).
  */
 import { sql } from "drizzle-orm";
-import { boolean, index, pgTable, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgTable, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { pk, timestamps, tstz } from "./_columns";
 
 export const users = pgTable(
@@ -108,6 +108,9 @@ export const twoFactors = pgTable(
     /** Criptografados pelo próprio Better Auth. */
     secret: text().notNull(),
     backupCodes: text().notNull(),
+    verified: boolean().notNull().default(true),
+    failedVerificationCount: integer().notNull().default(0),
+    lockedUntil: tstz(),
   },
   (t) => [uniqueIndex("two_factors_user_uq").on(t.userId)],
 );

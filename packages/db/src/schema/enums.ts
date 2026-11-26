@@ -62,12 +62,7 @@ export const demandStatus = pgEnum("demand_status", ["pending", "accepted", "rej
 // ── Financeiro ─────────────────────────────────────────────────────────────
 export const contractModality = pgEnum("contract_modality", ["parcelado", "mensalidade"]);
 export const contractStatus = pgEnum("contract_status", ["ativo", "concluido", "cancelado"]);
-export const installmentStatus = pgEnum("installment_status", [
-  "pendente",
-  "pago",
-  "atrasado",
-  "estornado",
-]);
+export const installmentStatus = pgEnum("installment_status", ["pendente", "pago", "atrasado", "estornado"]);
 export const paymentMethod = pgEnum("payment_method", [
   "pix",
   "boleto",
@@ -76,10 +71,7 @@ export const paymentMethod = pgEnum("payment_method", [
   "dinheiro",
   "outro",
 ]);
-export const clientSubscriptionStatus = pgEnum("client_subscription_status", [
-  "ativa",
-  "cancelada",
-]);
+export const clientSubscriptionStatus = pgEnum("client_subscription_status", ["ativa", "cancelada"]);
 
 // ── Assinatura eletrônica ──────────────────────────────────────────────────
 export const signatureStatus = pgEnum("signature_status", [
@@ -103,12 +95,7 @@ export const calendarEventSource = pgEnum("calendar_event_source", ["interno", "
 
 // ── Comunicação ────────────────────────────────────────────────────────────
 export const conversationType = pgEnum("conversation_type", ["dm", "grupo", "ia", "projeto"]);
-export const messageAuthorType = pgEnum("message_author_type", [
-  "user",
-  "assistant",
-  "system",
-  "tool",
-]);
+export const messageAuthorType = pgEnum("message_author_type", ["user", "assistant", "system", "tool"]);
 
 // ── Arquivos, integrações e jobs ───────────────────────────────────────────
 export const fileScanStatus = pgEnum("file_scan_status", ["pending", "clean", "infected", "error"]);

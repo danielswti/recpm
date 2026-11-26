@@ -129,10 +129,7 @@ export const tasks = pgTable(
       .on(t.tenantId, t.archiveRequestAt)
       .where(sql`${t.archiveRequestAt} IS NOT NULL AND NOT ${t.archived}`),
     check("tasks_piece_quantity_positive", sql`${t.pieceQuantity} >= 0`),
-    check(
-      "tasks_recurrence_has_rule",
-      sql`(${t.recurrence} IS NULL) = (${t.recurrenceRule} IS NULL)`,
-    ),
+    check("tasks_recurrence_has_rule", sql`(${t.recurrence} IS NULL) = (${t.recurrenceRule} IS NULL)`),
   ],
 );
 

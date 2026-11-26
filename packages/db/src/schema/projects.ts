@@ -90,10 +90,7 @@ export const projects = pgTable(
     index("projects_client_idx").on(t.tenantId, t.clientId),
     index("projects_manager_idx").on(t.tenantId, t.managerId),
     check("projects_client_unless_internal", sql`${t.internal} OR ${t.clientId} IS NOT NULL`),
-    check(
-      "projects_periodicity_if_monthly",
-      sql`${t.modality} = 'mensal' OR ${t.periodicity} IS NULL`,
-    ),
+    check("projects_periodicity_if_monthly", sql`${t.modality} = 'mensal' OR ${t.periodicity} IS NULL`),
   ],
 );
 

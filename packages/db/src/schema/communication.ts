@@ -41,9 +41,7 @@ export const conversations = pgTable(
     tfk("conversations_project_fk", t, t.projectId, projects).onDelete("cascade"),
     tfk("conversations_photo_fk", t, t.photoFileId, files),
     uniqueIndex("conversations_dm_uq").on(t.tenantId, t.dmKey).where(sql`${t.type} = 'dm'`),
-    uniqueIndex("conversations_project_uq")
-      .on(t.tenantId, t.projectId)
-      .where(sql`${t.type} = 'projeto'`),
+    uniqueIndex("conversations_project_uq").on(t.tenantId, t.projectId).where(sql`${t.type} = 'projeto'`),
   ],
 );
 
@@ -63,9 +61,7 @@ export const conversationParticipants = pgTable(
   },
   (t) => [
     primaryKey({ name: "conversation_participants_pk", columns: [t.conversationId, t.userId] }),
-    tfk("conversation_participants_conv_fk", t, t.conversationId, conversations).onDelete(
-      "cascade",
-    ),
+    tfk("conversation_participants_conv_fk", t, t.conversationId, conversations).onDelete("cascade"),
     index("conversation_participants_user_idx").on(t.tenantId, t.userId),
   ],
 );
@@ -127,9 +123,7 @@ export const notifications = pgTable(
   },
   (t) => [
     index("notifications_user_idx").on(t.tenantId, t.userId, t.createdAt.desc()),
-    index("notifications_unread_idx")
-      .on(t.tenantId, t.userId)
-      .where(sql`NOT ${t.read}`),
+    index("notifications_unread_idx").on(t.tenantId, t.userId).where(sql`NOT ${t.read}`),
   ],
 );
 

@@ -28,10 +28,7 @@ export const apiKeys = pgTable(
     revokedAt: tstz(),
     ...timestamps,
   },
-  (t) => [
-    uniqueIndex("api_keys_prefix_uq").on(t.prefix),
-    index("api_keys_tenant_idx").on(t.tenantId),
-  ],
+  (t) => [uniqueIndex("api_keys_prefix_uq").on(t.prefix), index("api_keys_tenant_idx").on(t.tenantId)],
 );
 
 export type AuditDetails = {
@@ -93,4 +90,3 @@ export const platformAuditLogs = pgTable(
     index("platform_audit_logs_tenant_idx").on(t.tenantId, t.createdAt.desc()),
   ],
 );
-

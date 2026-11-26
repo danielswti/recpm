@@ -162,11 +162,12 @@ BEGIN
 END $$;
 
 -- ── Tabelas globais: o que a aplicação pode ver ──────────────────────────────
--- tenants: só o tenant atual.
+-- tenants: só o tenant atual. INSERT é liberado porque o cadastro do workspace roda dentro de
+-- withTenant(<id novo>) — a política só aceita a linha cujo id é o do próprio contexto.
 DROP POLICY IF EXISTS tenant_self ON tenants;
 CREATE POLICY tenant_self ON tenants FOR ALL TO recpm_app
   USING (id = app.tenant_id()) WITH CHECK (id = app.tenant_id());
-GRANT SELECT, UPDATE ON tenants TO recpm_app;
+GRANT SELECT, INSERT, UPDATE ON tenants TO recpm_app;
 
 -- users: eu mesmo + membros do tenant atual (nomes/avatares de colegas). Escrita só via Better Auth.
 DROP POLICY IF EXISTS users_visible ON users;

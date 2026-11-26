@@ -71,9 +71,7 @@ export const briefingResponses = pgTable(
     taskId: uuid(),
     respondentId: uuid().references(() => users.id, { onDelete: "set null" }),
     answers: jsonb().$type<Record<string, string | string[]>>().notNull(),
-    snapshot: jsonb()
-      .$type<{ id: string; label: string; type: string; options: string[] }[]>()
-      .notNull(),
+    snapshot: jsonb().$type<{ id: string; label: string; type: string; options: string[] }[]>().notNull(),
     submittedAt: createdAt(),
   },
   (t) => [
@@ -84,6 +82,9 @@ export const briefingResponses = pgTable(
     tfk("briefing_responses_task_fk", t, t.taskId, tasks),
     index("briefing_responses_task_idx").on(t.tenantId, t.taskId),
     index("briefing_responses_client_idx").on(t.tenantId, t.clientId),
-    check("briefing_responses_has_subject", sql`num_nonnulls(${t.clientId}, ${t.projectId}, ${t.taskId}) > 0`),
+    check(
+      "briefing_responses_has_subject",
+      sql`num_nonnulls(${t.clientId}, ${t.projectId}, ${t.taskId}) > 0`,
+    ),
   ],
 );

@@ -1,23 +1,21 @@
 /**
- * Teste de isolamento entre tenants contra um Postgres real.
- * Na Fase 1 isto vira suíte Vitest + Testcontainers; aqui roda com `node --test` + tsx.
+ * Isolamento entre tenants contra um Postgres real (banco descartável criado no globalSetup,
+ * migrado com schema + RLS como em produção). A aplicação conecta como recpm_app.
  *
- *   DATABASE_URL_OWNER=postgres://recpm_owner@.../recpm DATABASE_URL_APP=postgres://recpm_app@.../recpm \
- *   node --import tsx --test packages/db/test/rls.test.ts
- *
- * Pré-requisito: banco migrado (0000_init.sql) + sql/rls.sql aplicados.
+ *   TEST_PG_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres pnpm --filter @recpm/db test
  */
 import assert from "node:assert/strict";
-import { after, before, describe, test } from "node:test";
 import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { uuidv7 } from "uuidv7";
+import { afterAll as after, beforeAll as before, describe, inject, test } from "vitest";
 import * as s from "../src/schema";
 import { withTenant } from "../src/tenant-context";
 
-const ownerPool = new Pool({ connectionString: process.env.DATABASE_URL_OWNER });
-const appPool = new Pool({ connectionString: process.env.DATABASE_URL_APP, max: 25 });
+const urls = inject("db");
+const ownerPool = new Pool({ connectionString: urls.owner });
+const appPool = new Pool({ connectionString: urls.app, max: 25 });
 const owner = drizzle({ client: ownerPool, schema: s, casing: "snake_case" });
 const app = drizzle({ client: appPool, schema: s, casing: "snake_case" });
 
@@ -40,9 +38,9 @@ const pgCode = (e: unknown): string | undefined => {
 
 before(async () => {
   // Seed como dono (ignora RLS), exatamente como o seed de dev fará.
-  await owner.insert(s.users).values(
-    Object.entries(U).map(([k, v]) => ({ id: v, name: k, email: `${k}@example.test` })),
-  );
+  await owner
+    .insert(s.users)
+    .values(Object.entries(U).map(([k, v]) => ({ id: v, name: k, email: `${k}@example.test` })));
   await owner.insert(s.tenants).values([
     { id: T.A, name: "Agência A", slug: `a-${T.A.slice(-6)}` },
     { id: T.B, name: "Agência B", slug: `b-${T.B.slice(-6)}` },
@@ -68,31 +66,71 @@ before(async () => {
     { id: P.b1, tenantId: T.B, name: "Projeto B1", clientId: C.b1, modality: "avulso" },
   ]);
   const task = (tid: string, tenantId: string, projectId: string, visibleToClient: boolean) => ({
-    id: tid, tenantId, projectId, title: tid, statusKey: "a_fazer", rank: "a0", visibleToClient,
+    id: tid,
+    tenantId,
+    projectId,
+    title: tid,
+    statusKey: "a_fazer",
+    rank: "a0",
+    visibleToClient,
   });
-  await owner.insert(s.tasks).values([
-    task(K.aVisible, T.A, P.a1, true),
-    task(K.aHidden, T.A, P.a1, false),
-    task(K.a2, T.A, P.a2, true),
-    task(K.b1, T.B, P.b1, true),
-  ]);
+  await owner
+    .insert(s.tasks)
+    .values([
+      task(K.aVisible, T.A, P.a1, true),
+      task(K.aHidden, T.A, P.a1, false),
+      task(K.a2, T.A, P.a2, true),
+      task(K.b1, T.B, P.b1, true),
+    ]);
   await owner.insert(s.personalNotes).values({ tenantId: T.A, userId: U.adminA, content: { type: "doc" } });
-  await owner.insert(s.conversations).values({ id: conv, tenantId: T.A, type: "grupo", name: "Diretoria", createdBy: U.adminA });
-  await owner.insert(s.conversationParticipants).values({ tenantId: T.A, conversationId: conv, userId: U.adminA });
-  await owner.insert(s.messages).values({ tenantId: T.A, conversationId: conv, authorId: U.adminA, body: "segredo" });
+  await owner
+    .insert(s.conversations)
+    .values({ id: conv, tenantId: T.A, type: "grupo", name: "Diretoria", createdBy: U.adminA });
+  await owner
+    .insert(s.conversationParticipants)
+    .values({ tenantId: T.A, conversationId: conv, userId: U.adminA });
+  await owner
+    .insert(s.messages)
+    .values({ tenantId: T.A, conversationId: conv, authorId: U.adminA, body: "segredo" });
   await owner.insert(s.plans).values({
-    id: id(), name: "Teste", slug: `teste-${T.A.slice(-6)}`, priceMonthlyCents: 0, priceYearlyCents: 0,
-    limits: { tasksPerCycle: 5, maxUsers: null, maxClientPortalUsers: null, storageGb: 1, aiMessagesPerCycle: null },
-    features: { clientPortal: true, eSignature: true, publicApi: true, aiAssistant: true, customDomain: false, advancedReports: false, outgoingWebhooks: false, sso: false },
+    id: id(),
+    name: "Teste",
+    slug: `teste-${T.A.slice(-6)}`,
+    priceMonthlyCents: 0,
+    priceYearlyCents: 0,
+    limits: {
+      tasksPerCycle: 5,
+      maxUsers: null,
+      maxClientPortalUsers: null,
+      storageGb: 1,
+      aiMessagesPerCycle: null,
+    },
+    features: {
+      clientPortal: true,
+      eSignature: true,
+      publicApi: true,
+      aiAssistant: true,
+      customDomain: false,
+      advancedReports: false,
+      outgoingWebhooks: false,
+      sso: false,
+    },
   });
   await owner.insert(s.usageCounters).values({
-    tenantId: T.A, periodStart: new Date("2026-11-01"), periodEnd: new Date("2026-12-01"),
+    tenantId: T.A,
+    periodStart: new Date("2026-11-01"),
+    periodEnd: new Date("2026-12-01"),
   });
 });
 
 after(async () => {
   await owner.delete(s.tenants).where(sql`${s.tenants.id} IN (${T.A}, ${T.B})`);
-  await owner.delete(s.users).where(sql`${s.users.id} IN (${sql.join(Object.values(U).map((u) => sql`${u}`), sql`, `)})`);
+  await owner.delete(s.users).where(
+    sql`${s.users.id} IN (${sql.join(
+      Object.values(U).map((u) => sql`${u}`),
+      sql`, `,
+    )})`,
+  );
   await ownerPool.end();
   await appPool.end();
 });
@@ -106,7 +144,9 @@ describe("isolamento entre tenants", () => {
   });
 
   test("tenant A só enxerga as próprias tarefas", async () => {
-    const rows = await withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) => tx.select().from(s.tasks));
+    const rows = await withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) =>
+      tx.select().from(s.tasks),
+    );
     assert.deepEqual(rows.map((r) => r.id).sort(), [K.aVisible, K.aHidden, K.a2].sort());
   });
 
@@ -122,7 +162,9 @@ describe("isolamento entre tenants", () => {
   test("FK composta impede apontar para projeto de outro tenant", async () => {
     await assert.rejects(
       withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) =>
-        tx.insert(s.tasks).values({ tenantId: T.A, projectId: P.b1, title: "x", statusKey: "a_fazer", rank: "a1" }),
+        tx
+          .insert(s.tasks)
+          .values({ tenantId: T.A, projectId: P.b1, title: "x", statusKey: "a_fazer", rank: "a1" }),
       ),
       (e) => pgCode(e) === "23503",
     );
@@ -140,7 +182,9 @@ describe("isolamento entre tenants", () => {
   });
 
   test("users: só eu e os membros do tenant atual", async () => {
-    const rows = await withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) => tx.select({ id: s.users.id }).from(s.users));
+    const rows = await withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) =>
+      tx.select({ id: s.users.id }).from(s.users),
+    );
     const ids = rows.map((r) => r.id);
     assert.ok(ids.includes(U.memberA) && ids.includes(U.clientUserA));
     assert.ok(!ids.includes(U.adminB));
@@ -156,20 +200,32 @@ describe("portal do cliente", () => {
 
   test("vê só tarefas visíveis dos projetos do próprio cliente", async () => {
     const rows = await withTenant(app, portal, (tx) => tx.select({ id: s.tasks.id }).from(s.tasks));
-    assert.deepEqual(rows.map((r) => r.id), [K.aVisible]);
+    assert.deepEqual(
+      rows.map((r) => r.id),
+      [K.aVisible],
+    );
   });
 
   test("vê só o próprio cliente e os projetos dele", async () => {
     const [clients, projects] = await withTenant(app, portal, (tx) =>
       Promise.all([tx.select().from(s.clients), tx.select().from(s.projects)]),
     );
-    assert.deepEqual(clients.map((c) => c.id), [C.a1]);
-    assert.deepEqual(projects.map((p) => p.id), [P.a1]);
+    assert.deepEqual(
+      clients.map((c) => c.id),
+      [C.a1],
+    );
+    assert.deepEqual(
+      projects.map((p) => p.id),
+      [P.a1],
+    );
   });
 
   test("não vê custo/hora nem dados de outros membros", async () => {
     const rows = await withTenant(app, portal, (tx) => tx.select().from(s.memberships));
-    assert.deepEqual(rows.map((r) => r.userId), [U.clientUserA]);
+    assert.deepEqual(
+      rows.map((r) => r.userId),
+      [U.clientUserA],
+    );
   });
 
   test("não acessa tabelas internas (financeiro, auditoria, tempo)", async () => {
@@ -184,7 +240,18 @@ describe("portal do cliente", () => {
 
   test("cria e apaga tarefas só nos próprios projetos, sempre visíveis", async () => {
     const created = await withTenant(app, portal, (tx) =>
-      tx.insert(s.tasks).values({ tenantId: T.A, projectId: P.a1, title: "pedido do cliente", statusKey: "a_fazer", rank: "c0", visibleToClient: true, source: "portal" }).returning(),
+      tx
+        .insert(s.tasks)
+        .values({
+          tenantId: T.A,
+          projectId: P.a1,
+          title: "pedido do cliente",
+          statusKey: "a_fazer",
+          rank: "c0",
+          visibleToClient: true,
+          source: "portal",
+        })
+        .returning(),
     );
     assert.equal(created.length, 1);
     const deleted = await withTenant(app, portal, (tx) =>
@@ -194,14 +261,32 @@ describe("portal do cliente", () => {
     // projeto de outro cliente → recusado
     await assert.rejects(
       withTenant(app, portal, (tx) =>
-        tx.insert(s.tasks).values({ tenantId: T.A, projectId: P.a2, title: "x", statusKey: "a_fazer", rank: "c1", visibleToClient: true }),
+        tx
+          .insert(s.tasks)
+          .values({
+            tenantId: T.A,
+            projectId: P.a2,
+            title: "x",
+            statusKey: "a_fazer",
+            rank: "c1",
+            visibleToClient: true,
+          }),
       ),
       (e) => pgCode(e) === "42501",
     );
     // tarefa oculta → recusado
     await assert.rejects(
       withTenant(app, portal, (tx) =>
-        tx.insert(s.tasks).values({ tenantId: T.A, projectId: P.a1, title: "x", statusKey: "a_fazer", rank: "c2", visibleToClient: false }),
+        tx
+          .insert(s.tasks)
+          .values({
+            tenantId: T.A,
+            projectId: P.a1,
+            title: "x",
+            statusKey: "a_fazer",
+            rank: "c2",
+            visibleToClient: false,
+          }),
       ),
       (e) => pgCode(e) === "42501",
     );
@@ -214,7 +299,9 @@ describe("portal do cliente", () => {
 
   test("abre demanda só para o próprio cliente", async () => {
     await withTenant(app, portal, (tx) =>
-      tx.insert(s.demandRequests).values({ tenantId: T.A, clientId: C.a1, title: "Nova arte", requestedBy: U.clientUserA }),
+      tx
+        .insert(s.demandRequests)
+        .values({ tenantId: T.A, clientId: C.a1, title: "Nova arte", requestedBy: U.clientUserA }),
     );
     await assert.rejects(
       withTenant(app, portal, (tx) =>
@@ -227,26 +314,42 @@ describe("portal do cliente", () => {
 
 describe("dados pessoais e chat", () => {
   test("nota pessoal só para o dono", async () => {
-    const mine = await withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) => tx.select().from(s.personalNotes));
-    const other = await withTenant(app, { tenantId: T.A, userId: U.memberA }, (tx) => tx.select().from(s.personalNotes));
+    const mine = await withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) =>
+      tx.select().from(s.personalNotes),
+    );
+    const other = await withTenant(app, { tenantId: T.A, userId: U.memberA }, (tx) =>
+      tx.select().from(s.personalNotes),
+    );
     assert.equal(mine.length, 1);
     assert.equal(other.length, 0);
   });
 
   test("notificação: qualquer um cria para outro, só o dono lê", async () => {
     await withTenant(app, { tenantId: T.A, userId: U.memberA }, (tx) =>
-      tx.insert(s.notifications).values({ tenantId: T.A, userId: U.adminA, type: "tarefa_aprovacao_pendente", title: "Aprovar" }),
+      tx
+        .insert(s.notifications)
+        .values({ tenantId: T.A, userId: U.adminA, type: "tarefa_aprovacao_pendente", title: "Aprovar" }),
     );
-    const byMember = await withTenant(app, { tenantId: T.A, userId: U.memberA }, (tx) => tx.select().from(s.notifications));
-    const byOwner = await withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) => tx.select().from(s.notifications));
+    const byMember = await withTenant(app, { tenantId: T.A, userId: U.memberA }, (tx) =>
+      tx.select().from(s.notifications),
+    );
+    const byOwner = await withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) =>
+      tx.select().from(s.notifications),
+    );
     assert.equal(byMember.length, 0);
     assert.equal(byOwner.length, 1);
   });
 
   test("conversa invisível para quem não participa; job 'system' enxerga", async () => {
-    const outsider = await withTenant(app, { tenantId: T.A, userId: U.memberA }, (tx) => tx.select().from(s.messages));
-    const insider = await withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) => tx.select().from(s.messages));
-    const system = await withTenant(app, { tenantId: T.A, actor: "system" }, (tx) => tx.select().from(s.messages));
+    const outsider = await withTenant(app, { tenantId: T.A, userId: U.memberA }, (tx) =>
+      tx.select().from(s.messages),
+    );
+    const insider = await withTenant(app, { tenantId: T.A, userId: U.adminA }, (tx) =>
+      tx.select().from(s.messages),
+    );
+    const system = await withTenant(app, { tenantId: T.A, actor: "system" }, (tx) =>
+      tx.select().from(s.messages),
+    );
     assert.equal(outsider.length, 0);
     assert.equal(insider.length, 1);
     assert.equal(system.length, 1);
@@ -282,7 +385,9 @@ describe("regras garantidas pelo banco", () => {
           .where(and(eq(s.usageCounters.tenantId, T.A), sql`${s.usageCounters.tasksCreated} < ${LIMIT}`))
           .returning({ n: s.usageCounters.tasksCreated });
         if (ok.length === 0) return false; // → 402 PLAN_TASK_LIMIT_REACHED
-        await tx.insert(s.tasks).values({ tenantId: T.A, title: `quota ${n}`, statusKey: "a_fazer", rank: `q${n}` });
+        await tx
+          .insert(s.tasks)
+          .values({ tenantId: T.A, title: `quota ${n}`, statusKey: "a_fazer", rank: `q${n}` });
         return true;
       });
     const results = await Promise.all(Array.from({ length: 20 }, (_, i) => attempt(i)));
@@ -292,7 +397,15 @@ describe("regras garantidas pelo banco", () => {
   });
 
   test("funções de entrada sem sessão resolvem o tenant (chave de API)", async () => {
-    await owner.insert(s.apiKeys).values({ tenantId: T.B, name: "zap", prefix: `pfx${T.B.slice(-6)}`, hashedKey: "h", createdBy: U.adminB });
+    await owner
+      .insert(s.apiKeys)
+      .values({
+        tenantId: T.B,
+        name: "zap",
+        prefix: `pfx${T.B.slice(-6)}`,
+        hashedKey: "h",
+        createdBy: U.adminB,
+      });
     const r = await app.execute(sql`SELECT tenant_id FROM app.resolve_api_key(${`pfx${T.B.slice(-6)}`})`);
     assert.equal(r.rows[0]?.tenant_id, T.B);
   });

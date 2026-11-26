@@ -101,10 +101,7 @@ export const installments = pgTable(
     index("installments_due_idx").on(t.tenantId, t.status, t.dueDate),
     index("installments_client_idx").on(t.tenantId, t.clientId, t.status),
     index("installments_paid_idx").on(t.tenantId, t.paidAt),
-    check(
-      "installments_one_parent",
-      sql`num_nonnulls(${t.contractId}, ${t.clientSubscriptionId}) = 1`,
-    ),
+    check("installments_one_parent", sql`num_nonnulls(${t.contractId}, ${t.clientSubscriptionId}) = 1`),
     check(
       "installments_paid_fields",
       sql`${t.status} <> 'pago' OR (${t.paidAt} IS NOT NULL AND ${t.paidAmountCents} IS NOT NULL)`,
