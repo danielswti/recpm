@@ -181,11 +181,24 @@ export const createAuth = (deps: Deps) => {
           });
         }
       }),
+      // Auditoria da personificação pelo super_admin (início e fim), com IP.
+      after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== "/admin/impersonate-user" && ctx.path !== "/admin/stop-impersonating") return;
+        if (ctx.context.returned instanceof Error) return;
+        const actorId = ctx.context.session?.session.impersonatedBy ?? ctx.context.session?.user.id ?? null;
+        await dbs.platformDb.insert(schema.platformAuditLogs).values({
+          actorId,
+          action: ctx.path === "/admin/impersonate-user" ? "user.impersonate.start" : "user.impersonate.stop",
+          details: { userId: ctx.body?.userId ?? ctx.context.session?.user.id ?? null },
+          ip: ctx.request?.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+        });
+      }),
     },
     plugins: [
       twoFactor({ issuer: "Rec PM", schema: { twoFactor: { modelName: "twoFactors" } } }),
       admin({
         defaultRole: "user",
+        impersonationSessionDuration: 60 * 60, // 1 h
         adminRoles: ["super_admin"],
         roles: { user: platformUserAc, super_admin: platformAdminAc },
       }),

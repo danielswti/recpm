@@ -14,6 +14,7 @@ import { loadSession } from "./middleware/session";
 import { billingRoutes } from "./routes/billing";
 import { meRoutes } from "./routes/me";
 import { memberRoutes } from "./routes/members";
+import { platformRoutes } from "./routes/platform";
 import { webhookRoutes } from "./routes/webhooks";
 import { workspaceRoutes } from "./routes/workspaces";
 import type { AppEnv } from "./types";
@@ -86,7 +87,8 @@ export const createApp = (deps: Deps) => {
     .route("/api/v1", meRoutes(deps))
     .route("/api/v1", workspaceRoutes(deps))
     .route("/api/v1", memberRoutes(deps))
-    .route("/api/v1", billingRoutes(deps, billing));
+    .route("/api/v1", billingRoutes(deps, billing))
+    .route("/api/v1", platformRoutes(deps));
 
   app.doc31("/api/openapi.json", {
     openapi: "3.1.0",
