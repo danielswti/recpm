@@ -43,11 +43,14 @@ export async function createTestDatabase(adminUrl: string): Promise<TestDbUrls> 
   const admin = new Client({ connectionString: adminUrl });
   await admin.connect();
   try {
+    // Suítes rodam em paralelo (turbo): papéis são globais ao cluster, então a criação é serializada.
+    await admin.query("SELECT pg_advisory_lock(hashtext('recpm_test_roles'))");
     for (const [role, attrs] of Object.entries(ROLES)) {
       const exists = await admin.query("SELECT 1 FROM pg_roles WHERE rolname = $1", [role]);
       if (exists.rowCount === 0)
         await admin.query(`CREATE ROLE ${role} ${attrs} PASSWORD '${TEST_PASSWORD}'`);
     }
+    await admin.query("SELECT pg_advisory_unlock(hashtext('recpm_test_roles'))");
     await admin.query(`CREATE DATABASE ${name} OWNER recpm_owner`);
     await admin.query(`REVOKE ALL ON DATABASE ${name} FROM PUBLIC`);
     await admin.query(`GRANT CONNECT ON DATABASE ${name} TO recpm_app, recpm_auth, recpm_platform`);
