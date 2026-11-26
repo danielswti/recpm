@@ -1,0 +1,54 @@
+# Ambiente de desenvolvimento: só os serviços de apoio. API, worker e web rodam no host (pnpm dev).
+name: recpm-dev
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: recpm
+      # lidas por postgres/init/01-roles.sql (\getenv)
+      RECPM_OWNER_PASSWORD: ${RECPM_OWNER_PASSWORD:-recpm_owner}
+      RECPM_APP_PASSWORD: ${RECPM_APP_PASSWORD:-recpm_app}
+      RECPM_AUTH_PASSWORD: ${RECPM_AUTH_PASSWORD:-recpm_auth}
+      RECPM_PLATFORM_PASSWORD: ${RECPM_PLATFORM_PASSWORD:-recpm_platform}
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d recpm"]
+      interval: 5s
+      retries: 10
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:-minio}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:-minio12345}
+    ports: ["9000:9000", "9001:9001"]
+    volumes:
+      - miniodata:/data
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    ports: ["3001:3000"]
+
+  # Caixa de e-mail de desenvolvimento (SMTP 1025, UI em http://localhost:8025)
+  mailpit:
+    image: axllent/mailpit:latest
+    ports: ["1025:1025", "8025:8025"]
+
+volumes:
+  pgdata:
+  miniodata:

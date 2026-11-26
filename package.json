@@ -1,0 +1,25 @@
+{
+  "name": "recpm",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.11"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "db:migrate": "pnpm --filter @recpm/db migrate",
+    "db:generate": "pnpm --filter @recpm/db db:generate",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.yml down"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.9",
+    "turbo": "2.11.13",
+    "typescript": "5.9.3"
+  }
+}
