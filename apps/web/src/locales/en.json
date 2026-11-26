@@ -73,7 +73,7 @@
   },
   "signup": {
     "title": "Create your account",
-    "subtitle": "Your workspace starts with a 14-day Pro trial.",
+    "subtitle": "Your workspace starts with a 14-day Profissional trial.",
     "invitedSubtitle": "Create your account to accept the invitation.",
     "yourName": "Your name",
     "workspaceName": "Agency name",
@@ -118,12 +118,12 @@
     "empty": "You are not part of any workspace yet.",
     "create": "Create workspace",
     "createTitle": "New workspace",
-    "createDescription": "One workspace per agency. Starts with a 14-day Pro trial."
+    "createDescription": "One workspace per agency. Starts with a 14-day Profissional trial."
   },
   "dashboard": {
     "greeting": "Hi, {{name}}",
     "intro": "This is your {{workspace}} workspace. Projects, tasks and reports arrive in the next phases.",
-    "trial": "Pro trial active.",
+    "trial": "Profissional trial active.",
     "nextSteps": "Next steps",
     "inviteTeam": "Invite your team",
     "inviteTeamDesc": "Managers and staff join through the invitation link.",

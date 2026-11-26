@@ -37,13 +37,16 @@ export const plans = pgTable(
     name: text().notNull(),
     slug: text().notNull(),
     priceMonthlyCents: cents().notNull(),
-    priceYearlyCents: cents().notNull(),
+    /** null = plano sem opção anual. */
+    priceYearlyCents: cents(),
     currency: text().notNull().default("BRL"),
     limits: jsonb().$type<PlanLimits>().notNull(),
     features: jsonb().$type<PlanFeatures>().notNull(),
     stripePriceIds: jsonb().$type<{ monthly?: string; yearly?: string }>().notNull().default({}),
     asaasPlanIds: jsonb().$type<{ monthly?: string; yearly?: string }>().notNull().default({}),
     trialDays: integer().notNull().default(14),
+    /** "A partir de": preço de referência; o valor final é negociado (ex.: Enterprise). */
+    priceIsStartingAt: boolean().notNull().default(false),
     /** Planos ocultos (ex.: contratos sob medida) não aparecem na página de preços. */
     isPublic: boolean().notNull().default(true),
     active: boolean().notNull().default(true),

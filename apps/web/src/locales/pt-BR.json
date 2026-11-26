@@ -73,7 +73,7 @@
   },
   "signup": {
     "title": "Criar sua conta",
-    "subtitle": "Seu workspace começa com 14 dias de teste do plano Pro.",
+    "subtitle": "Seu workspace começa com 14 dias de teste do plano Profissional.",
     "invitedSubtitle": "Crie sua conta para aceitar o convite.",
     "yourName": "Seu nome",
     "workspaceName": "Nome da agência",
@@ -118,12 +118,12 @@
     "empty": "Você ainda não participa de nenhum workspace.",
     "create": "Criar workspace",
     "createTitle": "Novo workspace",
-    "createDescription": "Um workspace por agência. Começa com 14 dias de teste do plano Pro."
+    "createDescription": "Um workspace por agência. Começa com 14 dias de teste do plano Profissional."
   },
   "dashboard": {
     "greeting": "Olá, {{name}}",
     "intro": "Este é o seu workspace {{workspace}}. Projetos, tarefas e relatórios chegam nas próximas fases.",
-    "trial": "Teste do plano Pro ativo.",
+    "trial": "Teste do plano Profissional ativo.",
     "nextSteps": "Próximos passos",
     "inviteTeam": "Convide sua equipe",
     "inviteTeamDesc": "Gestores e funcionários entram pelo link do convite.",

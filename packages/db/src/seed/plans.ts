@@ -1,6 +1,6 @@
 /**
  * Planos padrão (§4). Ficam no banco e são editáveis pelo super_admin — nada é hard-coded na
- * aplicação. Preços são PROVISÓRIOS (a definir antes da Fase 2, quando entra a cobrança).
+ * aplicação.
  */
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import { type PlanFeatures, type PlanLimits, plans } from "../schema";
@@ -24,58 +24,46 @@ const l = (tasksPerCycle: number | null, maxUsers: number | null, storageGb: num
   aiMessagesPerCycle: tasksPerCycle === null ? null : tasksPerCycle * 2,
 });
 
+/**
+ * Planos definidos pelo usuário em 2026-11-26 (preços mensais em centavos, BRL).
+ * Opção anual fica desligada (priceYearlyCents null) até haver preço anual definido.
+ */
 export const DEFAULT_PLANS = [
   {
-    slug: "free",
-    name: "Free",
+    slug: "basico",
+    name: "Básico",
     sortOrder: 0,
     priceMonthlyCents: 0,
-    priceYearlyCents: 0,
+    priceYearlyCents: null,
+    trialDays: 0,
     limits: l(50, 3, 1),
     features: f({}),
   },
   {
-    slug: "starter",
-    name: "Starter",
+    slug: "essencial",
+    name: "Essencial",
     sortOrder: 1,
-    priceMonthlyCents: 0,
-    priceYearlyCents: 0,
+    priceMonthlyCents: 9900,
+    priceYearlyCents: null,
     limits: l(300, 10, 20),
     features: f({ clientPortal: true }),
   },
   {
-    slug: "pro",
-    name: "Pro",
+    slug: "profissional",
+    name: "Profissional",
     sortOrder: 2,
-    priceMonthlyCents: 0,
-    priceYearlyCents: 0,
+    priceMonthlyCents: 24700,
+    priceYearlyCents: null,
     limits: l(1500, 30, 100),
     features: f({ clientPortal: true, eSignature: true, aiAssistant: true, publicApi: true }),
   },
   {
-    slug: "business",
-    name: "Business",
-    sortOrder: 3,
-    priceMonthlyCents: 0,
-    priceYearlyCents: 0,
-    limits: l(5000, 100, 500),
-    features: f({
-      clientPortal: true,
-      eSignature: true,
-      aiAssistant: true,
-      publicApi: true,
-      customDomain: true,
-      advancedReports: true,
-      outgoingWebhooks: true,
-    }),
-  },
-  {
     slug: "enterprise",
     name: "Enterprise",
-    sortOrder: 4,
-    priceMonthlyCents: 0,
-    priceYearlyCents: 0,
-    isPublic: false,
+    sortOrder: 3,
+    priceMonthlyCents: 31900,
+    priceYearlyCents: null,
+    priceIsStartingAt: true,
     limits: l(null, null, 2000),
     features: f({
       clientPortal: true,
@@ -91,7 +79,10 @@ export const DEFAULT_PLANS = [
 ] as const;
 
 /** Plano usado durante o trial de 14 dias. */
-export const TRIAL_PLAN_SLUG = "pro";
+export const TRIAL_PLAN_SLUG = "profissional";
+
+/** Plano para onde o tenant volta quando o trial acaba sem assinatura paga. */
+export const FREE_PLAN_SLUG = "basico";
 
 // biome-ignore lint/suspicious/noExplicitAny: aceita qualquer instância/tx do Drizzle com este schema
 export async function seedPlans(db: NodePgDatabase<any>): Promise<number> {
