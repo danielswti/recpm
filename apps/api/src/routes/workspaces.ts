@@ -35,7 +35,11 @@ const createWorkspace = createRoute({
   tags: ["Workspaces"],
   summary: "Cria um workspace (tenant) com trial e catálogos padrão",
   request: {
-    body: { content: { "application/json": { schema: createWorkspaceSchema.openapi("CreateWorkspace") } } },
+    body: {
+      content: {
+        "application/json": { schema: z.object(createWorkspaceSchema.shape).openapi("CreateWorkspace") },
+      },
+    },
   },
   responses: {
     201: {

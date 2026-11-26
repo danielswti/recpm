@@ -15,6 +15,13 @@ const schema = z.object({
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default("Rec PM <nao-responda@localhost>"),
   SMTP_URL: z.string().optional(),
+  // Cobrança (sem chaves = cobrança desligada; o trial e o plano gratuito funcionam normalmente)
+  BILLING_PROVIDER: z.enum(["stripe", "asaas"]).default("stripe"),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  ASAAS_API_KEY: z.string().optional(),
+  ASAAS_BASE_URL: z.url().default("https://api-sandbox.asaas.com/v3"),
+  ASAAS_WEBHOOK_TOKEN: z.string().optional(),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 

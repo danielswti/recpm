@@ -239,6 +239,7 @@ export async function runBillingCycle(db: AppDb, now = new Date()): Promise<Cycl
         and(eq(ts.status, "trialing"), lte(ts.trialEndsAt, now), unpaid),
         and(inArray(ts.status, ["active", "canceled"]), lte(ts.currentPeriodEnd, now), unpaid),
         and(eq(ts.status, "past_due"), isNotNull(ts.graceEndsAt), lte(ts.graceEndsAt, now)),
+        and(eq(ts.cancelAtPeriodEnd, true), lte(ts.currentPeriodEnd, now)),
       ),
     );
 
@@ -258,6 +259,26 @@ export async function runBillingCycle(db: AppDb, now = new Date()): Promise<Cycl
         });
         await audit(tx, sub.tenantId, "billing.trial_ended", { plan: FREE_PLAN_SLUG });
         report.trialsEnded++;
+        return;
+      }
+
+      // Cancelamento ao fim do ciclo de assinatura paga (o Asaas não avisa; no Stripe é rede de segurança).
+      if (sub.cancelAtPeriodEnd && sub.currentPeriodEnd <= now && !isUnpaid) {
+        const free = await planBySlug(tx, FREE_PLAN_SLUG);
+        await openPeriod(tx, sub, now, addMonths(now, 1), {
+          planId: free.id,
+          pendingPlanId: null,
+          status: "active",
+          provider: null,
+          providerSubscriptionId: null,
+          cancelAtPeriodEnd: false,
+          canceledAt: now,
+          pastDueSince: null,
+          graceEndsAt: null,
+        });
+        await reactivate(tx, sub.tenantId);
+        await audit(tx, sub.tenantId, "billing.subscription_canceled", { atPeriodEnd: true });
+        report.periodsRolled++;
         return;
       }
 

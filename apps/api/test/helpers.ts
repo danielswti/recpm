@@ -2,13 +2,14 @@ import { createHmac } from "node:crypto";
 import { createDbs } from "@recpm/db";
 import { inject } from "vitest";
 import { createApp } from "../src/app";
+import type { Deps } from "../src/deps";
 import { parseEnv } from "../src/env";
 import { createLogger } from "../src/lib/logger";
 import { memoryMailer } from "../src/lib/mailer";
 
 export const WEB = "http://localhost:5173";
 
-export function setupApp() {
+export function setupApp(opts: { env?: Record<string, string>; billing?: Deps["billing"] } = {}) {
   const db = inject("db");
   const env = parseEnv({
     NODE_ENV: "test",
@@ -19,6 +20,7 @@ export function setupApp() {
     DATABASE_URL_PLATFORM: db.platform,
     BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret-123",
     LOG_LEVEL: "silent",
+    ...opts.env,
   });
   const dbs = createDbs({
     DATABASE_URL_APP: db.app,
@@ -26,8 +28,9 @@ export function setupApp() {
     DATABASE_URL_PLATFORM: db.platform,
   });
   const mailer = memoryMailer();
-  const app = createApp({ env, dbs, mailer, logger: createLogger("silent") });
-  return { app, dbs, mailer, urls: db };
+  const deps: Deps = { env, dbs, mailer, logger: createLogger("silent"), billing: opts.billing };
+  const app = createApp(deps);
+  return { app, dbs, mailer, urls: db, deps };
 }
 
 type App = ReturnType<typeof setupApp>["app"];

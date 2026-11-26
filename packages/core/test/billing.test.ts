@@ -377,3 +377,18 @@ describe("troca de plano", () => {
     expect(await mode(free, "essencial")).toBe("checkout");
   });
 });
+
+describe("cancelamento ao fim do ciclo (assinatura paga)", () => {
+  test("ciclo vencido com cancelAtPeriodEnd volta ao Básico e solta o provedor", async () => {
+    const t = await tenant({
+      planSlug: "essencial",
+      provider: "asaas",
+      providerSubscriptionId: `sub_${t8()}`,
+      cancelAtPeriodEnd: true,
+      currentPeriodStart: addMonths(new Date(), -1),
+      currentPeriodEnd: addDays(new Date(), -1),
+    });
+    await runBillingCycle(platform);
+    expect(await sub(t)).toMatchObject({ planId: plan.basico!.id, provider: null, cancelAtPeriodEnd: false });
+  });
+});

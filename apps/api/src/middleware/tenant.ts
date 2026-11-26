@@ -31,6 +31,18 @@ export const requireTenant = (dbs: Dbs) =>
     });
     if (!found.m?.active) throw new AppError(403, "NOT_A_MEMBER", "Você não faz parte deste workspace.");
     if (found.t?.status === "suspended") throw new AppError(403, "TENANT_SUSPENDED", "Workspace suspenso.");
+    // Somente leitura (pagamento em atraso após a carência): leitura liberada, escrita só na cobrança.
+    if (
+      found.t?.status === "read_only" &&
+      c.req.method !== "GET" &&
+      c.req.method !== "HEAD" &&
+      !c.req.path.startsWith("/api/v1/billing")
+    )
+      throw new AppError(
+        403,
+        "TENANT_READ_ONLY",
+        "Workspace em modo somente leitura. Regularize a assinatura.",
+      );
 
     const context: TenantContext = {
       tenantId,
@@ -42,6 +54,7 @@ export const requireTenant = (dbs: Dbs) =>
       userId,
       role: found.m.role,
       clientId: found.m.clientId,
+      status: found.t?.status ?? "active",
       context,
       tx: (fn) => withTenant(dbs.appDb, context, fn),
     });

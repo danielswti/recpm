@@ -7,6 +7,7 @@ export {
   recordPlanChange,
 } from "./billing/plan-change";
 export { consumeTaskQuota, type QuotaResult } from "./billing/quota";
+export { assertSeatAvailable } from "./billing/seats";
 export {
   applyBillingEvent,
   type BillingEvent,
