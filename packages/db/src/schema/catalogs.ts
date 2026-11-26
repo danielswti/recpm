@@ -17,7 +17,6 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { catalogColumns, pk, tenantUnique, tfk, timestamps } from "./_columns";
-import { reportCategory } from "./enums";
 import { tenantId } from "./tenants";
 
 /** Ex.: Avulso, Mensal, Evento, Clipe. */
@@ -37,6 +36,27 @@ export const projectTypes = pgTable(
   ],
 );
 
+/**
+ * Categorias de relatório, editáveis por tenant (agrupam tipos de tarefa em "Contratado × Entregue",
+ * "Peças por tipo" etc.). Semeadas com Artes, Vídeos, Captações e Planejamento; tipo de tarefa
+ * sem categoria aparece como "Outros".
+ */
+export const reportCategories = pgTable(
+  "report_categories",
+  {
+    id: pk(),
+    tenantId: tenantId(),
+    slug: text().notNull(),
+    label: text().notNull(),
+    ...catalogColumns,
+    ...timestamps,
+  },
+  (t) => [
+    tenantUnique("report_categories_tenant_id_uq", t),
+    uniqueIndex("report_categories_tenant_slug_uq").on(t.tenantId, t.slug),
+  ],
+);
+
 /** Ex.: Arte digital, Capa, Captação, Edição, Filme, Fotos, Identidade visual… */
 export const taskTypes = pgTable(
   "task_types",
@@ -50,8 +70,8 @@ export const taskTypes = pgTable(
     sellable: boolean().notNull().default(true),
     /** Aparece como opção de "tipo" ao criar tarefa. */
     usableAsType: boolean().notNull().default(true),
-    /** NULL = "Outros" nos relatórios. */
-    reportCategory: reportCategory(),
+    /** Categoria de relatório do tenant. NULL = "Outros" nos relatórios. */
+    reportCategoryId: uuid(),
     /** Entregas deste tipo contam como "peças" (produtividade, contratado × entregue). */
     countsAsPiece: boolean().notNull().default(true),
     ...catalogColumns,
@@ -60,6 +80,7 @@ export const taskTypes = pgTable(
   (t) => [
     tenantUnique("task_types_tenant_id_uq", t),
     uniqueIndex("task_types_tenant_slug_uq").on(t.tenantId, t.slug),
+    tfk("task_types_report_category_fk", t, t.reportCategoryId, reportCategories),
   ],
 );
 

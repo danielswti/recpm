@@ -25,13 +25,6 @@ export const seniorityLevel = pgEnum("seniority_level", ["junior", "pleno", "sen
 export const employmentType = pgEnum("employment_type", ["clt", "pj", "terceirizado"]);
 
 // ── Catálogos ──────────────────────────────────────────────────────────────
-/** NULL em task_types.report_category = "Outros". */
-export const reportCategory = pgEnum("report_category", [
-  "artes",
-  "videos",
-  "captacoes",
-  "planejamento",
-]);
 export const briefingFieldType = pgEnum("briefing_field_type", [
   "texto",
   "paragrafo",

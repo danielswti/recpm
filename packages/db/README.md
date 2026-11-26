@@ -4,7 +4,7 @@ Schema Drizzle, migrações, políticas RLS e helper de contexto de tenant do Re
 
 | Caminho | Conteúdo |
 | --- | --- |
-| `src/schema/` | 72 tabelas, um arquivo por domínio (§5 da especificação) |
+| `src/schema/` | 73 tabelas, um arquivo por domínio (§5 da especificação) |
 | `src/tenant-context.ts` | `withTenant()`: única forma de a API/worker tocar dados de tenant |
 | `src/client.ts` | Três pools: `recpm_app` (RLS), `recpm_auth` (Better Auth), `recpm_platform` (super admin) |
 | `migrations/0000_init.sql` | Gerada pelo drizzle-kit a partir do schema |

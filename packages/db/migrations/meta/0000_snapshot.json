@@ -1,5 +1,5 @@
 {
-  "id": "cdda8c7a-7155-48cf-933b-fd98f98e66f7",
+  "id": "b43b4d69-6beb-4699-8a90-fdaca38e2ae7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -3310,6 +3310,128 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.report_categories": {
+      "name": "report_categories",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "report_categories_tenant_slug_uq": {
+          "name": "report_categories_tenant_slug_uq",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "report_categories_tenant_id_tenants_id_fk": {
+          "name": "report_categories_tenant_id_tenants_id_fk",
+          "tableFrom": "report_categories",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "report_categories_tenant_id_uq": {
+          "name": "report_categories_tenant_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tenant_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.sectors": {
       "name": "sectors",
       "schema": "",
@@ -3821,10 +3943,9 @@
           "notNull": true,
           "default": true
         },
-        "report_category": {
-          "name": "report_category",
-          "type": "report_category",
-          "typeSchema": "public",
+        "report_category_id": {
+          "name": "report_category_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -3911,6 +4032,21 @@
             "id"
           ],
           "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "task_types_report_category_fk": {
+          "name": "task_types_report_category_fk",
+          "tableFrom": "task_types",
+          "tableTo": "report_categories",
+          "columnsFrom": [
+            "tenant_id",
+            "report_category_id"
+          ],
+          "columnsTo": [
+            "tenant_id",
+            "id"
+          ],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -11630,16 +11766,6 @@
         "diaria",
         "semanal",
         "mensal"
-      ]
-    },
-    "public.report_category": {
-      "name": "report_category",
-      "schema": "public",
-      "values": [
-        "artes",
-        "videos",
-        "captacoes",
-        "planejamento"
       ]
     },
     "public.review_status": {

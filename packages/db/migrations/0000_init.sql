@@ -21,7 +21,6 @@ CREATE TYPE "public"."project_modality" AS ENUM('mensal', 'avulso');--> statemen
 CREATE TYPE "public"."project_periodicity" AS ENUM('mensal', 'anual');--> statement-breakpoint
 CREATE TYPE "public"."project_status" AS ENUM('planejamento', 'ativo', 'em_validacao', 'pausado', 'entregue_suporte', 'concluido');--> statement-breakpoint
 CREATE TYPE "public"."recurrence" AS ENUM('diaria', 'semanal', 'mensal');--> statement-breakpoint
-CREATE TYPE "public"."report_category" AS ENUM('artes', 'videos', 'captacoes', 'planejamento');--> statement-breakpoint
 CREATE TYPE "public"."review_status" AS ENUM('pending', 'approved', 'rejected');--> statement-breakpoint
 CREATE TYPE "public"."seniority_level" AS ENUM('junior', 'pleno', 'senior');--> statement-breakpoint
 CREATE TYPE "public"."signature_status" AS ENUM('rascunho', 'enviado', 'assinado', 'recusado', 'cancelado');--> statement-breakpoint
@@ -389,6 +388,20 @@ CREATE TABLE "project_types" (
 	CONSTRAINT "project_types_tenant_id_uq" UNIQUE("tenant_id","id")
 );
 --> statement-breakpoint
+CREATE TABLE "report_categories" (
+	"id" uuid PRIMARY KEY NOT NULL,
+	"tenant_id" uuid NOT NULL,
+	"slug" text NOT NULL,
+	"label" text NOT NULL,
+	"color" text,
+	"icon" text,
+	"position" integer DEFAULT 0 NOT NULL,
+	"active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "report_categories_tenant_id_uq" UNIQUE("tenant_id","id")
+);
+--> statement-breakpoint
 CREATE TABLE "sectors" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"tenant_id" uuid NOT NULL,
@@ -446,7 +459,7 @@ CREATE TABLE "task_types" (
 	"default_estimated_hours" numeric(6, 2),
 	"sellable" boolean DEFAULT true NOT NULL,
 	"usable_as_type" boolean DEFAULT true NOT NULL,
-	"report_category" "report_category",
+	"report_category_id" uuid,
 	"counts_as_piece" boolean DEFAULT true NOT NULL,
 	"color" text,
 	"icon" text,
@@ -1142,12 +1155,14 @@ ALTER TABLE "adjustment_reasons" ADD CONSTRAINT "adjustment_reasons_tenant_id_te
 ALTER TABLE "kanban_columns" ADD CONSTRAINT "kanban_columns_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "project_tags" ADD CONSTRAINT "project_tags_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "project_types" ADD CONSTRAINT "project_types_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "report_categories" ADD CONSTRAINT "report_categories_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sectors" ADD CONSTRAINT "sectors_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tags" ADD CONSTRAINT "tags_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "task_roles" ADD CONSTRAINT "task_roles_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "task_type_checklist_items" ADD CONSTRAINT "task_type_checklist_items_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "task_type_checklist_items" ADD CONSTRAINT "task_type_checklist_items_type_fk" FOREIGN KEY ("tenant_id","task_type_id") REFERENCES "public"."task_types"("tenant_id","id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "task_types" ADD CONSTRAINT "task_types_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "task_types" ADD CONSTRAINT "task_types_report_category_fk" FOREIGN KEY ("tenant_id","report_category_id") REFERENCES "public"."report_categories"("tenant_id","id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "briefing_fields" ADD CONSTRAINT "briefing_fields_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "briefing_fields" ADD CONSTRAINT "briefing_fields_form_fk" FOREIGN KEY ("tenant_id","form_id") REFERENCES "public"."briefing_forms"("tenant_id","id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "briefing_forms" ADD CONSTRAINT "briefing_forms_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -1334,6 +1349,7 @@ CREATE UNIQUE INDEX "adjustment_reasons_tenant_slug_uq" ON "adjustment_reasons" 
 CREATE UNIQUE INDEX "kanban_columns_one_final_uq" ON "kanban_columns" USING btree ("tenant_id") WHERE "kanban_columns"."is_final";--> statement-breakpoint
 CREATE UNIQUE INDEX "project_tags_tenant_slug_uq" ON "project_tags" USING btree ("tenant_id","slug");--> statement-breakpoint
 CREATE UNIQUE INDEX "project_types_tenant_slug_uq" ON "project_types" USING btree ("tenant_id","slug");--> statement-breakpoint
+CREATE UNIQUE INDEX "report_categories_tenant_slug_uq" ON "report_categories" USING btree ("tenant_id","slug");--> statement-breakpoint
 CREATE UNIQUE INDEX "sectors_tenant_name_uq" ON "sectors" USING btree ("tenant_id",lower("name"));--> statement-breakpoint
 CREATE UNIQUE INDEX "tags_tenant_name_uq" ON "tags" USING btree ("tenant_id",lower("name"));--> statement-breakpoint
 CREATE UNIQUE INDEX "task_roles_tenant_name_uq" ON "task_roles" USING btree ("tenant_id",lower("name"));--> statement-breakpoint
