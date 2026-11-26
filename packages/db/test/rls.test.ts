@@ -261,32 +261,28 @@ describe("portal do cliente", () => {
     // projeto de outro cliente → recusado
     await assert.rejects(
       withTenant(app, portal, (tx) =>
-        tx
-          .insert(s.tasks)
-          .values({
-            tenantId: T.A,
-            projectId: P.a2,
-            title: "x",
-            statusKey: "a_fazer",
-            rank: "c1",
-            visibleToClient: true,
-          }),
+        tx.insert(s.tasks).values({
+          tenantId: T.A,
+          projectId: P.a2,
+          title: "x",
+          statusKey: "a_fazer",
+          rank: "c1",
+          visibleToClient: true,
+        }),
       ),
       (e) => pgCode(e) === "42501",
     );
     // tarefa oculta → recusado
     await assert.rejects(
       withTenant(app, portal, (tx) =>
-        tx
-          .insert(s.tasks)
-          .values({
-            tenantId: T.A,
-            projectId: P.a1,
-            title: "x",
-            statusKey: "a_fazer",
-            rank: "c2",
-            visibleToClient: false,
-          }),
+        tx.insert(s.tasks).values({
+          tenantId: T.A,
+          projectId: P.a1,
+          title: "x",
+          statusKey: "a_fazer",
+          rank: "c2",
+          visibleToClient: false,
+        }),
       ),
       (e) => pgCode(e) === "42501",
     );
@@ -397,15 +393,13 @@ describe("regras garantidas pelo banco", () => {
   });
 
   test("funções de entrada sem sessão resolvem o tenant (chave de API)", async () => {
-    await owner
-      .insert(s.apiKeys)
-      .values({
-        tenantId: T.B,
-        name: "zap",
-        prefix: `pfx${T.B.slice(-6)}`,
-        hashedKey: "h",
-        createdBy: U.adminB,
-      });
+    await owner.insert(s.apiKeys).values({
+      tenantId: T.B,
+      name: "zap",
+      prefix: `pfx${T.B.slice(-6)}`,
+      hashedKey: "h",
+      createdBy: U.adminB,
+    });
     const r = await app.execute(sql`SELECT tenant_id FROM app.resolve_api_key(${`pfx${T.B.slice(-6)}`})`);
     assert.equal(r.rows[0]?.tenant_id, T.B);
   });

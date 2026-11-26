@@ -11,7 +11,12 @@ export interface Mailer {
   send(mail: Mail): Promise<void>;
 }
 
-export const createMailer = (opts: { resendApiKey?: string; smtpUrl?: string; from: string }): Mailer => {
+export const createMailer = (opts: {
+  resendApiKey?: string;
+  smtpUrl?: string;
+  from: string;
+  production: boolean;
+}): Mailer => {
   if (opts.resendApiKey) {
     const resend = new Resend(opts.resendApiKey);
     return {
@@ -25,7 +30,9 @@ export const createMailer = (opts: { resendApiKey?: string; smtpUrl?: string; fr
     const t = nodemailer.createTransport(opts.smtpUrl);
     return { send: async (m) => void (await t.sendMail({ from: opts.from, ...m })) };
   }
-  return { send: async (m) => console.info(`[mailer] (sem transporte) para ${m.to}: ${m.subject}`) };
+  if (opts.production) throw new Error("E-mail sem transporte: defina RESEND_API_KEY ou SMTP_URL");
+  // Dev sem Mailpit: imprime o texto (com os links) no console.
+  return { send: async (m) => console.info(`[mailer] para ${m.to}: ${m.subject}\n${m.text}`) };
 };
 
 export const memoryMailer = () => {

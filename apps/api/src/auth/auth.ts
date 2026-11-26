@@ -15,7 +15,7 @@ import { admin, organization, twoFactor } from "better-auth/plugins";
 import { createAccessControl } from "better-auth/plugins/access";
 import { adminAc as platformAdminAc, userAc as platformUserAc } from "better-auth/plugins/admin/access";
 import { defaultStatements } from "better-auth/plugins/organization/access";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { uuidv7 } from "uuidv7";
 import type { Deps } from "../deps";
 import { hashPassword, verifyPassword } from "../lib/password";
@@ -126,6 +126,21 @@ export const createAuth = (deps: Deps) => {
       },
     },
     databaseHooks: {
+      session: {
+        create: {
+          // Nova sessão (login) já abre no workspace mais recente do usuário, se houver.
+          before: async (session) => {
+            const [m] = await dbs.authDb
+              .select({ tenantId: schema.memberships.tenantId })
+              .from(schema.memberships)
+              .innerJoin(schema.tenants, eq(schema.tenants.id, schema.memberships.tenantId))
+              .where(and(eq(schema.memberships.userId, session.userId), eq(schema.memberships.active, true)))
+              .orderBy(desc(schema.memberships.createdAt))
+              .limit(1);
+            return { data: { ...session, activeOrganizationId: m?.tenantId ?? null } };
+          },
+        },
+      },
       user: {
         create: {
           // O aceite é exigido na tela de cadastro (e no hook abaixo, para e-mail/senha).

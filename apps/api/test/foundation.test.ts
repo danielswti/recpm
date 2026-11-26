@@ -214,6 +214,17 @@ describe("senha e 2FA", () => {
     expect(login.status).toBe(200);
   });
 
+  test("login abre direto no workspace do usuário", async () => {
+    const b = new Browser(app);
+    const { email, password } = await signUp(b, "Gil");
+    const ws = await createWorkspace(b, "Agência Gil");
+    const fresh = new Browser(app);
+    expect((await fresh.post("/api/auth/sign-in/email", { email, password })).status).toBe(200);
+    const me = await fresh.get("/api/v1/me");
+    expect(me.json.tenant?.id).toBe(ws.id);
+    expect(me.json.tenant?.role).toBe("admin");
+  });
+
   test("2FA TOTP: ativar, e o login passa a pedir o código", async () => {
     const b = new Browser(app);
     const { email, password } = await signUp(b, "Eva");

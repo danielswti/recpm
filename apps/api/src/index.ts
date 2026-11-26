@@ -14,6 +14,7 @@ const mailer = createMailer({
   resendApiKey: env.RESEND_API_KEY,
   smtpUrl: env.SMTP_URL,
   from: env.EMAIL_FROM,
+  production: env.NODE_ENV === "production",
 });
 
 const app = createApp({ env, dbs, redis, mailer, logger });
