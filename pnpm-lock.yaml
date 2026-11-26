@@ -178,6 +178,37 @@ importers:
 
   packages/config: {}
 
+  packages/core:
+    dependencies:
+      '@recpm/db':
+        specifier: workspace:*
+        version: link:../db
+      '@recpm/shared':
+        specifier: workspace:*
+        version: link:../shared
+      drizzle-orm:
+        specifier: 0.45.4
+        version: 0.45.4(@types/pg@8.23.1)(kysely@0.29.9)(pg@8.23.1)
+      uuidv7:
+        specifier: 1.2.1
+        version: 1.2.1
+    devDependencies:
+      '@recpm/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.20.7
+        version: 22.20.7
+      '@types/pg':
+        specifier: ^8.23.1
+        version: 8.23.1
+      pg:
+        specifier: ^8.23.1
+        version: 8.23.1
+      vitest:
+        specifier: ^5.1.2
+        version: 5.1.2(@types/node@22.20.7)(vite@8.4.0(@types/node@22.20.7)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+
   packages/db:
     dependencies:
       drizzle-orm:
