@@ -1,5 +1,5 @@
 {
-  "id": "b43b4d69-6beb-4699-8a90-fdaca38e2ae7",
+  "id": "58cd2cd3-5b02-429e-b825-5fc1fb47fa28",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -11815,6 +11815,7 @@
         "duplicate",
         "recurrence",
         "api",
+        "portal",
         "portal_demand",
         "import"
       ]

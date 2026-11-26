@@ -25,7 +25,7 @@ CREATE TYPE "public"."review_status" AS ENUM('pending', 'approved', 'rejected');
 CREATE TYPE "public"."seniority_level" AS ENUM('junior', 'pleno', 'senior');--> statement-breakpoint
 CREATE TYPE "public"."signature_status" AS ENUM('rascunho', 'enviado', 'assinado', 'recusado', 'cancelado');--> statement-breakpoint
 CREATE TYPE "public"."subscription_status" AS ENUM('trialing', 'active', 'past_due', 'canceled');--> statement-breakpoint
-CREATE TYPE "public"."task_source" AS ENUM('ui', 'duplicate', 'recurrence', 'api', 'portal_demand', 'import');--> statement-breakpoint
+CREATE TYPE "public"."task_source" AS ENUM('ui', 'duplicate', 'recurrence', 'api', 'portal', 'portal_demand', 'import');--> statement-breakpoint
 CREATE TYPE "public"."tenant_role" AS ENUM('admin', 'gestor', 'funcionario', 'cliente');--> statement-breakpoint
 CREATE TYPE "public"."tenant_status" AS ENUM('active', 'read_only', 'suspended');--> statement-breakpoint
 CREATE TABLE "accounts" (

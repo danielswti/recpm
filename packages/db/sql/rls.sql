@@ -337,8 +337,9 @@ CREATE POLICY portal_scope ON project_comments AS RESTRICTIVE FOR ALL TO recpm_a
   WITH CHECK (app.client_id() IS NULL OR (visible_to_client AND author_id = app.user_id()
               AND EXISTS (SELECT 1 FROM projects p WHERE p.id = project_id)));
 
--- Tarefas: só as marcadas como visíveis, de projetos do cliente. O cliente pode atualizar
--- (aprovar entrega) mas não criar — demandas viram tarefa pelo time, no aceite.
+-- Tarefas: só as marcadas como visíveis, de projetos do cliente. O cliente pode criar,
+-- atualizar (ex.: aprovar entrega) e apagar tarefas, sempre dentro dos próprios projetos e
+-- sempre visíveis para ele. Tarefa criada pelo portal conta na cota do plano (source = 'portal').
 DROP POLICY IF EXISTS portal_scope ON tasks;
 CREATE POLICY portal_scope ON tasks AS RESTRICTIVE FOR SELECT TO recpm_app
   USING (app.client_id() IS NULL OR (visible_to_client AND deleted_at IS NULL
@@ -346,13 +347,16 @@ CREATE POLICY portal_scope ON tasks AS RESTRICTIVE FOR SELECT TO recpm_app
 DROP POLICY IF EXISTS portal_update ON tasks;
 CREATE POLICY portal_update ON tasks AS RESTRICTIVE FOR UPDATE TO recpm_app
   USING (app.client_id() IS NULL OR (visible_to_client AND EXISTS (SELECT 1 FROM projects p WHERE p.id = project_id)))
-  WITH CHECK (app.client_id() IS NULL OR visible_to_client);
+  WITH CHECK (app.client_id() IS NULL OR (visible_to_client
+              AND EXISTS (SELECT 1 FROM projects p WHERE p.id = project_id)));
 DROP POLICY IF EXISTS portal_insert ON tasks;
 CREATE POLICY portal_insert ON tasks AS RESTRICTIVE FOR INSERT TO recpm_app
-  WITH CHECK (app.client_id() IS NULL);
+  WITH CHECK (app.client_id() IS NULL OR (visible_to_client
+              AND EXISTS (SELECT 1 FROM projects p WHERE p.id = project_id)));
 DROP POLICY IF EXISTS portal_delete ON tasks;
 CREATE POLICY portal_delete ON tasks AS RESTRICTIVE FOR DELETE TO recpm_app
-  USING (app.client_id() IS NULL);
+  USING (app.client_id() IS NULL OR (visible_to_client
+         AND EXISTS (SELECT 1 FROM projects p WHERE p.id = project_id)));
 
 -- Filhos de tarefa (a subconsulta passa pelo RLS de tasks).
 DROP POLICY IF EXISTS portal_scope ON task_subitems;

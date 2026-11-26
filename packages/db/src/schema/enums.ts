@@ -51,6 +51,7 @@ export const taskSource = pgEnum("task_source", [
   "duplicate",
   "recurrence",
   "api",
+  "portal",
   "portal_demand",
   "import",
 ]);

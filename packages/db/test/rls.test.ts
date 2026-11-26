@@ -182,13 +182,34 @@ describe("portal do cliente", () => {
     assert.deepEqual(counts, [0, 0, 0, 1]);
   });
 
-  test("não cria tarefas diretamente (demanda passa pela equipe)", async () => {
+  test("cria e apaga tarefas só nos próprios projetos, sempre visíveis", async () => {
+    const created = await withTenant(app, portal, (tx) =>
+      tx.insert(s.tasks).values({ tenantId: T.A, projectId: P.a1, title: "pedido do cliente", statusKey: "a_fazer", rank: "c0", visibleToClient: true, source: "portal" }).returning(),
+    );
+    assert.equal(created.length, 1);
+    const deleted = await withTenant(app, portal, (tx) =>
+      tx.delete(s.tasks).where(eq(s.tasks.id, created[0]!.id)).returning(),
+    );
+    assert.equal(deleted.length, 1);
+    // projeto de outro cliente → recusado
     await assert.rejects(
       withTenant(app, portal, (tx) =>
-        tx.insert(s.tasks).values({ tenantId: T.A, projectId: P.a1, title: "x", statusKey: "a_fazer", rank: "b0" }),
+        tx.insert(s.tasks).values({ tenantId: T.A, projectId: P.a2, title: "x", statusKey: "a_fazer", rank: "c1", visibleToClient: true }),
       ),
       (e) => pgCode(e) === "42501",
     );
+    // tarefa oculta → recusado
+    await assert.rejects(
+      withTenant(app, portal, (tx) =>
+        tx.insert(s.tasks).values({ tenantId: T.A, projectId: P.a1, title: "x", statusKey: "a_fazer", rank: "c2", visibleToClient: false }),
+      ),
+      (e) => pgCode(e) === "42501",
+    );
+    // não apaga tarefa oculta nem de outro cliente
+    const none = await withTenant(app, portal, (tx) =>
+      tx.delete(s.tasks).where(sql`${s.tasks.id} IN (${K.aHidden}, ${K.a2})`).returning(),
+    );
+    assert.equal(none.length, 0);
   });
 
   test("abre demanda só para o próprio cliente", async () => {
