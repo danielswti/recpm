@@ -20,6 +20,7 @@ import {
   Building2,
   CalendarDays,
   CheckSquare,
+  CreditCard,
   FolderKanban,
   Gauge,
   Languages,
@@ -43,13 +44,15 @@ import { useTranslation } from "react-i18next";
 import { authClient } from "../lib/auth-client";
 import { LOCALES } from "../lib/i18n";
 import type { Me } from "../lib/queries";
+import { PlanBanner } from "./plan-banner";
 import { ThemeToggle } from "./theme-toggle";
+import { UpgradeDialog } from "./upgrade-dialog";
 
 type NavItem = {
   key: string;
   icon: LucideIcon;
   /** Rota já implementada; sem `to`, o item aparece desabilitado com a fase em que chega. */
-  to?: "/" | "/membros";
+  to?: "/" | "/membros" | "/assinatura";
   phase?: number;
   perm?: Permission;
 };
@@ -84,6 +87,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { key: "nav.catalogs", icon: BookOpen, phase: 3, perm: "catalogs.manage" },
       { key: "nav.settings", icon: Settings, phase: 3, perm: "tenant.settings" },
+      { key: "nav.billing", icon: CreditCard, to: "/assinatura", perm: "tenant.billing" },
     ],
   },
 ];
@@ -175,7 +179,9 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
             <NotificationsBell />
           </div>
         </header>
+        <PlanBanner canManage={perms.has("tenant.billing")} />
         <main className="flex-1 p-4 md:p-8">{children}</main>
+        <UpgradeDialog canManage={perms.has("tenant.billing")} />
       </div>
     </div>
   );
