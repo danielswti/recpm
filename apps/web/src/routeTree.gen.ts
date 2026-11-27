@@ -18,9 +18,12 @@ import { Route as PlataformaRouteImport } from './routes/plataforma'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as WorkspacesRouteImport } from './routes/workspaces'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppAprovacoesRouteImport } from './routes/_app/aprovacoes'
 import { Route as AppAssinaturaRouteImport } from './routes/_app/assinatura'
+import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
 import { Route as AppMembrosRouteImport } from './routes/_app/membros'
 import { Route as AppTarefasRouteImport } from './routes/_app/tarefas'
+import { Route as AppTrabalhandoAgoraRouteImport } from './routes/_app/trabalhando-agora'
 import { Route as ConviteIdRouteImport } from './routes/convite.$id'
 import { Route as AppCadastrosIndexRouteImport } from './routes/_app/cadastros.index'
 import { Route as AppClientesIndexRouteImport } from './routes/_app/clientes.index'
@@ -74,9 +77,19 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAprovacoesRoute = AppAprovacoesRouteImport.update({
+  id: '/aprovacoes',
+  path: '/aprovacoes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAssinaturaRoute = AppAssinaturaRouteImport.update({
   id: '/assinatura',
   path: '/assinatura',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMembrosRoute = AppMembrosRouteImport.update({
@@ -87,6 +100,11 @@ const AppMembrosRoute = AppMembrosRouteImport.update({
 const AppTarefasRoute = AppTarefasRouteImport.update({
   id: '/tarefas',
   path: '/tarefas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTrabalhandoAgoraRoute = AppTrabalhandoAgoraRouteImport.update({
+  id: '/trabalhando-agora',
+  path: '/trabalhando-agora',
   getParentRoute: () => AppRoute,
 } as any)
 const ConviteIdRoute = ConviteIdRouteImport.update({
@@ -139,9 +157,12 @@ export interface FileRoutesByFullPath {
   '/plataforma': typeof PlataformaRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/workspaces': typeof WorkspacesRoute
+  '/aprovacoes': typeof AppAprovacoesRoute
   '/assinatura': typeof AppAssinaturaRoute
+  '/configuracoes': typeof AppConfiguracoesRoute
   '/membros': typeof AppMembrosRoute
   '/tarefas': typeof AppTarefasRoute
+  '/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
   '/convite/$id': typeof ConviteIdRoute
   '/clientes/$id': typeof AppClientesIdRoute
   '/conta/seguranca': typeof AppContaSegurancaRoute
@@ -159,9 +180,12 @@ export interface FileRoutesByTo {
   '/plataforma': typeof PlataformaRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/workspaces': typeof WorkspacesRoute
+  '/aprovacoes': typeof AppAprovacoesRoute
   '/assinatura': typeof AppAssinaturaRoute
+  '/configuracoes': typeof AppConfiguracoesRoute
   '/membros': typeof AppMembrosRoute
   '/tarefas': typeof AppTarefasRoute
+  '/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
   '/convite/$id': typeof ConviteIdRoute
   '/': typeof AppIndexRoute
   '/clientes/$id': typeof AppClientesIdRoute
@@ -182,9 +206,12 @@ export interface FileRoutesById {
   '/plataforma': typeof PlataformaRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/workspaces': typeof WorkspacesRoute
+  '/_app/aprovacoes': typeof AppAprovacoesRoute
   '/_app/assinatura': typeof AppAssinaturaRoute
+  '/_app/configuracoes': typeof AppConfiguracoesRoute
   '/_app/membros': typeof AppMembrosRoute
   '/_app/tarefas': typeof AppTarefasRoute
+  '/_app/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
   '/convite/$id': typeof ConviteIdRoute
   '/_app/': typeof AppIndexRoute
   '/_app/clientes/$id': typeof AppClientesIdRoute
@@ -206,9 +233,12 @@ export interface FileRouteTypes {
     | '/plataforma'
     | '/redefinir-senha'
     | '/workspaces'
+    | '/aprovacoes'
     | '/assinatura'
+    | '/configuracoes'
     | '/membros'
     | '/tarefas'
+    | '/trabalhando-agora'
     | '/convite/$id'
     | '/clientes/$id'
     | '/conta/seguranca'
@@ -226,9 +256,12 @@ export interface FileRouteTypes {
     | '/plataforma'
     | '/redefinir-senha'
     | '/workspaces'
+    | '/aprovacoes'
     | '/assinatura'
+    | '/configuracoes'
     | '/membros'
     | '/tarefas'
+    | '/trabalhando-agora'
     | '/convite/$id'
     | '/'
     | '/clientes/$id'
@@ -248,9 +281,12 @@ export interface FileRouteTypes {
     | '/plataforma'
     | '/redefinir-senha'
     | '/workspaces'
+    | '/_app/aprovacoes'
     | '/_app/assinatura'
+    | '/_app/configuracoes'
     | '/_app/membros'
     | '/_app/tarefas'
+    | '/_app/trabalhando-agora'
     | '/convite/$id'
     | '/_app/'
     | '/_app/clientes/$id'
@@ -339,11 +375,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/aprovacoes': {
+      id: '/_app/aprovacoes'
+      path: '/aprovacoes'
+      fullPath: '/aprovacoes'
+      preLoaderRoute: typeof AppAprovacoesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/assinatura': {
       id: '/_app/assinatura'
       path: '/assinatura'
       fullPath: '/assinatura'
       preLoaderRoute: typeof AppAssinaturaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/configuracoes': {
+      id: '/_app/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AppConfiguracoesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/membros': {
@@ -358,6 +408,13 @@ declare module '@tanstack/react-router' {
       path: '/tarefas'
       fullPath: '/tarefas'
       preLoaderRoute: typeof AppTarefasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/trabalhando-agora': {
+      id: '/_app/trabalhando-agora'
+      path: '/trabalhando-agora'
+      fullPath: '/trabalhando-agora'
+      preLoaderRoute: typeof AppTrabalhandoAgoraRouteImport
       parentRoute: typeof AppRoute
     }
     '/convite/$id': {
@@ -420,9 +477,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAprovacoesRoute: typeof AppAprovacoesRoute
   AppAssinaturaRoute: typeof AppAssinaturaRoute
+  AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppMembrosRoute: typeof AppMembrosRoute
   AppTarefasRoute: typeof AppTarefasRoute
+  AppTrabalhandoAgoraRoute: typeof AppTrabalhandoAgoraRoute
   AppIndexRoute: typeof AppIndexRoute
   AppClientesIdRoute: typeof AppClientesIdRoute
   AppContaSegurancaRoute: typeof AppContaSegurancaRoute
@@ -434,9 +494,12 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAprovacoesRoute: AppAprovacoesRoute,
   AppAssinaturaRoute: AppAssinaturaRoute,
+  AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppMembrosRoute: AppMembrosRoute,
   AppTarefasRoute: AppTarefasRoute,
+  AppTrabalhandoAgoraRoute: AppTrabalhandoAgoraRoute,
   AppIndexRoute: AppIndexRoute,
   AppClientesIdRoute: AppClientesIdRoute,
   AppContaSegurancaRoute: AppContaSegurancaRoute,

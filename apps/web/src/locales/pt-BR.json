@@ -53,7 +53,9 @@
     "openMenu": "Abrir menu",
     "userMenu": "Menu do usuário",
     "billing": "Plano e cobrança",
-    "platform": "Plataforma"
+    "platform": "Plataforma",
+    "workingNow": "Trabalhando agora",
+    "approvals": "Ajustes de tempo"
   },
   "roles": {
     "admin": "Administrador",
@@ -341,7 +343,20 @@
     "PLAN_STORAGE_LIMIT_REACHED": "O armazenamento do plano acabou.",
     "FILE_TYPE_BLOCKED": "Este tipo de arquivo não é aceito.",
     "UPLOAD_NOT_FOUND": "O envio do arquivo não terminou. Tente de novo.",
-    "FILE_NOT_AVAILABLE": "Arquivo ainda em verificação."
+    "FILE_NOT_AVAILABLE": "Arquivo ainda em verificação.",
+    "TASK_COMPLETED": "A tarefa já foi concluída.",
+    "TIMER_CONFLICT": "Outro timer acabou de ser iniciado. Atualize a página.",
+    "INVALID_TIME_ADJUSTMENT": "Ajuste inválido. Confira os horários e minutos.",
+    "TIME_ADJUSTMENT_PENDING": "Já existe um pedido pendente para este registro.",
+    "TIME_ENTRY_NOT_FOUND": "Registro de tempo não encontrado.",
+    "TIMER_RUNNING": "Pare o timer antes de pedir o ajuste.",
+    "TIME_ADJUSTMENT_NOT_FOUND": "Pedido não encontrado.",
+    "ALREADY_REVIEWED": "Este pedido já foi analisado.",
+    "SELF_REVIEW": "Outra pessoa precisa aprovar o seu próprio ajuste.",
+    "INVALID_TIMEZONE": "Fuso horário inválido.",
+    "INVALID_IMAGE": "Envie uma imagem (PNG, JPG, SVG ou WebP).",
+    "INVALID_EXPIRY": "A validade precisa ser uma data futura.",
+    "SECRETS_KEY_MISSING": "Criptografia de segredos não configurada no servidor."
   },
   "billing": {
     "title": "Plano e cobrança",
@@ -1054,7 +1069,203 @@
       "client_chase": "registrou cobrança ao cliente",
       "attachment_add": "anexou {{name}}",
       "attachment_delete": "removeu o anexo {{name}}",
-      "delete": "apagou a tarefa"
+      "delete": "apagou a tarefa",
+      "delivery": "registrou entrega de {{quantity}} peça(s)",
+      "delivery_removed": "desfez uma entrega de {{quantity}} peça(s)"
+    }
+  },
+  "time": {
+    "start": "Estou nessa",
+    "stop": "Parar",
+    "stopTask": "Parar o timer de {{title}}",
+    "title": "Tempo",
+    "running": "em andamento",
+    "none": "Ninguém registrou tempo nesta tarefa ainda.",
+    "entries_one": "{{count}} registro",
+    "entries_other": "{{count}} registros",
+    "rework": "retrabalho {{time}}",
+    "reworkShort": "retrabalho",
+    "reworkHelp": "Tempo registrado enquanto a tarefa estava em Ajustes.",
+    "pendingCount_one": "{{count}} ajuste pendente",
+    "pendingCount_other": "{{count}} ajustes pendentes",
+    "requestAdjustment": "Pedir ajuste de tempo",
+    "fixEntry": "Corrigir este registro",
+    "adjustmentHelp": "O ajuste só entra nos relatórios depois que um gestor aprovar.",
+    "startedAt": "Início",
+    "endedAt": "Fim",
+    "direction": "Ajuste",
+    "add": "Acrescentar",
+    "remove": "Descontar",
+    "minutes": "Minutos",
+    "reason": "Motivo",
+    "sendForApproval": "Enviar para aprovação",
+    "adjustmentSent": "Pedido enviado para aprovação."
+  },
+  "deliveries": {
+    "title": "Entregas",
+    "progress": "{{done}} de {{total}} peças",
+    "done": "Concluído",
+    "quantity": "Peças entregues",
+    "note": "Observação (opcional)",
+    "saved": "Entrega registrada.",
+    "pieces_one": "{{count}} peça",
+    "pieces_other": "{{count}} peças",
+    "undo": "Desfazer entrega"
+  },
+  "workingNow": {
+    "title": "Trabalhando agora",
+    "subtitle": "Quem está em qual tarefa neste momento, em horas úteis.",
+    "tabs": {
+      "now": "Agora",
+      "history": "Histórico"
+    },
+    "live": "Ao vivo",
+    "polling": "Atualizando a cada 30 segundos",
+    "count_one": "{{count}} pessoa trabalhando",
+    "count_other": "{{count}} pessoas trabalhando",
+    "empty": "Ninguém com tarefa ativa agora",
+    "emptyText": "Quando alguém clicar em “Estou nessa”, aparece aqui na hora.",
+    "person": "Pessoa",
+    "task": "Tarefa",
+    "elapsed": "Tempo útil",
+    "started": "Começou",
+    "idle_one": "Sem tarefa ativa ({{count}})",
+    "idle_other": "Sem tarefa ativa ({{count}})",
+    "lastSeen": "última atividade {{when}}",
+    "never": "sem registros",
+    "from": "De",
+    "to": "Até",
+    "total": "Total no período:",
+    "noHistory": "Nenhum registro de tempo no período.",
+    "when": "Quando",
+    "business": "Horas úteis",
+    "adjustmentsLink": "Ver pedidos de ajuste de tempo"
+  },
+  "approvals": {
+    "title": "Ajustes de tempo",
+    "subtitle": "Pedidos da equipe para corrigir o tempo registrado. Só contam nos relatórios depois de aprovados.",
+    "subtitleMine": "Seus pedidos para corrigir o tempo registrado. Peça pela gaveta da tarefa, na seção Tempo.",
+    "tabs": {
+      "pending": "Pendentes",
+      "reviewed": "Analisados",
+      "mine": "Meus pedidos"
+    },
+    "empty": {
+      "pending": "Nenhum pedido pendente",
+      "reviewed": "Nenhum pedido analisado ainda",
+      "mine": "Você ainda não pediu ajustes"
+    },
+    "emptyMineText": "Abra uma tarefa e use “Pedir ajuste de tempo” na seção Tempo.",
+    "status": {
+      "pending": "Pendente",
+      "approved": "Aprovado",
+      "rejected": "Recusado"
+    },
+    "reviewedBy": "Analisado por {{name}} em {{when}}",
+    "note": "Observação",
+    "notePlaceholder": "Observação (opcional)",
+    "approve": "Aprovar",
+    "reject": "Recusar",
+    "approved": "Ajuste aprovado.",
+    "rejected": "Ajuste recusado."
+  },
+  "settings": {
+    "title": "Configurações",
+    "subtitle": "Regras do workspace: horário, produtividade, marca, IA e integrações.",
+    "section": "Seção",
+    "catalogsLink": "Cadastros (tipos, colunas, motivos…) →",
+    "saved": "Configurações salvas.",
+    "tabs": {
+      "operation": "Operação",
+      "productivity": "Produtividade",
+      "branding": "Marca",
+      "ai": "Assistente de IA",
+      "api-keys": "Chaves de API"
+    },
+    "help": {
+      "operation": "Fuso, horário comercial padrão e prazos que disparam avisos.",
+      "productivity": "Pesos da pontuação da equipe e do destaque do mês.",
+      "branding": "Cores e logo usados no app e no portal do cliente.",
+      "ai": "Provedor compatível com OpenAI para o assistente do chat.",
+      "api-keys": "Chaves para a API pública (/api/v1). Cada chave age com as permissões de quem a criou."
+    },
+    "operation": {
+      "timezone": "Fuso horário",
+      "sla": "SLA de cobrança (horas úteis)",
+      "slaHint": "Card em “Aguardando cliente” além disso avisa o atendimento.",
+      "idle": "Card parado (horas)",
+      "idleHint": "Usado na penalidade de atendimento.",
+      "hours": "Horário comercial padrão",
+      "hoursHint": "Vale para quem não tem horário próprio no perfil. O tempo do “Estou nessa” só conta dentro dele, fora de feriados e folgas."
+    },
+    "productivity": {
+      "production": "Produção",
+      "accountManagement": "Atendimento",
+      "note": "A pontuação aparece nos relatórios de produtividade (Fase 8).",
+      "fields": {
+        "production": {
+          "perPiece": "Por peça entregue",
+          "perBusinessHour": "Por hora útil",
+          "onTimeBonus": "Bônus no prazo",
+          "reworkPenalty": "Penalidade por retrabalho"
+        },
+        "accountManagement": {
+          "perClientChase": "Por cobrança ao cliente",
+          "perShootBooked": "Por gravação agendada",
+          "perPiece": "Por peça entregue",
+          "perIdleCard": "Por card parado",
+          "idleCardPenaltyCap": "Limite da penalidade de cards parados"
+        }
+      }
+    },
+    "branding": {
+      "primaryColor": "Cor principal",
+      "secondaryColor": "Cor secundária",
+      "chatColor": "Cor do chat",
+      "logo": "Logo",
+      "favicon": "Ícone (favicon)",
+      "upload": "Enviar imagem",
+      "imageOnly": "Envie uma imagem (PNG, JPG, SVG ou WebP).",
+      "note": "A cor principal muda o app na hora para toda a equipe."
+    },
+    "ai": {
+      "enabled": "Ativar o assistente de IA",
+      "name": "Nome do assistente",
+      "model": "Modelo",
+      "modelHint": "Ex.: gpt-4o-mini",
+      "baseUrl": "URL base (opcional)",
+      "baseUrlHint": "Vazio = provedor padrão da plataforma.",
+      "key": "Chave de API",
+      "keySet": "Chave configurada. Deixe vazio para manter.",
+      "keyMissing": "Nenhuma chave configurada.",
+      "clearKey": "Apagar a chave salva",
+      "note": "A chave é guardada criptografada e nunca é mostrada de novo. O chat com IA chega na Fase 6."
+    },
+    "apiKeys": {
+      "new": "Nova chave",
+      "newHelp": "Dê um nome que lembre onde ela será usada (ex.: Zapier).",
+      "name": "Nome",
+      "prefix": "Prefixo",
+      "createdBy": "Criada por",
+      "lastUsed": "Último uso",
+      "expires": "Validade",
+      "expiresOptional": "Validade (opcional)",
+      "noExpiry": "sem validade",
+      "never": "nunca",
+      "create": "Criar chave",
+      "createdTitle": "Copie a sua chave agora",
+      "createdHelp": "Por segurança, ela não aparece de novo. Se perder, revogue e crie outra.",
+      "copy": "Copiar",
+      "copied": "Chave copiada.",
+      "done": "Pronto",
+      "empty": "Nenhuma chave de API",
+      "emptyText": "Crie uma chave para integrar o Rec PM com outras ferramentas.",
+      "note": "Envie no cabeçalho Authorization: Bearer pk_live_…. A API pública completa (documentação e webhooks) chega na Fase 9.",
+      "revoke": "Revogar {{name}}",
+      "revokeTitle": "Revogar chave?",
+      "revokeText": "Integrações que usam “{{name}}” param de funcionar na hora.",
+      "revokeConfirm": "Revogar",
+      "revoked": "Chave revogada."
     }
   }
 }

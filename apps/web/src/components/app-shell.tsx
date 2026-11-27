@@ -13,6 +13,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
+  Activity,
   ArrowLeftRight,
   BarChart3,
   Bell,
@@ -20,6 +21,7 @@ import {
   Building2,
   CalendarDays,
   CheckSquare,
+  ClipboardCheck,
   CreditCard,
   FolderKanban,
   Gauge,
@@ -46,13 +48,24 @@ import { LOCALES } from "../lib/i18n";
 import type { Me } from "../lib/queries";
 import { PlanBanner } from "./plan-banner";
 import { ThemeToggle } from "./theme-toggle";
+import { CurrentTimer } from "./time/timer";
 import { UpgradeDialog } from "./upgrade-dialog";
 
 type NavItem = {
   key: string;
   icon: LucideIcon;
   /** Rota já implementada; sem `to`, o item aparece desabilitado com a fase em que chega. */
-  to?: "/" | "/membros" | "/assinatura" | "/clientes" | "/cadastros" | "/projetos" | "/tarefas";
+  to?:
+    | "/"
+    | "/membros"
+    | "/assinatura"
+    | "/clientes"
+    | "/cadastros"
+    | "/projetos"
+    | "/tarefas"
+    | "/trabalhando-agora"
+    | "/aprovacoes"
+    | "/configuracoes";
   phase?: number;
   perm?: Permission;
 };
@@ -80,13 +93,15 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { key: "nav.deliveries", icon: ListChecks, phase: 8, perm: "reports.read" },
       { key: "nav.clients", icon: Building2, to: "/clientes", perm: "clients.read" },
       { key: "nav.users", icon: Users, to: "/membros", perm: "members.read" },
+      { key: "nav.workingNow", icon: Activity, to: "/trabalhando-agora", perm: "workingNow.view" },
+      { key: "nav.approvals", icon: ClipboardCheck, to: "/aprovacoes", perm: "time.track" },
     ],
   },
   {
     group: "nav.admin",
     items: [
       { key: "nav.catalogs", icon: BookOpen, to: "/cadastros", perm: "catalogs.manage" },
-      { key: "nav.settings", icon: Settings, phase: 5, perm: "tenant.settings" },
+      { key: "nav.settings", icon: Settings, to: "/configuracoes", perm: "tenant.settings" },
       { key: "nav.billing", icon: CreditCard, to: "/assinatura", perm: "tenant.billing" },
     ],
   },
@@ -174,7 +189,8 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
           >
             {collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
           </Button>
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ml-auto flex min-w-0 items-center gap-1">
+            {perms.has("time.track") && <CurrentTimer />}
             <ThemeToggle />
             <NotificationsBell />
           </div>

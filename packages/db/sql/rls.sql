@@ -448,6 +448,20 @@ DROP TRIGGER IF EXISTS memberships_client_from_invitation ON memberships;
 CREATE TRIGGER memberships_client_from_invitation BEFORE INSERT ON memberships
   FOR EACH ROW EXECUTE FUNCTION app.membership_client_from_invitation();
 
+-- ── "Trabalhando agora" em tempo real ───────────────────────────────────────
+-- Toda mudança em time_entries avisa a API (LISTEN recpm_time) depois do COMMIT. O payload é só
+-- o tenant_id: a API reconsulta com RLS, então nada vaza entre tenants.
+CREATE OR REPLACE FUNCTION app.notify_time_entries() RETURNS trigger
+  LANGUAGE plpgsql SET search_path = pg_catalog, public
+  AS $$
+  BEGIN
+    PERFORM pg_notify('recpm_time', COALESCE(NEW.tenant_id, OLD.tenant_id)::text);
+    RETURN NULL;
+  END $$;
+DROP TRIGGER IF EXISTS time_entries_notify ON time_entries;
+CREATE TRIGGER time_entries_notify AFTER INSERT OR UPDATE OR DELETE ON time_entries
+  FOR EACH ROW EXECUTE FUNCTION app.notify_time_entries();
+
 -- ── Verificação de cobertura (rodada no CI e no teste de isolamento) ─────────
 -- Falha se existir tabela com tenant_id sem RLS ou sem a política tenant_isolation.
 CREATE OR REPLACE FUNCTION app.assert_rls_coverage() RETURNS void
