@@ -12,6 +12,9 @@ import { AppError, errorBody } from "./lib/errors";
 import { requireTrustedOrigin } from "./middleware/origin";
 import { loadSession } from "./middleware/session";
 import { billingRoutes } from "./routes/billing";
+import { briefingRoutes } from "./routes/briefings";
+import { catalogRoutes } from "./routes/catalogs";
+import { clientRoutes } from "./routes/clients";
 import { meRoutes } from "./routes/me";
 import { memberRoutes } from "./routes/members";
 import { platformRoutes } from "./routes/platform";
@@ -88,7 +91,10 @@ export const createApp = (deps: Deps) => {
     .route("/api/v1", workspaceRoutes(deps))
     .route("/api/v1", memberRoutes(deps))
     .route("/api/v1", billingRoutes(deps, billing))
-    .route("/api/v1", platformRoutes(deps));
+    .route("/api/v1", platformRoutes(deps))
+    .route("/api/v1", catalogRoutes(deps))
+    .route("/api/v1", briefingRoutes(deps))
+    .route("/api/v1", clientRoutes(deps));
 
   app.doc31("/api/openapi.json", {
     openapi: "3.1.0",
@@ -100,6 +106,7 @@ export const createApp = (deps: Deps) => {
     if (err instanceof DomainError) return c.json(errorBody(err.code, err.message, err.details), err.status);
     if (err instanceof HTTPException) return c.json(errorBody("HTTP_ERROR", err.message), err.status);
     deps.logger.error({ err, requestId: c.var.requestId }, "erro não tratado");
+    if (process.env.DEBUG_ERRORS) console.error(err);
     return c.json(errorBody("INTERNAL", "Erro inesperado. Tente novamente."), 500);
   });
   app.notFound((c) => c.json(errorBody("NOT_FOUND", "Rota não encontrada."), 404));

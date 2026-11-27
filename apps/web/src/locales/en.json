@@ -12,7 +12,9 @@
     "comingSoon": "Coming soon",
     "phase": "Phase {{n}}",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "nav": {
     "main": "Main",
@@ -150,8 +152,83 @@
     "cancelInvite": "Cancel invitation",
     "inviteSent": "Invitation sent to {{email}}.",
     "inviteCanceled": "Invitation canceled.",
-    "clientRoleLater": "Client portal access becomes available with client records (Phase 3).",
-    "empty": "Just you here. Invite your team."
+    "empty": "Just you here. Invite your team.",
+    "tabs": {
+      "team": "Team",
+      "clients": "Client portal"
+    },
+    "emptyPortal": "No client portal users yet. Invite them from the client page.",
+    "accountManager": "Account manager",
+    "actionsFor": "Actions for {{name}}",
+    "editProfile": "Edit profile",
+    "resetPassword": "Send password reset",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "saved": "Profile saved.",
+    "client": "Client",
+    "clientHint": "They will only see this client's projects.",
+    "ownRole": "You can't change your own role.",
+    "done": {
+      "deactivate": "{{name}} was deactivated.",
+      "reactivate": "{{name}} was reactivated.",
+      "reset": "Password reset e-mail sent to {{name}}."
+    },
+    "confirm": {
+      "deactivate": {
+        "title": "Deactivate {{name}}?",
+        "text": "They lose access to this workspace immediately. Their work history stays.",
+        "confirm": "Deactivate"
+      },
+      "reset": {
+        "title": "Send a password reset to {{name}}?",
+        "text": "A reset link goes to {{email}}, valid for 1 hour.",
+        "confirm": "Send"
+      }
+    },
+    "fields": {
+      "jobTitle": "Job title",
+      "sector": "Sector",
+      "defaultTaskRole": "Default task role",
+      "level": "Level",
+      "employmentType": "Contract",
+      "hourlyCost": "Hourly cost (BRL)",
+      "hourlyCostHint": "Used in cost reports. Only admins see it.",
+      "isAccountManager": "Account manager",
+      "phone": "Phone",
+      "birthday": "Birthday",
+      "hireDate": "Hire date",
+      "timezone": "Time zone",
+      "timezoneHint": "Blank = workspace time zone."
+    },
+    "levels": {
+      "junior": "Junior",
+      "pleno": "Mid-level",
+      "senior": "Senior"
+    },
+    "employment": {
+      "clt": "Employee (CLT)",
+      "pj": "Contractor (PJ)",
+      "terceirizado": "Outsourced"
+    },
+    "hours": {
+      "title": "Working hours",
+      "own": "Use custom hours",
+      "inherit": "Follows the workspace default hours. Task time only counts inside them.",
+      "off": "off",
+      "add": "Interval",
+      "remove": "Remove interval",
+      "start": "{{day}} start",
+      "end": "{{day}} end",
+      "days": {
+        "0": "Sun",
+        "1": "Mon",
+        "2": "Tue",
+        "3": "Wed",
+        "4": "Thu",
+        "5": "Fri",
+        "6": "Sat"
+      }
+    }
   },
   "security": {
     "title": "Account security",
@@ -218,7 +295,21 @@
     "PLAN_UNCHANGED": "You're already on this plan.",
     "TRIAL_ENDS_ON_FREE": "The free plan already applies when the trial ends.",
     "NO_PORTAL": "No invoice or paid subscription yet.",
-    "INTERVAL_UNAVAILABLE": "This plan has no yearly option."
+    "INTERVAL_UNAVAILABLE": "This plan has no yearly option.",
+    "DUPLICATE": "An item with this name already exists.",
+    "CATALOG_IN_USE": "This item is in use. Deactivate it instead.",
+    "COLUMN_REQUIRED": "This column is part of the workflow and can't be removed.",
+    "COLUMN_HAS_TASKS": "Move this column's tasks first.",
+    "FINAL_REQUIRED": "Mark another column as final instead.",
+    "INVALID_REFERENCE": "One of the chosen options no longer exists.",
+    "CLIENT_CODE_TAKEN": "A client with this code already exists.",
+    "CLIENT_IN_USE": "The client has projects or portal users. Deactivate instead.",
+    "LAST_ADMIN": "The workspace needs at least one active admin.",
+    "OWN_ROLE": "You can't change your own role.",
+    "OWN_ACCOUNT": "You can't deactivate your own access.",
+    "PORTAL_ROLE_FIXED": "Portal users can't change role.",
+    "MEMBER_INACTIVE": "Reactivate the user first.",
+    "NOT_FOUND": "Not found."
   },
   "billing": {
     "title": "Plan & billing",
@@ -406,5 +497,189 @@
     },
     "impersonatingAs": "You are browsing as {{name}} in {{tenant}}.",
     "stopImpersonating": "Stop"
+  },
+  "sortable": {
+    "handle": "Reorder {{name}} (drag or use the arrow keys)",
+    "moved": "{{name}} moved to position {{position}} of {{total}}."
+  },
+  "catalogs": {
+    "title": "Catalogs",
+    "subtitle": "The lists this workspace uses in projects, tasks and reports. Drag to reorder.",
+    "section": "Section",
+    "tabs": {
+      "task-types": "Task types",
+      "kanban-columns": "Kanban columns",
+      "project-types": "Project types",
+      "report-categories": "Report categories",
+      "adjustment-reasons": "Revision reasons",
+      "tags": "Task tags",
+      "project-tags": "Project tags",
+      "sectors": "Sectors",
+      "task-roles": "Task roles",
+      "briefings": "Briefing forms"
+    },
+    "help": {
+      "task-types": "Each type sets estimated hours and a checklist on the task, and whether it counts as a delivered piece.",
+      "kanban-columns": "The task workflow stages. A column's key never changes; name, color and order can.",
+      "project-types": "E.g. One-off, Monthly, Event, Music video.",
+      "report-categories": "Group task types in reports (Art, Video…). Types without a category show as \"Other\".",
+      "adjustment-reasons": "Reasons picked when a task goes back for revisions.",
+      "tags": "Free labels for tasks.",
+      "project-tags": "Labels for projects.",
+      "sectors": "Agency teams, used in the productivity scoreboard.",
+      "task-roles": "Roles on a task: editor, designer, videomaker, copywriter…",
+      "briefings": "Questions the team or the client answer when requesting work."
+    },
+    "add": "Add",
+    "newTitle": "New item in {{kind}}",
+    "editTitle": "Edit",
+    "color": "Color",
+    "noColor": "no color",
+    "clearColor": "Remove color",
+    "inactive": "Inactive",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "actionsFor": "Actions for {{name}}",
+    "saved": "Saved.",
+    "deleted": "Deleted.",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteText": "Only items never used can be deleted. If it's in use, deactivate it.",
+    "empty": "Nothing here yet.",
+    "otherCategory": "Other",
+    "taskType": {
+      "hours": "Estimated hours",
+      "hoursShort": "{{h}} h",
+      "category": "Report category",
+      "categoryHint": "Where deliveries of this type add up in reports.",
+      "flags": "Options",
+      "countsAsPiece": "Counts as a piece",
+      "countsAsPieceHint": "Deliveries of this type count in productivity and contracted × delivered.",
+      "sellable": "Sellable",
+      "sellableHint": "Shows up in the project's contract items.",
+      "usableAsType": "Available when creating tasks",
+      "usableAsTypeHint": "Uncheck for types that only exist as contract items.",
+      "checklist": "Default checklist",
+      "checklistHint": "One item per line. Copied to the task when this type is chosen.",
+      "checklistCount_one": "{{count}} checklist item",
+      "checklistCount_other": "{{count}} checklist items",
+      "piece": "Piece",
+      "sellable2": "Sellable",
+      "notUsable": "Contract only"
+    },
+    "column": {
+      "add": "New column",
+      "emoji": "Emoji",
+      "tasks_one": "{{count}} task",
+      "tasks_other": "{{count}} tasks",
+      "approval": "Approval",
+      "final": "Final",
+      "system": "Workflow",
+      "isApproval": "Approval column",
+      "isApprovalHint": "Entering it notifies the task approver; approving moves on, rejecting goes back to revisions.",
+      "isFinal": "Final column",
+      "isFinalHint": "Marks the task as done. Only one column can be final.",
+      "keyFixed": "Internal key: {{key}} (never changes).",
+      "deleteText": "Only empty columns outside the workflow rules can be deleted."
+    },
+    "briefing": {
+      "new": "New form",
+      "edit": "Edit form",
+      "empty": "No forms yet.",
+      "fields_one": "{{count}} question",
+      "fields_other": "{{count}} questions",
+      "updated": "updated {{date}}",
+      "duplicate": "Duplicate",
+      "duplicated": "Copy created: {{name}}",
+      "deleteText": "Answers already sent are kept.",
+      "active": "Active (visible to team and client)",
+      "description": "Description",
+      "taskType": "Suggest for task type",
+      "projectType": "Suggest for project type",
+      "suggestHint": "Optional.",
+      "any": "Any",
+      "fieldsTitle": "Questions",
+      "question": "Question",
+      "type": "Answer type",
+      "types": {
+        "texto": "Short text",
+        "paragrafo": "Paragraph",
+        "escolha_unica": "Single choice",
+        "caixas": "Checkboxes"
+      },
+      "options": "Options",
+      "optionsHint": "One option per line (at least two).",
+      "help": "Help text (optional)",
+      "required": "Required",
+      "allowOther": "Allow \"Other\"",
+      "addField": "Add question",
+      "moveUp": "Move question {{n}} up",
+      "moveDown": "Move question {{n}} down",
+      "removeField": "Remove question {{n}}",
+      "needName": "Give the form a name.",
+      "badField": "Check question {{n}}: it needs text and, for choices, at least two options."
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "Clients, hour balance and portal access.",
+    "new": "New client",
+    "create": "Create client",
+    "created": "Client {{name}} created.",
+    "saved": "Client saved.",
+    "deleted": "Client deleted.",
+    "search": "Search by name, code, e-mail or tax id",
+    "filter": "Status",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "all": "All"
+    },
+    "empty": "No clients yet",
+    "emptyText": "Add your first client to create projects for them.",
+    "noResults": "No clients found.",
+    "inactive": "Inactive",
+    "cols": {
+      "client": "Client",
+      "contact": "Contact",
+      "projects": "Active projects",
+      "hours": "Hours this month",
+      "portal": "Portal"
+    },
+    "hoursLeft": "{{h}} h left",
+    "assets": "Assets",
+    "data": "Client details",
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "email": "E-mail",
+      "phone": "Phone",
+      "document": "Tax id (CPF/CNPJ)",
+      "assetsLink": "Assets link",
+      "notes": "Notes"
+    },
+    "stats": {
+      "projects": "Active / total projects",
+      "contracted": "Contracted hours this month",
+      "invested": "Hours spent this month",
+      "remaining": "Month balance"
+    },
+    "hoursHelp": "Contracted = contract items of active projects × the type's estimated hours. Spent = business hours logged on this client's tasks this month.",
+    "portal": {
+      "title": "Portal users",
+      "text": "People at the client who follow projects and request work.",
+      "empty": "Nobody from this client has access yet.",
+      "invite": "Invite someone from the client",
+      "pending": "invitation pending until {{date}}"
+    },
+    "danger": "Danger zone",
+    "activate": "Reactivate client",
+    "deactivate": "Deactivate client",
+    "delete": "Delete client",
+    "deleteHelp": "Only a client without projects or portal users can be deleted. With history, deactivate it.",
+    "activateTitle": "Reactivate {{name}}?",
+    "deactivateTitle": "Deactivate {{name}}?",
+    "deactivateText": "The client disappears from lists and can't get new projects. Nothing is deleted.",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteText": "This can't be undone."
   }
 }

@@ -26,3 +26,12 @@ export async function unwrap<R extends RpcResponse>(res: Promise<R>): Promise<Su
   }
   return (await r.json()) as Success<R>;
 }
+
+/** Para respostas sem corpo (204): só confere o status. */
+export async function unwrapVoid<R extends RpcResponse>(res: Promise<R>): Promise<void> {
+  const r = await res;
+  if (!r.ok) {
+    const body = (await r.json().catch(() => ({}))) as { error?: { code?: string; message?: string } };
+    throw new ApiError(r.status, body.error?.code ?? "HTTP_ERROR", body.error?.message ?? "Erro");
+  }
+}

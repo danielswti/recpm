@@ -424,6 +424,30 @@ CREATE POLICY portal_scope ON files AS RESTRICTIVE FOR ALL TO recpm_app
   )
   WITH CHECK (app.client_id() IS NULL OR uploaded_by = app.user_id());
 
+-- ── Vínculo do portal herda o cliente do convite ─────────────────────────────
+-- O Better Auth cria o vínculo no aceite sem campos extras; este gatilho copia o client_id do
+-- convite aceito mais recente (mesmo tenant, mesmo e-mail, papel cliente).
+CREATE OR REPLACE FUNCTION app.membership_client_from_invitation() RETURNS trigger
+  LANGUAGE plpgsql SET search_path = pg_catalog, public
+  AS $$
+  BEGIN
+    IF NEW.role = 'cliente' AND NEW.client_id IS NULL THEN
+      SELECT i.client_id INTO NEW.client_id
+        FROM invitations i
+        JOIN users u ON lower(u.email) = lower(i.email)
+       WHERE u.id = NEW.user_id
+         AND i.tenant_id = NEW.tenant_id
+         AND i.role = 'cliente'
+         AND i.status IN ('accepted', 'pending')
+       ORDER BY i.updated_at DESC
+       LIMIT 1;
+    END IF;
+    RETURN NEW;
+  END $$;
+DROP TRIGGER IF EXISTS memberships_client_from_invitation ON memberships;
+CREATE TRIGGER memberships_client_from_invitation BEFORE INSERT ON memberships
+  FOR EACH ROW EXECUTE FUNCTION app.membership_client_from_invitation();
+
 -- ── Verificação de cobertura (rodada no CI e no teste de isolamento) ─────────
 -- Falha se existir tabela com tenant_id sem RLS ou sem a política tenant_isolation.
 CREATE OR REPLACE FUNCTION app.assert_rls_coverage() RETURNS void

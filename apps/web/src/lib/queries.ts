@@ -29,10 +29,14 @@ export const workspaceQuery = queryOptions({
   queryFn: () => unwrap(api.workspace.$get()),
 });
 
-export const membersQuery = queryOptions({
-  queryKey: ["members"],
-  queryFn: () => unwrap(api.members.$get()),
-});
+export const membersQuery = (kind: "team" | "clients" | "all" = "all") =>
+  queryOptions({
+    queryKey: ["members", kind],
+    queryFn: () => unwrap(api.members.$get({ query: { kind } })),
+  });
+export type Member = Awaited<
+  ReturnType<NonNullable<ReturnType<typeof membersQuery>["queryFn"]>>
+>["data"][number];
 
 export type Me = NonNullable<Awaited<ReturnType<NonNullable<typeof meQuery.queryFn>>>>;
 

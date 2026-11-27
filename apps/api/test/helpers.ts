@@ -70,6 +70,9 @@ export class Browser {
   }
   get = (p: string) => this.req("GET", p);
   post = (p: string, b: unknown = {}, h?: Record<string, string>) => this.req("POST", p, b, h);
+  patch = (p: string, b: unknown = {}) => this.req("PATCH", p, b);
+  put = (p: string, b: unknown = {}) => this.req("PUT", p, b);
+  del = (p: string) => this.req("DELETE", p);
   clearCookies() {
     this.jar.clear();
   }
@@ -105,4 +108,32 @@ export function totp(secretBase32: string, at = Date.now()) {
   const o = h[h.length - 1]! & 0xf;
   const code = (h.readUInt32BE(o) & 0x7fffffff) % 1_000_000;
   return code.toString().padStart(6, "0");
+}
+
+/** Cria usuário com e-mail confirmado, convida para o workspace do admin e aceita. */
+export async function addMember(
+  app: App,
+  admin: Browser,
+  mailer: { outbox: { to: string; subject: string; text: string }[] },
+  tenantId: string,
+  name: string,
+  role: string,
+  extra: Record<string, unknown> = {},
+) {
+  const b = new Browser(app);
+  const { email, userId } = await signUp(b, name);
+  const verify = mailer.outbox.findLast((m) => m.to === email && m.subject.includes("Confirme"))!;
+  const url = new URL(verify.text.match(/https?:\/\/\S+/)![0]);
+  await b.get(url.pathname + url.search);
+  const inv = await admin.post("/api/auth/organization/invite-member", {
+    email,
+    role,
+    organizationId: tenantId,
+    ...extra,
+  });
+  if (inv.status !== 200) throw new Error(`convite falhou: ${inv.status} ${JSON.stringify(inv.json)}`);
+  const acc = await b.post("/api/auth/organization/accept-invitation", { invitationId: inv.json.id });
+  if (acc.status !== 200) throw new Error(`aceite falhou: ${acc.status} ${JSON.stringify(acc.json)}`);
+  await b.post("/api/auth/organization/set-active", { organizationId: tenantId });
+  return { browser: b, email, userId };
 }

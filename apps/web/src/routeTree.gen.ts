@@ -21,7 +21,11 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAssinaturaRouteImport } from './routes/_app/assinatura'
 import { Route as AppMembrosRouteImport } from './routes/_app/membros'
 import { Route as ConviteIdRouteImport } from './routes/convite.$id'
+import { Route as AppCadastrosIndexRouteImport } from './routes/_app/cadastros.index'
+import { Route as AppClientesIndexRouteImport } from './routes/_app/clientes.index'
+import { Route as AppClientesIdRouteImport } from './routes/_app/clientes.$id'
 import { Route as AppContaSegurancaRouteImport } from './routes/_app/conta.seguranca'
+import { Route as AppCadastrosBriefingsIdRouteImport } from './routes/_app/cadastros.briefings.$id'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -82,9 +86,29 @@ const ConviteIdRoute = ConviteIdRouteImport.update({
   path: '/convite/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppCadastrosIndexRoute = AppCadastrosIndexRouteImport.update({
+  id: '/cadastros/',
+  path: '/cadastros/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppClientesIndexRoute = AppClientesIndexRouteImport.update({
+  id: '/clientes/',
+  path: '/clientes/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppClientesIdRoute = AppClientesIdRouteImport.update({
+  id: '/clientes/$id',
+  path: '/clientes/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppContaSegurancaRoute = AppContaSegurancaRouteImport.update({
   id: '/conta/seguranca',
   path: '/conta/seguranca',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCadastrosBriefingsIdRoute = AppCadastrosBriefingsIdRouteImport.update({
+  id: '/cadastros/briefings/$id',
+  path: '/cadastros/briefings/$id',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -100,7 +124,11 @@ export interface FileRoutesByFullPath {
   '/assinatura': typeof AppAssinaturaRoute
   '/membros': typeof AppMembrosRoute
   '/convite/$id': typeof ConviteIdRoute
+  '/clientes/$id': typeof AppClientesIdRoute
   '/conta/seguranca': typeof AppContaSegurancaRoute
+  '/cadastros/': typeof AppCadastrosIndexRoute
+  '/clientes/': typeof AppClientesIndexRoute
+  '/cadastros/briefings/$id': typeof AppCadastrosBriefingsIdRoute
 }
 export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
@@ -114,7 +142,11 @@ export interface FileRoutesByTo {
   '/membros': typeof AppMembrosRoute
   '/convite/$id': typeof ConviteIdRoute
   '/': typeof AppIndexRoute
+  '/clientes/$id': typeof AppClientesIdRoute
   '/conta/seguranca': typeof AppContaSegurancaRoute
+  '/cadastros': typeof AppCadastrosIndexRoute
+  '/clientes': typeof AppClientesIndexRoute
+  '/cadastros/briefings/$id': typeof AppCadastrosBriefingsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -130,7 +162,11 @@ export interface FileRoutesById {
   '/_app/membros': typeof AppMembrosRoute
   '/convite/$id': typeof ConviteIdRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/clientes/$id': typeof AppClientesIdRoute
   '/_app/conta/seguranca': typeof AppContaSegurancaRoute
+  '/_app/cadastros/': typeof AppCadastrosIndexRoute
+  '/_app/clientes/': typeof AppClientesIndexRoute
+  '/_app/cadastros/briefings/$id': typeof AppCadastrosBriefingsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -146,7 +182,11 @@ export interface FileRouteTypes {
     | '/assinatura'
     | '/membros'
     | '/convite/$id'
+    | '/clientes/$id'
     | '/conta/seguranca'
+    | '/cadastros/'
+    | '/clientes/'
+    | '/cadastros/briefings/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/cadastro'
@@ -160,7 +200,11 @@ export interface FileRouteTypes {
     | '/membros'
     | '/convite/$id'
     | '/'
+    | '/clientes/$id'
     | '/conta/seguranca'
+    | '/cadastros'
+    | '/clientes'
+    | '/cadastros/briefings/$id'
   id:
     | '__root__'
     | '/_app'
@@ -175,7 +219,11 @@ export interface FileRouteTypes {
     | '/_app/membros'
     | '/convite/$id'
     | '/_app/'
+    | '/_app/clientes/$id'
     | '/_app/conta/seguranca'
+    | '/_app/cadastros/'
+    | '/_app/clientes/'
+    | '/_app/cadastros/briefings/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -276,11 +324,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConviteIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/cadastros/': {
+      id: '/_app/cadastros/'
+      path: '/cadastros'
+      fullPath: '/cadastros/'
+      preLoaderRoute: typeof AppCadastrosIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/clientes/': {
+      id: '/_app/clientes/'
+      path: '/clientes'
+      fullPath: '/clientes/'
+      preLoaderRoute: typeof AppClientesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/clientes/$id': {
+      id: '/_app/clientes/$id'
+      path: '/clientes/$id'
+      fullPath: '/clientes/$id'
+      preLoaderRoute: typeof AppClientesIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/conta/seguranca': {
       id: '/_app/conta/seguranca'
       path: '/conta/seguranca'
       fullPath: '/conta/seguranca'
       preLoaderRoute: typeof AppContaSegurancaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/cadastros/briefings/$id': {
+      id: '/_app/cadastros/briefings/$id'
+      path: '/cadastros/briefings/$id'
+      fullPath: '/cadastros/briefings/$id'
+      preLoaderRoute: typeof AppCadastrosBriefingsIdRouteImport
       parentRoute: typeof AppRoute
     }
   }
@@ -290,14 +366,22 @@ interface AppRouteChildren {
   AppAssinaturaRoute: typeof AppAssinaturaRoute
   AppMembrosRoute: typeof AppMembrosRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppClientesIdRoute: typeof AppClientesIdRoute
   AppContaSegurancaRoute: typeof AppContaSegurancaRoute
+  AppCadastrosIndexRoute: typeof AppCadastrosIndexRoute
+  AppClientesIndexRoute: typeof AppClientesIndexRoute
+  AppCadastrosBriefingsIdRoute: typeof AppCadastrosBriefingsIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAssinaturaRoute: AppAssinaturaRoute,
   AppMembrosRoute: AppMembrosRoute,
   AppIndexRoute: AppIndexRoute,
+  AppClientesIdRoute: AppClientesIdRoute,
   AppContaSegurancaRoute: AppContaSegurancaRoute,
+  AppCadastrosIndexRoute: AppCadastrosIndexRoute,
+  AppClientesIndexRoute: AppClientesIndexRoute,
+  AppCadastrosBriefingsIdRoute: AppCadastrosBriefingsIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

@@ -25,3 +25,14 @@ export const isUniqueViolation = (e: unknown, constraint?: string): boolean => {
   }
   return false;
 };
+
+/** Violação de chave estrangeira (registro em uso por outro). */
+export const isFkViolation = (e: unknown): boolean => {
+  let cur: unknown = e;
+  while (cur && typeof cur === "object") {
+    const c = cur as { code?: string; cause?: unknown };
+    if (c.code === "23503") return true;
+    cur = c.cause;
+  }
+  return false;
+};
