@@ -52,7 +52,7 @@ type NavItem = {
   key: string;
   icon: LucideIcon;
   /** Rota já implementada; sem `to`, o item aparece desabilitado com a fase em que chega. */
-  to?: "/" | "/membros" | "/assinatura" | "/clientes" | "/cadastros";
+  to?: "/" | "/membros" | "/assinatura" | "/clientes" | "/cadastros" | "/projetos" | "/tarefas";
   phase?: number;
   perm?: Permission;
 };
@@ -63,8 +63,8 @@ const NAV: { group: string; items: NavItem[] }[] = [
     group: "nav.main",
     items: [
       { key: "nav.dashboard", icon: LayoutDashboard, to: "/" },
-      { key: "nav.projects", icon: FolderKanban, phase: 4, perm: "projects.read" },
-      { key: "nav.tasks", icon: CheckSquare, phase: 4, perm: "tasks.read" },
+      { key: "nav.projects", icon: FolderKanban, to: "/projetos", perm: "projects.read" },
+      { key: "nav.tasks", icon: CheckSquare, to: "/tarefas", perm: "tasks.read" },
       { key: "nav.calendar", icon: CalendarDays, phase: 6, perm: "calendar.read" },
       { key: "nav.myProductivity", icon: Gauge, phase: 8, perm: "productivity.own" },
     ],

@@ -15,3 +15,27 @@ export {
   runBillingCycle,
 } from "./billing/subscription";
 export { DomainError } from "./errors";
+export { rankBetween } from "./tasks/rank";
+export { nextOccurrence } from "./tasks/recurrence";
+export {
+  type Actor,
+  activeColumns,
+  approveTask,
+  assertCanEdit,
+  assertCanSee,
+  assertProjectAccess,
+  audit,
+  createTask,
+  generateRecurringTasks,
+  isInvolved,
+  loadTask,
+  type Move,
+  moveTask,
+  type NewTask,
+  notify,
+  rejectTask,
+  runRecurrence,
+  systemActor,
+  type TaskRow,
+  tenantTimezone,
+} from "./tasks/service";

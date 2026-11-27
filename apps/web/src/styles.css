@@ -1,3 +1,36 @@
 @import "@recpm/ui/styles.css";
 
 @source "./";
+
+/* Texto rico (TipTap e leitura) */
+.rich-text > * + * {
+  margin-top: 0.5rem;
+}
+.rich-text ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.rich-text ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+.rich-text h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.rich-text h3 {
+  font-weight: 600;
+}
+.rich-text blockquote {
+  border-left: 3px solid var(--color-border);
+  padding-left: 0.75rem;
+  color: var(--color-muted-foreground);
+}
+.rich-text p.is-editor-empty:first-child::before,
+.rich-text[data-placeholder]:has(> p.is-empty:only-child)::before {
+  content: attr(data-placeholder);
+  color: var(--color-muted-foreground);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
