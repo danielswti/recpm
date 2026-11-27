@@ -8,12 +8,7 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <title>Rec PM</title>
-    <script>
-      // Tema antes da primeira pintura (escuro por padrão). Só a preferência de tema fica no navegador.
-      try {
-        if (localStorage.getItem("recpm-theme") === "light") document.documentElement.classList.remove("dark");
-      } catch {}
-    </script>
+    <script src="/theme.js"></script>
   </head>
   <body>
     <div id="root"></div>

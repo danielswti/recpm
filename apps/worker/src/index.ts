@@ -25,11 +25,22 @@ import {
   runRecurrence,
 } from "@recpm/core";
 import { createDbs } from "@recpm/db";
+import * as Sentry from "@sentry/node";
 import { Queue, Worker } from "bullmq";
 import { Redis } from "ioredis";
 import pino from "pino";
 
 const logger = pino({ name: "worker", level: process.env.LOG_LEVEL ?? "info" });
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    release: process.env.SENTRY_RELEASE,
+    environment: process.env.NODE_ENV ?? "development",
+    serverName: "worker",
+    sendDefaultPii: false,
+    tracesSampleRate: 0,
+  });
+}
 const redisUrl = process.env.REDIS_URL;
 if (!redisUrl) throw new Error("REDIS_URL não configurada");
 
@@ -113,7 +124,10 @@ const worker = new Worker(
   },
   { connection, concurrency: 1 },
 );
-worker.on("failed", (job, err) => logger.error({ job: job?.name, err }, "job falhou"));
+worker.on("failed", (job, err) => {
+  logger.error({ job: job?.name, err }, "job falhou");
+  Sentry.captureException(err, { tags: { job: job?.name } });
+});
 logger.info("worker pronto");
 
 const shutdown = async () => {
@@ -121,6 +135,7 @@ const shutdown = async () => {
   await worker.close();
   await queue.close();
   connection.disconnect();
+  await Sentry.flush(2000);
   process.exit(0);
 };
 process.on("SIGTERM", shutdown);

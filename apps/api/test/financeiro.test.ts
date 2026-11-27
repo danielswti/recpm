@@ -19,6 +19,8 @@ const storage: Storage = {
   put: async (key, body) => {
     objects.set(key, body);
   },
+  stream: async () => null,
+  remove: async () => {},
 };
 
 const { app, mailer, urls, dbs } = setupApp({ storage });

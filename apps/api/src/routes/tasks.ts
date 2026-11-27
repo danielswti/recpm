@@ -283,27 +283,6 @@ async function listTasks(
   page = 1,
   pageSize = 1000,
 ) {
-  const check = tx
-    .select({
-      taskId: s.taskSubitems.taskId,
-      total: sql<number>`count(*)`.as("ck_total"),
-      done: sql<number>`count(*) filter (where ${s.taskSubitems.done})`.as("ck_done"),
-    })
-    .from(s.taskSubitems)
-    .groupBy(s.taskSubitems.taskId)
-    .as("ck");
-  const people = tx
-    .select({ taskId: s.taskAssignees.taskId, n: sql<number>`count(*)`.as("pp_n") })
-    .from(s.taskAssignees)
-    .groupBy(s.taskAssignees.taskId)
-    .as("pp");
-  const adj = tx
-    .select({ taskId: s.taskAdjustments.taskId, n: sql<number>`count(*)`.as("aj_n") })
-    .from(s.taskAdjustments)
-    .where(isNull(s.taskAdjustments.resolvedAt))
-    .groupBy(s.taskAdjustments.taskId)
-    .as("aj");
-
   const order =
     sort === "board"
       ? [sql`${s.tasks.rank} COLLATE "C" asc`]
@@ -316,6 +295,8 @@ async function listTasks(
             ]
           : [sql`${s.tasks.deadline} asc nulls last`, desc(s.tasks.createdAt)];
 
+  // Página primeiro (sem agregados nem count(*) over (), que obrigariam a montar a lista inteira);
+  // o total e as contagens por card vêm em consultas separadas, só para os ids da página.
   const rows = await tx
     .select({
       t: s.tasks,
@@ -326,36 +307,59 @@ async function listTasks(
       assigneeImage: s.users.image,
       typeLabel: s.taskTypes.label,
       typeColor: s.taskTypes.color,
-      ckTotal: check.total,
-      ckDone: check.done,
-      people: people.n,
-      openAdj: adj.n,
-      count: sql<number>`count(*) over ()`,
     })
     .from(s.tasks)
     .leftJoin(s.projects, eq(s.projects.id, s.tasks.projectId))
     .leftJoin(s.clients, eq(s.clients.id, s.projects.clientId))
     .leftJoin(s.users, eq(s.users.id, s.tasks.assigneeId))
     .leftJoin(s.taskTypes, eq(s.taskTypes.id, s.tasks.taskTypeId))
-    .leftJoin(check, eq(check.taskId, s.tasks.id))
-    .leftJoin(people, eq(people.taskId, s.tasks.id))
-    .leftJoin(adj, eq(adj.taskId, s.tasks.id))
     .where(where)
     .orderBy(...order)
     .limit(pageSize)
     .offset((page - 1) * pageSize);
 
   const ids = rows.map((r) => r.t.id);
-  const tagRows = ids.length
-    ? await tx
-        .select({ taskId: s.taskTags.taskId, id: s.tags.id, name: s.tags.name, color: s.tags.color })
-        .from(s.taskTags)
-        .innerJoin(s.tags, eq(s.tags.id, s.taskTags.tagId))
-        .where(inArray(s.taskTags.taskId, ids))
+  const total =
+    rows.length < pageSize && (page === 1 || rows.length > 0)
+      ? (page - 1) * pageSize + rows.length
+      : Number(
+          (
+            await tx
+              .select({ n: sql<number>`count(*)` })
+              .from(s.tasks)
+              .leftJoin(s.projects, eq(s.projects.id, s.tasks.projectId))
+              .where(where)
+          )[0]?.n ?? 0,
+        );
+  // Contagens e etiquetas dos cards da página numa consulta só (cada subconsulta usa o índice por tarefa)
+  type Extra = {
+    id: string;
+    ck_total: number;
+    ck_done: number;
+    pp: number;
+    aj: number;
+    tags: { id: string; name: string; color: string | null }[];
+  };
+  const extras = ids.length
+    ? ((
+        await tx.execute(sql`
+          SELECT x.id,
+            (SELECT count(*) FROM ${s.taskSubitems} k WHERE k.task_id = x.id)::int AS ck_total,
+            (SELECT count(*) FROM ${s.taskSubitems} k WHERE k.task_id = x.id AND k.done)::int AS ck_done,
+            (SELECT count(*) FROM ${s.taskAssignees} a WHERE a.task_id = x.id)::int AS pp,
+            (SELECT count(*) FROM ${s.taskAdjustments} j WHERE j.task_id = x.id AND j.resolved_at IS NULL)::int AS aj,
+            (SELECT coalesce(json_agg(json_build_object('id', g.id, 'name', g.name, 'color', g.color)), '[]'::json)
+               FROM ${s.taskTags} tt JOIN ${s.tags} g ON g.id = tt.tag_id WHERE tt.task_id = x.id) AS tags
+          FROM unnest(ARRAY[${sql.join(
+            ids.map((id) => sql`${id}`),
+            sql`, `,
+          )}]::uuid[]) AS x(id)`)
+      ).rows as Extra[])
     : [];
+  const extra = new Map(extras.map((x) => [x.id, x]));
   const now = Date.now();
   return {
-    total: Number(rows[0]?.count ?? 0),
+    total,
     data: rows.map(({ t, ...r }) => ({
       id: t.id,
       title: t.title,
@@ -374,17 +378,17 @@ async function listTasks(
       assignee: t.assigneeId
         ? { id: t.assigneeId, name: r.assigneeName ?? "", image: r.assigneeImage }
         : null,
-      participantCount: Number(r.people ?? 0),
+      participantCount: extra.get(t.id)?.pp ?? 0,
       approverId: t.approverId,
       taskType: t.taskTypeId ? { id: t.taskTypeId, label: r.typeLabel ?? "", color: r.typeColor } : null,
-      tags: tagRows.filter((x) => x.taskId === t.id).map(({ taskId: _, ...x }) => x),
-      checklist: { total: Number(r.ckTotal ?? 0), done: Number(r.ckDone ?? 0) },
+      tags: extra.get(t.id)?.tags ?? [],
+      checklist: { total: extra.get(t.id)?.ck_total ?? 0, done: extra.get(t.id)?.ck_done ?? 0 },
       pieceQuantity: t.pieceQuantity,
       visibleToClient: t.visibleToClient,
       recurrence: t.recurrence,
       archived: t.archived,
       archiveRequestAt: iso(t.archiveRequestAt),
-      openAdjustments: Number(r.openAdj ?? 0),
+      openAdjustments: extra.get(t.id)?.aj ?? 0,
       createdAt: t.createdAt.toISOString(),
     })),
   };

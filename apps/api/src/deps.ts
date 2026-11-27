@@ -2,6 +2,7 @@ import type { createDbs } from "@recpm/db";
 import type { Redis } from "ioredis";
 import type { BillingProviders } from "./billing";
 import type { Env } from "./env";
+import type { Scanner } from "./lib/antivirus";
 import type { LiveHub } from "./lib/live";
 import type { Logger } from "./lib/logger";
 import type { Mailer } from "./lib/mailer";
@@ -21,6 +22,8 @@ export type Deps = {
   billing?: BillingProviders;
   /** Armazenamento de arquivos; sem isso, monta a partir do ambiente (S3/R2/MinIO). */
   storage?: Storage | null;
+  /** Antivírus dos uploads; sem isso, usa o ClamAV de CLAMAV_HOST (ou nenhum). */
+  scanner?: Scanner;
   /** Avisos em tempo real (LISTEN/NOTIFY); sem isso, abre sob demanda com DATABASE_URL_APP. */
   live?: LiveHub | null;
   /** Envio de web push; sem isso, usa web-push com as chaves VAPID do ambiente. */

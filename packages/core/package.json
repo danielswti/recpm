@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@opentelemetry/api": "1.9.1",
     "@recpm/db": "workspace:*",
     "@recpm/shared": "workspace:*",
     "drizzle-orm": "0.45.4",

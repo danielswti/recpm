@@ -1353,7 +1353,7 @@
       "ai": "AI assistant",
       "api-keys": "API keys",
       "webhooks": "Webhooks",
-      "exports": "Export and backup"
+      "exports": "Export and privacy"
     },
     "help": {
       "operation": "Time zone, default business hours and the deadlines that trigger alerts.",
@@ -1362,7 +1362,7 @@
       "ai": "OpenAI-compatible provider for the chat assistant.",
       "api-keys": "Keys for the public API (/api/v1). Each key acts with its creator's permissions.",
       "webhooks": "Notify other systems when something happens in Rec PM (Enterprise plan).",
-      "exports": "Download all workspace data as JSON or CSV, now or on a schedule."
+      "exports": "Download all workspace data as JSON or CSV, now or on a schedule, or delete the workspace."
     },
     "operation": {
       "timezone": "Time zone",
@@ -1510,7 +1510,14 @@
         "running": "Building",
         "succeeded": "Ready",
         "failed": "Failed"
-      }
+      },
+      "deleteTitle": "Delete workspace",
+      "deleteHelp": "Permanently deletes every project, task, client, file and financial record in this workspace (LGPD/GDPR). Export your data first. People's accounts are kept.",
+      "deleteButton": "Delete workspace",
+      "deleteConfirmTitle": "Delete {{name}} forever?",
+      "deleteConfirmText": "This can't be undone. Type {{slug}} to confirm.",
+      "deleteSlug": "Workspace address",
+      "deleted": "Workspace deleted."
     }
   },
   "notifications": {

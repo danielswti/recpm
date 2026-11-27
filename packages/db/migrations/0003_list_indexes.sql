@@ -1,0 +1,2 @@
+CREATE INDEX "tasks_list_deadline_idx" ON "tasks" USING btree ("tenant_id","deadline","created_at" DESC) WHERE "tasks"."deleted_at" IS NULL AND NOT "tasks"."archived";--> statement-breakpoint
+CREATE INDEX "tasks_project_rank_idx" ON "tasks" USING btree ("tenant_id","project_id","rank" COLLATE "C") WHERE "tasks"."deleted_at" IS NULL AND NOT "tasks"."archived";

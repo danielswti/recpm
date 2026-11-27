@@ -18,16 +18,18 @@ export const requireTenant = (dbs: Dbs) =>
     const userId = session.user.id;
 
     const found = await withTenant(dbs.appDb, { tenantId, userId }, async (tx) => {
-      const [m] = await tx
+      // uma consulta só (roda em todo pedido): vínculo + situação do tenant
+      const [row] = await tx
         .select({
           role: schema.memberships.role,
           clientId: schema.memberships.clientId,
           active: schema.memberships.active,
+          status: schema.tenants.status,
         })
         .from(schema.memberships)
+        .innerJoin(schema.tenants, eq(schema.tenants.id, schema.memberships.tenantId))
         .where(and(eq(schema.memberships.tenantId, tenantId), eq(schema.memberships.userId, userId)));
-      const [t] = await tx.select({ status: schema.tenants.status }).from(schema.tenants);
-      return { m, t };
+      return { m: row, t: row && { status: row.status } };
     });
     if (!found.m?.active) throw new AppError(403, "NOT_A_MEMBER", "Você não faz parte deste workspace.");
     if (found.t?.status === "suspended") throw new AppError(403, "TENANT_SUSPENDED", "Workspace suspenso.");
@@ -36,7 +38,10 @@ export const requireTenant = (dbs: Dbs) =>
       found.t?.status === "read_only" &&
       c.req.method !== "GET" &&
       c.req.method !== "HEAD" &&
-      !c.req.path.startsWith("/api/v1/billing")
+      !c.req.path.startsWith("/api/v1/billing") &&
+      // exportar os dados e excluir o workspace (LGPD) seguem liberados
+      !c.req.path.startsWith("/api/v1/exports") &&
+      !(c.req.method === "DELETE" && c.req.path === "/api/v1/workspace")
     )
       throw new AppError(
         403,

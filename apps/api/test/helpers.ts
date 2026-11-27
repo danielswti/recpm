@@ -14,6 +14,7 @@ export function setupApp(
     env?: Record<string, string>;
     billing?: Deps["billing"];
     storage?: Deps["storage"];
+    scanner?: Deps["scanner"];
     push?: Deps["push"];
     fetch?: Deps["fetch"];
   } = {},
@@ -43,6 +44,7 @@ export function setupApp(
     logger: createLogger("silent"),
     billing: opts.billing,
     storage: opts.storage,
+    scanner: opts.scanner,
     push: opts.push,
     fetch: opts.fetch,
   };

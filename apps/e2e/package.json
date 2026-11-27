@@ -1,0 +1,17 @@
+{
+  "name": "@recpm/e2e",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@recpm/config": "workspace:*",
+    "@recpm/db": "workspace:*",
+    "@types/node": "^22.20.7",
+    "tsx": "^4.23.15",
+    "typescript": "5.9.3"
+  }
+}

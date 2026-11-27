@@ -1,6 +1,7 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { DomainError } from "@recpm/core";
 import { schema } from "@recpm/db";
+import { Scalar } from "@scalar/hono-api-reference";
 import { or, sql } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
@@ -12,6 +13,7 @@ import { apiDescription } from "./lib/api-docs";
 import { AppError, errorBody } from "./lib/errors";
 import { createLiveHub } from "./lib/live";
 import { createPushSender } from "./lib/push";
+import { captureError } from "./lib/sentry";
 import { apiKeyAuth } from "./middleware/api-key";
 import { requireTrustedOrigin } from "./middleware/origin";
 import { loadSession } from "./middleware/session";
@@ -30,6 +32,7 @@ import { notificationRoutes } from "./routes/notifications";
 import { platformRoutes } from "./routes/platform";
 import { portalRoutes } from "./routes/portal";
 import { projectRoutes } from "./routes/projects";
+import { publicPlanRoutes } from "./routes/public-plans";
 import { reportRoutes } from "./routes/reports";
 import { settingsRoutes } from "./routes/settings";
 import { signatureRoutes } from "./routes/signatures";
@@ -70,7 +73,7 @@ export const createApp = (deps: Deps) => {
     );
   });
 
-  app.get("/health", async (c) => {
+  const health = async (c: import("hono").Context<AppEnv>) => {
     const db = await deps.dbs.appDb.execute(sql`SELECT 1`).then(
       () => true,
       () => false,
@@ -81,8 +84,12 @@ export const createApp = (deps: Deps) => {
           () => false,
         )
       : null;
+    c.header("Cache-Control", "no-store");
     return c.json({ ok: db && redis !== false, db, redis }, db && redis !== false ? 200 : 503);
-  });
+  };
+  // /health para o Docker (rede interna) e /api/v1/health para monitores externos (via Caddy)
+  app.get("/health", health);
+  app.get("/api/v1/health", health);
 
   app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
@@ -128,6 +135,7 @@ export const createApp = (deps: Deps) => {
     .route("/api/v1", settingsRoutes(deps))
     .route("/api/v1", integrationRoutes(deps))
     .route("/api/v1", portalRoutes(deps))
+    .route("/api/v1", publicPlanRoutes(deps))
     .route("/api/v1", fileRoutes(deps));
 
   app.openAPIRegistry.registerComponent("securitySchemes", "apiKey", {
@@ -143,11 +151,15 @@ export const createApp = (deps: Deps) => {
     security: [{ apiKey: [] }],
   });
 
+  // Referência navegável da API (Scalar, carregada do CDN jsDelivr; o Caddy libera o CDN só nesta rota)
+  app.get("/api/docs", Scalar({ url: "/api/openapi.json", pageTitle: "Rec PM API", hideClientButton: true }));
+
   app.onError((err, c) => {
     if (err instanceof AppError) return c.json(errorBody(err.code, err.message), err.status);
     if (err instanceof DomainError) return c.json(errorBody(err.code, err.message, err.details), err.status);
     if (err instanceof HTTPException) return c.json(errorBody("HTTP_ERROR", err.message), err.status);
     deps.logger.error({ err, requestId: c.var.requestId }, "erro não tratado");
+    captureError(err, { requestId: c.var.requestId, route: c.req.routePath, method: c.req.method });
     if (process.env.DEBUG_ERRORS) console.error(err);
     return c.json(errorBody("INTERNAL", "Erro inesperado. Tente novamente."), 500);
   });

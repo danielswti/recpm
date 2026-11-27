@@ -124,6 +124,14 @@ export const tasks = pgTable(
     index("tasks_board_idx")
       .on(t.tenantId, t.projectId, t.statusKey, t.rank)
       .where(sql`${t.deletedAt} IS NULL AND NOT ${t.archived}`),
+    // Listas (§9.10: p95 < 200 ms): ordem padrão por prazo e quadro do projeto por rank, já ordenados
+    // no índice para o LIMIT parar cedo. rank usa COLLATE "C", como no ORDER BY da API.
+    index("tasks_list_deadline_idx")
+      .on(t.tenantId, t.deadline, sql`${t.createdAt} DESC`)
+      .where(sql`${t.deletedAt} IS NULL AND NOT ${t.archived}`),
+    index("tasks_project_rank_idx")
+      .on(t.tenantId, t.projectId, sql`${t.rank} COLLATE "C"`)
+      .where(sql`${t.deletedAt} IS NULL AND NOT ${t.archived}`),
     index("tasks_approver_idx").on(t.tenantId, t.approverId),
     index("tasks_recurrence_due_idx")
       .on(t.nextGenerationAt)

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preços · Rec PM</title>
+    <meta name="description" content="Planos do Rec PM pelo volume de tarefas do mês: Básico gratuito, Essencial, Profissional e Enterprise. Teste grátis por 14 dias." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <!--header-->
+    <main id="conteudo" class="mx-auto max-w-6xl px-4 py-16">
+      <div class="mx-auto max-w-2xl text-center">
+        <h1 class="text-4xl font-bold tracking-tight">Planos e preços</h1>
+        <p class="mt-3 text-lg text-slate-600">Você paga pelo volume de tarefas do mês. Comece com 14 dias grátis no Profissional, sem cartão.</p>
+      </div>
+      <div data-plans class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"></div>
+
+      <h2 class="mt-20 text-2xl font-bold tracking-tight">Compare os planos</h2>
+      <div class="mt-6 overflow-x-auto rounded-xl border border-slate-200">
+        <table data-compare class="w-full min-w-[640px] text-sm">
+          <caption class="sr-only">Comparação dos planos</caption>
+        </table>
+      </div>
+      <p class="mt-4 text-sm text-slate-500">Preços mensais em reais. Todos os planos incluem projetos, Kanban, controle de tempo, calendário, chat, relatórios, financeiro e exportação dos dados. Cada tarefa criada no ciclo conta no limite, venha da equipe, do portal, da API ou de recorrência.</p>
+    </main>
+    <!--footer-->
+  </body>
+</html>

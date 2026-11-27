@@ -188,10 +188,18 @@ function Signup() {
   );
 }
 
+/** Página do site de marketing: em produção o app fica em app.<domínio> e o site no domínio principal. */
+function siteUrl(path: string) {
+  const { protocol, hostname, port } = window.location;
+  return hostname.startsWith("app.")
+    ? `${protocol}//${hostname.slice(4)}${port ? `:${port}` : ""}${path}`
+    : path;
+}
+
 /** Link para os termos/política; o texto vem da tradução via <Trans>. */
 function ExtLink({ href, children }: { href: string; children?: React.ReactNode }) {
   return (
-    <a href={href} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+    <a href={siteUrl(href)} target="_blank" rel="noreferrer" className="text-primary hover:underline">
       {children}
     </a>
   );

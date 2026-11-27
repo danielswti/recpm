@@ -1,0 +1,87 @@
+# Rec PM em produção. Site em {$SITE_DOMAIN}, app em app.{$SITE_DOMAIN}; HTTPS automático (Let's Encrypt).
+{
+	email {$ACME_EMAIL}
+	servers {
+		# Só o Caddy fala com a internet; o X-Forwarded-For que chega do cliente é ignorado
+		# e substituído pelo IP real da conexão.
+		trusted_proxies static private_ranges
+	}
+}
+
+(security) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		X-Frame-Options "DENY"
+		-Server
+	}
+}
+
+(static_cache) {
+	@hashed path /assets/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	@html path / /*.html
+	header @html Cache-Control "no-cache"
+}
+
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
+
+{$SITE_DOMAIN} {
+	import security
+	encode zstd gzip
+	header Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+	handle /api/v1/public/* {
+		reverse_proxy api:3000
+	}
+	handle {
+		root * /srv/site
+		import static_cache
+		try_files {path} {path}.html
+		file_server {
+			precompressed br gzip
+		}
+	}
+	handle_errors 404 {
+		rewrite * /404.html
+		file_server {
+			root /srv/site
+			precompressed br gzip
+		}
+	}
+}
+
+app.{$SITE_DOMAIN} {
+	import security
+	encode zstd gzip
+	# img/connect https: links temporários do armazenamento (R2/S3) e o Sentry
+	header Content-Security-Policy "default-src 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' https:; worker-src 'self'; manifest-src 'self'; frame-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+	handle /api/docs {
+		header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'"
+		reverse_proxy api:3000
+	}
+	handle /api/* {
+		# flush imediato para o SSE (/api/v1/stream)
+		reverse_proxy api:3000 {
+			flush_interval -1
+		}
+	}
+	handle /sw.js {
+		root * /srv/app
+		header Cache-Control "no-cache"
+		file_server {
+			precompressed br gzip
+		}
+	}
+	handle {
+		root * /srv/app
+		import static_cache
+		try_files {path} /index.html
+		file_server {
+			precompressed br gzip
+		}
+	}
+}
