@@ -23,13 +23,19 @@ import { Route as AppAssinaturaRouteImport } from './routes/_app/assinatura'
 import { Route as AppCalendarioRouteImport } from './routes/_app/calendario'
 import { Route as AppChatRouteImport } from './routes/_app/chat'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
+import { Route as AppContratadoEntregueRouteImport } from './routes/_app/contratado-entregue'
+import { Route as AppEntregasRouteImport } from './routes/_app/entregas'
 import { Route as AppFinanceiroRouteImport } from './routes/_app/financeiro'
 import { Route as AppMembrosRouteImport } from './routes/_app/membros'
 import { Route as AppMensalidadesRouteImport } from './routes/_app/mensalidades'
+import { Route as AppMinhaProdutividadeRouteImport } from './routes/_app/minha-produtividade'
+import { Route as AppProdutividadeRouteImport } from './routes/_app/produtividade'
+import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
 import { Route as AppTarefasRouteImport } from './routes/_app/tarefas'
 import { Route as AppTrabalhandoAgoraRouteImport } from './routes/_app/trabalhando-agora'
 import { Route as AssinarTokenRouteImport } from './routes/assinar.$token'
 import { Route as ConviteIdRouteImport } from './routes/convite.$id'
+import { Route as RelatorioContratadoEntregueRouteImport } from './routes/relatorio.contratado-entregue'
 import { Route as VerificarCodeRouteImport } from './routes/verificar.$code'
 import { Route as AppCadastrosIndexRouteImport } from './routes/_app/cadastros.index'
 import { Route as AppClientesIndexRouteImport } from './routes/_app/clientes.index'
@@ -109,6 +115,16 @@ const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppContratadoEntregueRoute = AppContratadoEntregueRouteImport.update({
+  id: '/contratado-entregue',
+  path: '/contratado-entregue',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEntregasRoute = AppEntregasRouteImport.update({
+  id: '/entregas',
+  path: '/entregas',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppFinanceiroRoute = AppFinanceiroRouteImport.update({
   id: '/financeiro',
   path: '/financeiro',
@@ -122,6 +138,21 @@ const AppMembrosRoute = AppMembrosRouteImport.update({
 const AppMensalidadesRoute = AppMensalidadesRouteImport.update({
   id: '/mensalidades',
   path: '/mensalidades',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMinhaProdutividadeRoute = AppMinhaProdutividadeRouteImport.update({
+  id: '/minha-produtividade',
+  path: '/minha-produtividade',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProdutividadeRoute = AppProdutividadeRouteImport.update({
+  id: '/produtividade',
+  path: '/produtividade',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTarefasRoute = AppTarefasRouteImport.update({
@@ -144,6 +175,12 @@ const ConviteIdRoute = ConviteIdRouteImport.update({
   path: '/convite/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RelatorioContratadoEntregueRoute =
+  RelatorioContratadoEntregueRouteImport.update({
+    id: '/relatorio/contratado-entregue',
+    path: '/relatorio/contratado-entregue',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const VerificarCodeRoute = VerificarCodeRouteImport.update({
   id: '/verificar/$code',
   path: '/verificar/$code',
@@ -204,13 +241,19 @@ export interface FileRoutesByFullPath {
   '/calendario': typeof AppCalendarioRoute
   '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
+  '/contratado-entregue': typeof AppContratadoEntregueRoute
+  '/entregas': typeof AppEntregasRoute
   '/financeiro': typeof AppFinanceiroRoute
   '/membros': typeof AppMembrosRoute
   '/mensalidades': typeof AppMensalidadesRoute
+  '/minha-produtividade': typeof AppMinhaProdutividadeRoute
+  '/produtividade': typeof AppProdutividadeRoute
+  '/relatorios': typeof AppRelatoriosRoute
   '/tarefas': typeof AppTarefasRoute
   '/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
   '/assinar/$token': typeof AssinarTokenRoute
   '/convite/$id': typeof ConviteIdRoute
+  '/relatorio/contratado-entregue': typeof RelatorioContratadoEntregueRoute
   '/verificar/$code': typeof VerificarCodeRoute
   '/clientes/$id': typeof AppClientesIdRoute
   '/conta/notificacoes': typeof AppContaNotificacoesRoute
@@ -234,13 +277,19 @@ export interface FileRoutesByTo {
   '/calendario': typeof AppCalendarioRoute
   '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
+  '/contratado-entregue': typeof AppContratadoEntregueRoute
+  '/entregas': typeof AppEntregasRoute
   '/financeiro': typeof AppFinanceiroRoute
   '/membros': typeof AppMembrosRoute
   '/mensalidades': typeof AppMensalidadesRoute
+  '/minha-produtividade': typeof AppMinhaProdutividadeRoute
+  '/produtividade': typeof AppProdutividadeRoute
+  '/relatorios': typeof AppRelatoriosRoute
   '/tarefas': typeof AppTarefasRoute
   '/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
   '/assinar/$token': typeof AssinarTokenRoute
   '/convite/$id': typeof ConviteIdRoute
+  '/relatorio/contratado-entregue': typeof RelatorioContratadoEntregueRoute
   '/verificar/$code': typeof VerificarCodeRoute
   '/': typeof AppIndexRoute
   '/clientes/$id': typeof AppClientesIdRoute
@@ -267,13 +316,19 @@ export interface FileRoutesById {
   '/_app/calendario': typeof AppCalendarioRoute
   '/_app/chat': typeof AppChatRoute
   '/_app/configuracoes': typeof AppConfiguracoesRoute
+  '/_app/contratado-entregue': typeof AppContratadoEntregueRoute
+  '/_app/entregas': typeof AppEntregasRoute
   '/_app/financeiro': typeof AppFinanceiroRoute
   '/_app/membros': typeof AppMembrosRoute
   '/_app/mensalidades': typeof AppMensalidadesRoute
+  '/_app/minha-produtividade': typeof AppMinhaProdutividadeRoute
+  '/_app/produtividade': typeof AppProdutividadeRoute
+  '/_app/relatorios': typeof AppRelatoriosRoute
   '/_app/tarefas': typeof AppTarefasRoute
   '/_app/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
   '/assinar/$token': typeof AssinarTokenRoute
   '/convite/$id': typeof ConviteIdRoute
+  '/relatorio/contratado-entregue': typeof RelatorioContratadoEntregueRoute
   '/verificar/$code': typeof VerificarCodeRoute
   '/_app/': typeof AppIndexRoute
   '/_app/clientes/$id': typeof AppClientesIdRoute
@@ -301,13 +356,19 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/chat'
     | '/configuracoes'
+    | '/contratado-entregue'
+    | '/entregas'
     | '/financeiro'
     | '/membros'
     | '/mensalidades'
+    | '/minha-produtividade'
+    | '/produtividade'
+    | '/relatorios'
     | '/tarefas'
     | '/trabalhando-agora'
     | '/assinar/$token'
     | '/convite/$id'
+    | '/relatorio/contratado-entregue'
     | '/verificar/$code'
     | '/clientes/$id'
     | '/conta/notificacoes'
@@ -331,13 +392,19 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/chat'
     | '/configuracoes'
+    | '/contratado-entregue'
+    | '/entregas'
     | '/financeiro'
     | '/membros'
     | '/mensalidades'
+    | '/minha-produtividade'
+    | '/produtividade'
+    | '/relatorios'
     | '/tarefas'
     | '/trabalhando-agora'
     | '/assinar/$token'
     | '/convite/$id'
+    | '/relatorio/contratado-entregue'
     | '/verificar/$code'
     | '/'
     | '/clientes/$id'
@@ -363,13 +430,19 @@ export interface FileRouteTypes {
     | '/_app/calendario'
     | '/_app/chat'
     | '/_app/configuracoes'
+    | '/_app/contratado-entregue'
+    | '/_app/entregas'
     | '/_app/financeiro'
     | '/_app/membros'
     | '/_app/mensalidades'
+    | '/_app/minha-produtividade'
+    | '/_app/produtividade'
+    | '/_app/relatorios'
     | '/_app/tarefas'
     | '/_app/trabalhando-agora'
     | '/assinar/$token'
     | '/convite/$id'
+    | '/relatorio/contratado-entregue'
     | '/verificar/$code'
     | '/_app/'
     | '/_app/clientes/$id'
@@ -393,6 +466,7 @@ export interface RootRouteChildren {
   WorkspacesRoute: typeof WorkspacesRoute
   AssinarTokenRoute: typeof AssinarTokenRoute
   ConviteIdRoute: typeof ConviteIdRoute
+  RelatorioContratadoEntregueRoute: typeof RelatorioContratadoEntregueRoute
   VerificarCodeRoute: typeof VerificarCodeRoute
 }
 
@@ -496,6 +570,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppConfiguracoesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/contratado-entregue': {
+      id: '/_app/contratado-entregue'
+      path: '/contratado-entregue'
+      fullPath: '/contratado-entregue'
+      preLoaderRoute: typeof AppContratadoEntregueRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/entregas': {
+      id: '/_app/entregas'
+      path: '/entregas'
+      fullPath: '/entregas'
+      preLoaderRoute: typeof AppEntregasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/financeiro': {
       id: '/_app/financeiro'
       path: '/financeiro'
@@ -515,6 +603,27 @@ declare module '@tanstack/react-router' {
       path: '/mensalidades'
       fullPath: '/mensalidades'
       preLoaderRoute: typeof AppMensalidadesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/minha-produtividade': {
+      id: '/_app/minha-produtividade'
+      path: '/minha-produtividade'
+      fullPath: '/minha-produtividade'
+      preLoaderRoute: typeof AppMinhaProdutividadeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/produtividade': {
+      id: '/_app/produtividade'
+      path: '/produtividade'
+      fullPath: '/produtividade'
+      preLoaderRoute: typeof AppProdutividadeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/relatorios': {
+      id: '/_app/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof AppRelatoriosRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/tarefas': {
@@ -543,6 +652,13 @@ declare module '@tanstack/react-router' {
       path: '/convite/$id'
       fullPath: '/convite/$id'
       preLoaderRoute: typeof ConviteIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relatorio/contratado-entregue': {
+      id: '/relatorio/contratado-entregue'
+      path: '/relatorio/contratado-entregue'
+      fullPath: '/relatorio/contratado-entregue'
+      preLoaderRoute: typeof RelatorioContratadoEntregueRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/verificar/$code': {
@@ -617,9 +733,14 @@ interface AppRouteChildren {
   AppCalendarioRoute: typeof AppCalendarioRoute
   AppChatRoute: typeof AppChatRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
+  AppContratadoEntregueRoute: typeof AppContratadoEntregueRoute
+  AppEntregasRoute: typeof AppEntregasRoute
   AppFinanceiroRoute: typeof AppFinanceiroRoute
   AppMembrosRoute: typeof AppMembrosRoute
   AppMensalidadesRoute: typeof AppMensalidadesRoute
+  AppMinhaProdutividadeRoute: typeof AppMinhaProdutividadeRoute
+  AppProdutividadeRoute: typeof AppProdutividadeRoute
+  AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppTarefasRoute: typeof AppTarefasRoute
   AppTrabalhandoAgoraRoute: typeof AppTrabalhandoAgoraRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -639,9 +760,14 @@ const AppRouteChildren: AppRouteChildren = {
   AppCalendarioRoute: AppCalendarioRoute,
   AppChatRoute: AppChatRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
+  AppContratadoEntregueRoute: AppContratadoEntregueRoute,
+  AppEntregasRoute: AppEntregasRoute,
   AppFinanceiroRoute: AppFinanceiroRoute,
   AppMembrosRoute: AppMembrosRoute,
   AppMensalidadesRoute: AppMensalidadesRoute,
+  AppMinhaProdutividadeRoute: AppMinhaProdutividadeRoute,
+  AppProdutividadeRoute: AppProdutividadeRoute,
+  AppRelatoriosRoute: AppRelatoriosRoute,
   AppTarefasRoute: AppTarefasRoute,
   AppTrabalhandoAgoraRoute: AppTrabalhandoAgoraRoute,
   AppIndexRoute: AppIndexRoute,
@@ -668,6 +794,7 @@ const rootRouteChildren: RootRouteChildren = {
   WorkspacesRoute: WorkspacesRoute,
   AssinarTokenRoute: AssinarTokenRoute,
   ConviteIdRoute: ConviteIdRoute,
+  RelatorioContratadoEntregueRoute: RelatorioContratadoEntregueRoute,
   VerificarCodeRoute: VerificarCodeRoute,
 }
 export const routeTree = rootRouteImport

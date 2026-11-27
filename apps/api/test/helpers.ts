@@ -85,6 +85,15 @@ export class Browser {
     }
     return { status: res.status, json };
   }
+  /** Resposta crua (arquivos): mesmos cookies, sem tentar ler JSON. */
+  raw(path: string) {
+    return this.app.request(`http://localhost:3000${path}`, {
+      headers: {
+        origin: WEB,
+        ...(this.jar.size ? { cookie: [...this.jar].map(([k, v]) => `${k}=${v}`).join("; ") } : {}),
+      },
+    });
+  }
   get = (p: string) => this.req("GET", p);
   post = (p: string, b: unknown = {}, h?: Record<string, string>) => this.req("POST", p, b, h);
   patch = (p: string, b: unknown = {}) => this.req("PATCH", p, b);
