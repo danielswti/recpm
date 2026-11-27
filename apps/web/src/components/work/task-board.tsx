@@ -267,6 +267,8 @@ function SortableCard({
     id: task.id,
   });
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: os attributes do useSortable dão role e tabIndex; pelo teclado, o título do card é um botão
+    // biome-ignore lint/a11y/useKeyWithClickEvents: Enter/Espaço iniciam o arrasto pelo teclado; abrir fica no botão do título
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}

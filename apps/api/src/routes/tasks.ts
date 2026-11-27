@@ -934,16 +934,14 @@ export const taskRoutes = (deps: Deps) => {
                 const main = b.assigneeId === undefined ? before.assigneeId : b.assigneeId;
                 if (main && !m.has(main)) m.set(main, before.mainRoleId);
                 if (m.size)
-                  await t
-                    .insert(s.taskAssignees)
-                    .values(
-                      [...m].map(([userId, roleId]) => ({
-                        tenantId: actor.tenantId,
-                        taskId: id,
-                        userId,
-                        roleId,
-                      })),
-                    );
+                  await t.insert(s.taskAssignees).values(
+                    [...m].map(([userId, roleId]) => ({
+                      tenantId: actor.tenantId,
+                      taskId: id,
+                      userId,
+                      roleId,
+                    })),
+                  );
                 newPeople.push(...[...m.keys()].filter((u) => !current.includes(u)));
               } else if (b.assigneeId) {
                 const ins = await t
@@ -961,15 +959,13 @@ export const taskRoutes = (deps: Deps) => {
               if (b.tagIds) {
                 await t.delete(s.taskTags).where(eq(s.taskTags.taskId, id));
                 if (b.tagIds.length)
-                  await t
-                    .insert(s.taskTags)
-                    .values(
-                      [...new Set(b.tagIds)].map((tagId) => ({
-                        tenantId: actor.tenantId,
-                        taskId: id,
-                        tagId,
-                      })),
-                    );
+                  await t.insert(s.taskTags).values(
+                    [...new Set(b.tagIds)].map((tagId) => ({
+                      tenantId: actor.tenantId,
+                      taskId: id,
+                      tagId,
+                    })),
+                  );
               }
               if (b.assigneeId && b.assigneeId !== before.assigneeId) newPeople.push(b.assigneeId);
               if (newPeople.length)
