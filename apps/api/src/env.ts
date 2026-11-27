@@ -22,6 +22,13 @@ const schema = z.object({
   ASAAS_API_KEY: z.string().optional(),
   ASAAS_BASE_URL: z.url().default("https://api-sandbox.asaas.com/v3"),
   ASAAS_WEBHOOK_TOKEN: z.string().optional(),
+  // Arquivos (R2 em produção, MinIO em dev). Sem bucket = upload desligado (links externos seguem).
+  S3_ENDPOINT: z.string().optional(),
+  S3_REGION: z.string().default("auto"),
+  S3_BUCKET: z.string().optional(),
+  S3_ACCESS_KEY_ID: z.string().optional(),
+  S3_SECRET_ACCESS_KEY: z.string().optional(),
+  S3_FORCE_PATH_STYLE: z.stringbool().default(false),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 

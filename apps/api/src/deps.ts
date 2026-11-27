@@ -4,6 +4,7 @@ import type { BillingProviders } from "./billing";
 import type { Env } from "./env";
 import type { Logger } from "./lib/logger";
 import type { Mailer } from "./lib/mailer";
+import type { Storage } from "./lib/storage";
 
 export type Dbs = ReturnType<typeof createDbs>;
 
@@ -16,4 +17,6 @@ export type Deps = {
   logger: Logger;
   /** Provedores de cobrança; sem isso, monta a partir do ambiente (testes injetam um falso). */
   billing?: BillingProviders;
+  /** Armazenamento de arquivos; sem isso, monta a partir do ambiente (S3/R2/MinIO). */
+  storage?: Storage | null;
 };

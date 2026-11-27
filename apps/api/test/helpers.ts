@@ -9,7 +9,9 @@ import { memoryMailer } from "../src/lib/mailer";
 
 export const WEB = "http://localhost:5173";
 
-export function setupApp(opts: { env?: Record<string, string>; billing?: Deps["billing"] } = {}) {
+export function setupApp(
+  opts: { env?: Record<string, string>; billing?: Deps["billing"]; storage?: Deps["storage"] } = {},
+) {
   const db = inject("db");
   const env = parseEnv({
     NODE_ENV: "test",
@@ -28,7 +30,14 @@ export function setupApp(opts: { env?: Record<string, string>; billing?: Deps["b
     DATABASE_URL_PLATFORM: db.platform,
   });
   const mailer = memoryMailer();
-  const deps: Deps = { env, dbs, mailer, logger: createLogger("silent"), billing: opts.billing };
+  const deps: Deps = {
+    env,
+    dbs,
+    mailer,
+    logger: createLogger("silent"),
+    billing: opts.billing,
+    storage: opts.storage,
+  };
   const app = createApp(deps);
   return { app, dbs, mailer, urls: db, deps };
 }

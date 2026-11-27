@@ -15,9 +15,12 @@ import { billingRoutes } from "./routes/billing";
 import { briefingRoutes } from "./routes/briefings";
 import { catalogRoutes } from "./routes/catalogs";
 import { clientRoutes } from "./routes/clients";
+import { fileRoutes } from "./routes/files";
 import { meRoutes } from "./routes/me";
 import { memberRoutes } from "./routes/members";
 import { platformRoutes } from "./routes/platform";
+import { projectRoutes } from "./routes/projects";
+import { taskRoutes } from "./routes/tasks";
 import { webhookRoutes } from "./routes/webhooks";
 import { workspaceRoutes } from "./routes/workspaces";
 import type { AppEnv } from "./types";
@@ -94,7 +97,10 @@ export const createApp = (deps: Deps) => {
     .route("/api/v1", platformRoutes(deps))
     .route("/api/v1", catalogRoutes(deps))
     .route("/api/v1", briefingRoutes(deps))
-    .route("/api/v1", clientRoutes(deps));
+    .route("/api/v1", clientRoutes(deps))
+    .route("/api/v1", projectRoutes(deps))
+    .route("/api/v1", taskRoutes(deps))
+    .route("/api/v1", fileRoutes(deps));
 
   app.doc31("/api/openapi.json", {
     openapi: "3.1.0",
