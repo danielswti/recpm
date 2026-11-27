@@ -8,9 +8,19 @@
  *                  cota; com a cota esgotada a série espera o próximo ciclo).
  *   client-chase   a cada 10 min: cards em "aguardando cliente" além do SLA (horas úteis) avisam o
  *                  atendimento do projeto, uma vez por espera.
- * As próximas fases acrescentam aqui: recorrência de tarefas, e-mails, notificações, backups.
+ *   deadline-reminders a cada 15 min: "prazo amanhã" (24 h antes) e "prazo vencido", uma vez por prazo.
+ *   holidays       diário: importa os feriados nacionais do ano corrente e do próximo (BrasilAPI) para
+ *                  os workspaces com a importação ligada.
+ * (O envio de e-mail e push das notificações roda na API, que tem o mailer e as chaves VAPID.)
  */
-import { runBillingCycle, runClientChaseSla, runRecurrence } from "@recpm/core";
+import {
+  brasilApiHolidays,
+  runBillingCycle,
+  runClientChaseSla,
+  runDeadlineReminders,
+  runHolidayImport,
+  runRecurrence,
+} from "@recpm/core";
 import { createDbs } from "@recpm/db";
 import { Queue, Worker } from "bullmq";
 import { Redis } from "ioredis";
@@ -44,6 +54,18 @@ await queue.upsertJobScheduler(
   { name: "client-chase", opts: { removeOnComplete: 100, removeOnFail: 500 } },
 );
 
+await queue.upsertJobScheduler(
+  "deadline-reminders",
+  { every: 15 * 60_000 },
+  { name: "deadline-reminders", opts: { removeOnComplete: 100, removeOnFail: 500 } },
+);
+
+await queue.upsertJobScheduler(
+  "holidays",
+  { pattern: "0 5 * * *" },
+  { name: "holidays", opts: { removeOnComplete: 30, removeOnFail: 100 } },
+);
+
 const worker = new Worker(
   QUEUE,
   async (job) => {
@@ -61,6 +83,16 @@ const worker = new Worker(
     if (job.name === "client-chase") {
       const report = await runClientChaseSla({ platformDb, appDb: dbs.appDb });
       if (report.notified) logger.info({ job: job.name, ...report }, "SLA de cobrança");
+      return report;
+    }
+    if (job.name === "deadline-reminders") {
+      const report = await runDeadlineReminders({ platformDb, appDb: dbs.appDb });
+      logger.info({ job: job.name, ...report }, "lembretes de prazo");
+      return report;
+    }
+    if (job.name === "holidays") {
+      const report = await runHolidayImport({ platformDb, appDb: dbs.appDb }, brasilApiHolidays(fetch));
+      logger.info({ job: job.name, ...report }, "feriados");
       return report;
     }
     logger.warn({ job: job.name }, "job desconhecido");

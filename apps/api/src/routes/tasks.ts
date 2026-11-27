@@ -215,7 +215,7 @@ const memberOfProjectSql = (uid: string) =>
     sql`(select 1 from ${s.projectMembers} pm where pm.project_id = ${s.tasks.projectId} and pm.user_id = ${uid})`,
   );
 
-const visibleTo = (actor: Actor): SQL | undefined =>
+export const taskVisibleTo = (actor: Actor): SQL | undefined =>
   actor.can("tasks.readAll") || !actor.userId
     ? undefined
     : or(involvedSql(actor.userId), memberOfProjectSql(actor.userId));
@@ -229,7 +229,7 @@ function whereOf(actor: Actor, f: Filters, tz: string): SQL | undefined {
   const dayStart = (d: string) => sql`(${d}::date)::timestamp AT TIME ZONE ${tz}`;
   return and(
     isNull(s.tasks.deletedAt),
-    visibleTo(actor),
+    taskVisibleTo(actor),
     f.scope === "mine"
       ? or(
           eq(s.tasks.assigneeId, uid),
@@ -550,6 +550,9 @@ function patchColumns(
   }
   if (deadline !== undefined) {
     out.deadline = deadline ? new Date(deadline) : null;
+    // novo prazo: os avisos de "vence em 24 h" / "venceu" voltam a valer
+    out.deadlineReminderAt = null;
+    out.overdueNotifiedAt = null;
     // O prazo original fica guardado (atrasos medem contra ele).
     if (!before.originalDeadline && deadline) out.originalDeadline = new Date(deadline);
   }
@@ -679,7 +682,7 @@ export const taskRoutes = (deps: Deps) => {
                   isNull(s.tasks.deletedAt),
                   eq(s.tasks.archived, false),
                   inArray(s.tasks.statusKey, approvalCols),
-                  actor.can("tasks.approve") ? visibleTo(actor) : eq(s.tasks.approverId, uid),
+                  actor.can("tasks.approve") ? taskVisibleTo(actor) : eq(s.tasks.approverId, uid),
                 ),
               );
             const [ar] = actor.can("tasks.archive")
@@ -789,7 +792,13 @@ export const taskRoutes = (deps: Deps) => {
                     const d = b.deadline ? new Date(b.deadline) : null;
                     await sp
                       .update(s.tasks)
-                      .set({ deadline: d, originalDeadline: task.originalDeadline ?? d, updatedAt: now })
+                      .set({
+                        deadline: d,
+                        originalDeadline: task.originalDeadline ?? d,
+                        deadlineReminderAt: null,
+                        overdueNotifiedAt: null,
+                        updatedAt: now,
+                      })
                       .where(eq(s.tasks.id, id));
                     await history(
                       sp,

@@ -462,6 +462,33 @@ DROP TRIGGER IF EXISTS time_entries_notify ON time_entries;
 CREATE TRIGGER time_entries_notify AFTER INSERT OR UPDATE OR DELETE ON time_entries
   FOR EACH ROW EXECUTE FUNCTION app.notify_time_entries();
 
+-- Notificações novas (payload "tenant:usuário") e mudanças no chat ("tenant:conversa").
+CREATE OR REPLACE FUNCTION app.notify_notifications() RETURNS trigger
+  LANGUAGE plpgsql SET search_path = pg_catalog, public
+  AS $$
+  BEGIN
+    PERFORM pg_notify('recpm_notify', NEW.tenant_id::text || ':' || NEW.user_id::text);
+    RETURN NULL;
+  END $$;
+DROP TRIGGER IF EXISTS notifications_notify ON notifications;
+CREATE TRIGGER notifications_notify AFTER INSERT ON notifications
+  FOR EACH ROW EXECUTE FUNCTION app.notify_notifications();
+
+CREATE OR REPLACE FUNCTION app.notify_chat() RETURNS trigger
+  LANGUAGE plpgsql SET search_path = pg_catalog, public
+  AS $$
+  DECLARE r record := COALESCE(NEW, OLD);
+  BEGIN
+    PERFORM pg_notify('recpm_chat', r.tenant_id::text || ':' || r.conversation_id::text);
+    RETURN NULL;
+  END $$;
+DROP TRIGGER IF EXISTS messages_notify ON messages;
+CREATE TRIGGER messages_notify AFTER INSERT OR UPDATE ON messages
+  FOR EACH ROW EXECUTE FUNCTION app.notify_chat();
+DROP TRIGGER IF EXISTS conversation_participants_notify ON conversation_participants;
+CREATE TRIGGER conversation_participants_notify AFTER INSERT OR UPDATE OR DELETE ON conversation_participants
+  FOR EACH ROW EXECUTE FUNCTION app.notify_chat();
+
 -- ── Verificação de cobertura (rodada no CI e no teste de isolamento) ─────────
 -- Falha se existir tabela com tenant_id sem RLS ou sem a política tenant_isolation.
 CREATE OR REPLACE FUNCTION app.assert_rls_coverage() RETURNS void

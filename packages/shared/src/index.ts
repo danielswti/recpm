@@ -1,5 +1,6 @@
 export * from "./billing";
 export * from "./catalogs";
+export * from "./communication";
 export * from "./defaults";
 export * from "./permissions";
 export * from "./roles";

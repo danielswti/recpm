@@ -10,7 +10,13 @@ import { memoryMailer } from "../src/lib/mailer";
 export const WEB = "http://localhost:5173";
 
 export function setupApp(
-  opts: { env?: Record<string, string>; billing?: Deps["billing"]; storage?: Deps["storage"] } = {},
+  opts: {
+    env?: Record<string, string>;
+    billing?: Deps["billing"];
+    storage?: Deps["storage"];
+    push?: Deps["push"];
+    fetch?: Deps["fetch"];
+  } = {},
 ) {
   const db = inject("db");
   const env = parseEnv({
@@ -37,6 +43,8 @@ export function setupApp(
     logger: createLogger("silent"),
     billing: opts.billing,
     storage: opts.storage,
+    push: opts.push,
+    fetch: opts.fetch,
   };
   const app = createApp(deps);
   return { app, dbs, mailer, urls: db, deps };
@@ -91,7 +99,7 @@ let seq = 0;
 export const uniq = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(seq++).toString(36)}`;
 
 export async function signUp(b: Browser, name: string, password = "senha-forte-123") {
-  const email = `${uniq(name.toLowerCase())}@example.test`;
+  const email = `${uniq(name.toLowerCase().replace(/[^a-z0-9]+/g, "-"))}@example.test`;
   const r = await b.post("/api/auth/sign-up/email", { name, email, password, acceptTerms: true });
   if (r.status !== 200) throw new Error(`sign-up falhou: ${r.status} ${JSON.stringify(r.json)}`);
   return { email, password, userId: r.json.user.id as string };

@@ -9,15 +9,20 @@ import { createAuth } from "./auth/auth";
 import { createBillingProviders } from "./billing";
 import type { Deps } from "./deps";
 import { AppError, errorBody } from "./lib/errors";
+import { createLiveHub } from "./lib/live";
+import { createPushSender } from "./lib/push";
 import { requireTrustedOrigin } from "./middleware/origin";
 import { loadSession } from "./middleware/session";
 import { billingRoutes } from "./routes/billing";
 import { briefingRoutes } from "./routes/briefings";
+import { calendarRoutes } from "./routes/calendar";
 import { catalogRoutes } from "./routes/catalogs";
+import { chatRoutes } from "./routes/chat";
 import { clientRoutes } from "./routes/clients";
 import { fileRoutes } from "./routes/files";
 import { meRoutes } from "./routes/me";
 import { memberRoutes } from "./routes/members";
+import { notificationRoutes } from "./routes/notifications";
 import { platformRoutes } from "./routes/platform";
 import { projectRoutes } from "./routes/projects";
 import { settingsRoutes } from "./routes/settings";
@@ -29,6 +34,9 @@ import type { AppEnv } from "./types";
 
 export const createApp = (deps: Deps) => {
   const auth = createAuth(deps);
+  const live = deps.live ?? createLiveHub(deps.env.DATABASE_URL_APP, deps.logger);
+  const push = deps.push === undefined ? createPushSender(deps.env) : deps.push;
+  const rt = { ...deps, live, push };
   const app = new OpenAPIHono<AppEnv>({
     defaultHook: (result, c) => {
       if (!result.success) {
@@ -102,7 +110,10 @@ export const createApp = (deps: Deps) => {
     .route("/api/v1", clientRoutes(deps))
     .route("/api/v1", projectRoutes(deps))
     .route("/api/v1", taskRoutes(deps))
-    .route("/api/v1", timeRoutes(deps))
+    .route("/api/v1", timeRoutes(rt))
+    .route("/api/v1", notificationRoutes(rt))
+    .route("/api/v1", calendarRoutes(rt))
+    .route("/api/v1", chatRoutes(rt))
     .route("/api/v1", settingsRoutes(deps))
     .route("/api/v1", fileRoutes(deps));
 
@@ -121,7 +132,7 @@ export const createApp = (deps: Deps) => {
   });
   app.notFound((c) => c.json(errorBody("NOT_FOUND", "Rota não encontrada."), 404));
 
-  return Object.assign(routes, { auth });
+  return Object.assign(routes, { auth, live, push });
 };
 
 export type App = ReturnType<typeof createApp>;

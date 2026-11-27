@@ -119,9 +119,12 @@ export const notifications = pgTable(
     referenceId: uuid(),
     read: boolean().notNull().default(false),
     readAt: tstz(),
+    /** E-mail/push já processados (despachante reivindica com FOR UPDATE SKIP LOCKED). */
+    dispatchedAt: tstz(),
     createdAt: createdAt(),
   },
   (t) => [
+    index("notifications_dispatch_idx").on(t.createdAt).where(sql`${t.dispatchedAt} IS NULL`),
     index("notifications_user_idx").on(t.tenantId, t.userId, t.createdAt.desc()),
     index("notifications_unread_idx").on(t.tenantId, t.userId).where(sql`NOT ${t.read}`),
   ],

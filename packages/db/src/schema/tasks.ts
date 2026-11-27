@@ -94,6 +94,10 @@ export const tasks = pgTable(
     // SLA de cobrança do cliente (coluna aguardando_cliente)
     lastClientChaseAt: tstz(),
     chaseSlaNotifiedAt: tstz(),
+    /** Aviso "prazo nas próximas 24 h" já enviado para este prazo (limpo ao mudar o prazo). */
+    deadlineReminderAt: tstz(),
+    /** Aviso "prazo vencido" já enviado para este prazo. */
+    overdueNotifiedAt: tstz(),
 
     ...timestamps,
     ...softDelete,

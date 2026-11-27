@@ -5,6 +5,7 @@ import { parseEnv } from "./env";
 import { createLogger } from "./lib/logger";
 import { createMailer } from "./lib/mailer";
 import { createRedis } from "./lib/redis";
+import { createNotificationDispatcher } from "./services/notification-dispatch";
 
 const env = parseEnv();
 const logger = createLogger(env.LOG_LEVEL);
@@ -18,6 +19,10 @@ const mailer = createMailer({
 });
 
 const app = createApp({ env, dbs, redis, mailer, logger });
+const stopDispatcher = createNotificationDispatcher(
+  { env, dbs, redis, mailer, logger, live: app.live },
+  app.push,
+).start();
 
 const server = serve({ fetch: app.fetch, port: env.PORT }, (info) =>
   logger.info(`API em http://localhost:${info.port}`),
@@ -25,8 +30,10 @@ const server = serve({ fetch: app.fetch, port: env.PORT }, (info) =>
 
 const shutdown = () => {
   logger.info("encerrando…");
+  stopDispatcher();
   server.close(() => {
     redis?.disconnect();
+    void app.live.close();
     process.exit(0);
   });
 };
