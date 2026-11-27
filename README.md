@@ -10,8 +10,10 @@ Stack: Node.js 22, pnpm + Turborepo, Hono (OpenAPI), Drizzle + PostgreSQL 17 com
 apps/
   api/        API Hono: /api/auth (Better Auth) e /api/v1 (rotas da aplicação, OpenAPI em /api/openapi.json)
   web/        SPA React (equipe e, na Fase 9, portal do cliente)
+  worker/     jobs BullMQ (ciclo de cobrança; depois recorrência, e-mails, backups)
 packages/
   db/         schema Drizzle, migrations, sql/rls.sql, withTenant(), seeds, banco de teste
+  core/       regras de domínio compartilhadas por API e worker (cota, entitlements, assinatura)
   shared/     papéis, matriz de permissões (RBAC) e schemas zod usados pela API e pela web
   ui/         tema (tokens CSS, escuro por padrão, cor do tenant) e componentes base
   config/     tsconfig base
@@ -27,7 +29,7 @@ pnpm install
 cp .env.example .env          # ajuste BETTER_AUTH_SECRET (openssl rand -base64 32)
 pnpm infra:up                 # Postgres 17, Valkey, MinIO, Gotenberg, Mailpit
 pnpm db:migrate               # migrations + políticas RLS + checagem de cobertura + planos
-pnpm dev                      # API em :3000 e web em http://localhost:5173
+pnpm dev                      # API em :3000, worker e web em http://localhost:5173
 ```
 
 E-mails de desenvolvimento (convite, confirmação, senha) chegam no Mailpit: http://localhost:8025.
@@ -51,3 +53,13 @@ A CI (`.github/workflows/ci.yml`) roda lint, typecheck, testes (com Postgres 17)
 Toda consulta de dados de tenant passa por `withTenant(db, { tenantId, userId }, tx => …)`, que define o contexto
 da transação para o RLS do Postgres; sem contexto, nenhuma linha volta. A API usa quatro papéis do Postgres
 (`recpm_owner`, `recpm_app`, `recpm_auth`, `recpm_platform`); detalhes em `packages/db/README.md`.
+
+## Cobrança
+
+Planos ficam na tabela `plans` (preços em centavos, limites e recursos em JSON); o super-admin edita.
+Provedores: Stripe (padrão) e Asaas, escolhidos por `BILLING_PROVIDER`. Para ligar o Stripe:
+
+1. Crie um produto com preço mensal recorrente para cada plano pago e grave o id em `plans.stripe_price_ids` (`{"monthly": "price_..."}`).
+2. Aponte o webhook para `https://<api>/api/webhooks/stripe` com os eventos `customer.subscription.created|updated|deleted`, `invoice.paid` e `invoice.payment_failed`, e grave o segredo em `STRIPE_WEBHOOK_SECRET`.
+
+No Asaas, cadastre o webhook `https://<api>/api/webhooks/asaas` (eventos de cobrança e de assinatura) com um token de autenticação e grave-o em `ASAAS_WEBHOOK_TOKEN`.

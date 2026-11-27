@@ -18,6 +18,8 @@ const Me = z
       twoFactorEnabled: z.boolean(),
       platformRole: z.string(),
     }),
+    /** Sessão aberta por um super_admin personificando este usuário. */
+    impersonating: z.boolean(),
     tenant: z
       .object({
         id: z.uuid(),
@@ -79,6 +81,7 @@ export const meRoutes = (deps: Deps) => {
           platformRole: u.role ?? "user",
         },
         tenant,
+        impersonating: !!(session as { impersonatedBy?: string | null }).impersonatedBy,
       },
       200,
     );

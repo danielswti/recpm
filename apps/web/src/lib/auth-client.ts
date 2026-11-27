@@ -1,4 +1,4 @@
-import { organizationClient, twoFactorClient } from "better-auth/client/plugins";
+import { adminClient, organizationClient, twoFactorClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 /**
@@ -8,7 +8,7 @@ import { createAuthClient } from "better-auth/react";
 export const authClient = createAuthClient({
   baseURL: typeof window === "undefined" ? "http://localhost:5173" : window.location.origin,
   basePath: "/api/auth",
-  plugins: [organizationClient(), twoFactorClient()],
+  plugins: [organizationClient(), twoFactorClient(), adminClient()],
 });
 
 type BaError = { code?: string; message?: string; status?: number } | null | undefined;

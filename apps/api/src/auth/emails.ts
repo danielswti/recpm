@@ -41,3 +41,27 @@ export const invitationEmail = (to: string, inviter: string, workspace: string, 
   ),
   text: `${inviter} convidou você para ${workspace} no Rec PM. Aceite em: ${url}`,
 });
+
+export const usageWarningEmail = (
+  to: string,
+  name: string,
+  workspace: string,
+  percent: 80 | 90 | 100,
+  used: number,
+  limit: number,
+  url: string,
+): Mail => {
+  const reached = percent === 100;
+  const subject = reached
+    ? `${workspace}: limite de tarefas do plano atingido`
+    : `${workspace}: ${percent}% das tarefas do plano usadas`;
+  const body = reached
+    ? `Olá, ${name}. O workspace ${workspace} usou as ${limit} tarefas do ciclo. Novas tarefas ficam bloqueadas até a virada do ciclo ou um upgrade de plano.`
+    : `Olá, ${name}. O workspace ${workspace} já criou ${used} de ${limit} tarefas neste ciclo (${percent}%).`;
+  return {
+    to,
+    subject,
+    html: layout(subject, `<p>${esc(body)}</p>`, { label: "Ver plano e uso", url }),
+    text: `${body} Plano e uso: ${url}`,
+  };
+};

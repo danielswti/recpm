@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "migrate": "tsx --env-file-if-exists=../../.env src/migrate.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "grant-super-admin": "tsx --env-file-if-exists=../../.env src/scripts/grant-super-admin.ts"
   },
   "dependencies": {
     "drizzle-orm": "0.45.4",

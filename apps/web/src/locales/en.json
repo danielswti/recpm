@@ -44,7 +44,9 @@
     "collapse": "Collapse menu",
     "expand": "Expand menu",
     "openMenu": "Open menu",
-    "userMenu": "User menu"
+    "userMenu": "User menu",
+    "billing": "Plan & billing",
+    "platform": "Platform"
   },
   "roles": {
     "admin": "Admin",
@@ -73,7 +75,7 @@
   },
   "signup": {
     "title": "Create your account",
-    "subtitle": "Your workspace starts with a 14-day Pro trial.",
+    "subtitle": "Your workspace starts with a 14-day Profissional trial.",
     "invitedSubtitle": "Create your account to accept the invitation.",
     "yourName": "Your name",
     "workspaceName": "Agency name",
@@ -118,17 +120,18 @@
     "empty": "You are not part of any workspace yet.",
     "create": "Create workspace",
     "createTitle": "New workspace",
-    "createDescription": "One workspace per agency. Starts with a 14-day Pro trial."
+    "createDescription": "One workspace per agency. Starts with a 14-day Profissional trial."
   },
   "dashboard": {
     "greeting": "Hi, {{name}}",
     "intro": "This is your {{workspace}} workspace. Projects, tasks and reports arrive in the next phases.",
-    "trial": "Pro trial active.",
+    "trial": "Profissional trial active.",
     "nextSteps": "Next steps",
     "inviteTeam": "Invite your team",
     "inviteTeamDesc": "Managers and staff join through the invitation link.",
     "secureAccount": "Turn on two-step verification",
-    "secureAccountDesc": "Protect your account with an authenticator app."
+    "secureAccountDesc": "Protect your account with an authenticator app.",
+    "planUsage": "{{plan}} plan usage"
   },
   "members": {
     "title": "Users",
@@ -205,6 +208,203 @@
     "EMAIL_VERIFICATION_REQUIRED_BEFORE_ACCEPTING_OR_REJECTING_INVITATION": "Confirm your email to accept the invitation.",
     "INVITATION_NOT_FOUND": "Invitation not found or expired.",
     "YOU_ARE_NOT_THE_RECIPIENT_OF_THE_INVITATION": "This invitation was sent to another email.",
-    "VALIDATION": "Check the highlighted fields."
+    "VALIDATION": "Check the highlighted fields.",
+    "PLAN_TASK_LIMIT_REACHED": "Plan task limit reached this cycle.",
+    "PLAN_USER_LIMIT_REACHED": "Plan user limit reached.",
+    "FEATURE_NOT_IN_PLAN": "Feature not included in your plan.",
+    "TENANT_READ_ONLY": "Workspace is read-only. Settle the subscription.",
+    "BILLING_NOT_CONFIGURED": "Online payment not configured yet.",
+    "PLAN_REQUIRES_CONTACT": "This plan is sold through sales.",
+    "PLAN_UNCHANGED": "You're already on this plan.",
+    "TRIAL_ENDS_ON_FREE": "The free plan already applies when the trial ends.",
+    "NO_PORTAL": "No invoice or paid subscription yet.",
+    "INTERVAL_UNAVAILABLE": "This plan has no yearly option."
+  },
+  "billing": {
+    "title": "Plan & billing",
+    "subtitle": "Your plan, task quota usage and upgrade options.",
+    "usage": "{{used}} of {{limit}} tasks this cycle",
+    "usageUnlimited": "{{used}} tasks this cycle (unlimited)",
+    "usageLabel": "Task quota usage",
+    "cycleEnds": "Cycle ends {{date}}",
+    "plans": "Plans",
+    "free": "Free",
+    "from": "from",
+    "perMonth": "/mo",
+    "currentPlan": "Current plan",
+    "contactSales": "Contact sales",
+    "scheduled": "Scheduled",
+    "afterTrial": "Applied when the trial ends",
+    "subscribe": "Subscribe",
+    "upgradeTo": "Upgrade",
+    "switch": "Switch to this plan",
+    "portal": "Payment & invoices",
+    "notConfigured": "Online payment is not configured in this environment yet. The trial and the free plan work normally.",
+    "trialLine_one": "Free trial: {{count}} day left (until {{date}}). Then the workspace moves to Básico unless subscribed.",
+    "trialLine_other": "Free trial: {{count}} days left (until {{date}}). Then the workspace moves to Básico unless subscribed.",
+    "pastDueLine": "Payment overdue. Settle it by {{date}} to avoid read-only mode.",
+    "freeLine": "Free plan.",
+    "renewsLine": "Renews on {{date}}.",
+    "cancelScheduled": "The subscription ends on {{date}}; then the workspace returns to Básico.",
+    "downgradeScheduled": "Switch to {{plan}} scheduled for {{date}}.",
+    "undo": "Undo",
+    "undone": "Scheduled change undone.",
+    "checkoutReturn": "Payment sent. Your plan updates as soon as the provider confirms it.",
+    "confirmTitle": "Switch to {{plan}}?",
+    "confirmText": "You stay on {{plan}} until {{date}}. The change applies from the next cycle and nothing is deleted.",
+    "confirm": "Confirm change",
+    "changed": {
+      "upgrade": "Upgraded. The new limit applies now.",
+      "downgrade": "Change scheduled for the next cycle.",
+      "cancel_at_period_end": "The subscription ends at the end of the cycle.",
+      "schedule_free": "Change scheduled for the next cycle.",
+      "checkout": ""
+    },
+    "status": {
+      "trialing": "Trial",
+      "active": "Active",
+      "past_due": "Payment overdue",
+      "canceled": "Canceled",
+      "readOnly": "Read-only"
+    },
+    "f": {
+      "tasks": "{{n}} tasks per month",
+      "tasksUnlimited": "Unlimited tasks",
+      "users": "Up to {{n}} users",
+      "usersUnlimited": "Unlimited users",
+      "storage": "{{n}} GB of files"
+    },
+    "feature": {
+      "clientPortal": "Client portal",
+      "eSignature": "E-signature",
+      "aiAssistant": "AI assistant",
+      "publicApi": "Public API",
+      "advancedReports": "Advanced reports",
+      "customDomain": "Custom domain",
+      "sso": "Single sign-on (SSO)"
+    },
+    "banner": {
+      "readOnly": "Workspace is read-only due to non-payment. Nothing was deleted.",
+      "pastDue": "We couldn't charge the subscription. Settle it by {{date}} to avoid read-only mode.",
+      "nearLimit": "You have used {{pct}}% of this cycle's plan tasks.",
+      "limitReached": "This cycle's plan task limit has been reached.",
+      "trial_one": "{{plan}} trial: {{count}} day left.",
+      "trial_other": "{{plan}} trial: {{count}} days left.",
+      "cta": "See plans"
+    },
+    "upgrade": {
+      "title": "Plan limit",
+      "PLAN_TASK_LIMIT_REACHED": "This cycle's plan task limit has been reached.",
+      "PLAN_USER_LIMIT_REACHED": "The current plan can't hold more users.",
+      "FEATURE_NOT_IN_PLAN": "This feature isn't part of the current plan.",
+      "admin": "Upgrade to continue now, or wait for the next cycle.",
+      "member": "Ask a workspace admin to upgrade the plan.",
+      "cta": "See plans"
+    }
+  },
+  "platform": {
+    "title": "Platform",
+    "backToApp": "Back to app",
+    "tabs": {
+      "tenants": "Workspaces",
+      "planos": "Plans"
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "paying": "Paying",
+      "total": "Workspaces",
+      "trialing": "Trialing",
+      "trials7d": "Trials ending in 7 days",
+      "pastDue": "Past due",
+      "readOnly": "Read-only",
+      "suspended": "Suspended"
+    },
+    "search": "Search by name, slug or e-mail",
+    "filter": "Filter by status",
+    "allStatuses": "All statuses",
+    "status": {
+      "active": "Active",
+      "trialing": "Trialing",
+      "past_due": "Past due",
+      "read_only": "Read-only",
+      "suspended": "Suspended"
+    },
+    "cols": {
+      "tenant": "Workspace",
+      "plan": "Plan",
+      "usage": "Tasks this cycle",
+      "members": "Members",
+      "status": "Status",
+      "created": "Created"
+    },
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}",
+    "empty": "No workspaces found.",
+    "trialUntil": "trial until {{date}}",
+    "periodUntil": "cycle until {{date}}",
+    "impersonate": "Sign in as admin",
+    "assignPlan": "Assign plan",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{pages}}",
+    "reason": "Reason (recorded in the audit log)",
+    "plan": "Plan",
+    "months": "Months",
+    "done": {
+      "reactivate": "Workspace reactivated.",
+      "suspend": "Workspace suspended.",
+      "plan": "Plan updated."
+    },
+    "dialog": {
+      "suspend": {
+        "title": "Suspend {{name}}",
+        "text": "Nobody in the workspace can use the app until it is reactivated.",
+        "confirm": "Suspend"
+      },
+      "impersonate": {
+        "title": "Sign in as admin of {{name}}",
+        "text": "You browse as the workspace admin for up to 1 hour. Start and end are logged.",
+        "confirm": "Sign in"
+      },
+      "plan": {
+        "title": "Assign a plan to {{name}}",
+        "text": "Grants the plan without charging for the chosen period (e.g. Enterprise closed by sales).",
+        "confirm": "Assign"
+      }
+    },
+    "hidden": "Hidden",
+    "inactive": "Inactive",
+    "editPlan": "Edit",
+    "editPlanTitle": "Edit plan {{name}}",
+    "editPlanText": "Changes apply to new charges. Running subscriptions keep the provider's price.",
+    "fields": {
+      "monthly": "Monthly price (BRL)",
+      "yearly": "Yearly price (BRL)",
+      "blankNone": "Blank = no yearly plan",
+      "tasks": "Tasks per cycle",
+      "users": "Users",
+      "portalUsers": "Portal users",
+      "storage": "Storage (GB)",
+      "blankUnlimited": "Blank = unlimited",
+      "stripeMonthly": "Stripe price id (monthly)",
+      "stripeYearly": "Stripe price id (yearly)",
+      "features": "Features",
+      "startingAt": "\"Starting at\" price",
+      "isPublic": "Visible on plans page",
+      "active": "Active"
+    },
+    "feature": {
+      "clientPortal": "Client portal",
+      "eSignature": "E-signature",
+      "aiAssistant": "AI assistant",
+      "publicApi": "Public API",
+      "advancedReports": "Advanced reports",
+      "customDomain": "Custom domain",
+      "sso": "Single sign-on (SSO)"
+    },
+    "impersonatingAs": "You are browsing as {{name}} in {{tenant}}.",
+    "stopImpersonating": "Stop"
   }
 }

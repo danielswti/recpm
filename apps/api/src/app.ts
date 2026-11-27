@@ -1,15 +1,21 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { sql } from "drizzle-orm";
+import { DomainError } from "@recpm/core";
+import { schema } from "@recpm/db";
+import { or, sql } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { createAuth } from "./auth/auth";
+import { createBillingProviders } from "./billing";
 import type { Deps } from "./deps";
 import { AppError, errorBody } from "./lib/errors";
 import { requireTrustedOrigin } from "./middleware/origin";
 import { loadSession } from "./middleware/session";
+import { billingRoutes } from "./routes/billing";
 import { meRoutes } from "./routes/me";
 import { memberRoutes } from "./routes/members";
+import { platformRoutes } from "./routes/platform";
+import { webhookRoutes } from "./routes/webhooks";
 import { workspaceRoutes } from "./routes/workspaces";
 import type { AppEnv } from "./types";
 
@@ -57,6 +63,22 @@ export const createApp = (deps: Deps) => {
 
   app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
+  const billing =
+    deps.billing ??
+    createBillingProviders(deps.env, async (priceId) => {
+      const [p] = await deps.dbs.platformDb
+        .select({ id: schema.plans.id })
+        .from(schema.plans)
+        .where(
+          or(
+            sql`${schema.plans.stripePriceIds}->>'monthly' = ${priceId}`,
+            sql`${schema.plans.stripePriceIds}->>'yearly' = ${priceId}`,
+          ),
+        );
+      return p?.id ?? null;
+    });
+  app.route("/api/webhooks", webhookRoutes(deps, billing));
+
   // Rotas da aplicação (cookie de sessão) — CSRF por Origin em métodos que alteram estado.
   app.use("/api/v1/*", requireTrustedOrigin([deps.env.WEB_URL, deps.env.API_URL]));
   app.use("/api/v1/*", loadSession);
@@ -64,7 +86,9 @@ export const createApp = (deps: Deps) => {
   const routes = app
     .route("/api/v1", meRoutes(deps))
     .route("/api/v1", workspaceRoutes(deps))
-    .route("/api/v1", memberRoutes(deps));
+    .route("/api/v1", memberRoutes(deps))
+    .route("/api/v1", billingRoutes(deps, billing))
+    .route("/api/v1", platformRoutes(deps));
 
   app.doc31("/api/openapi.json", {
     openapi: "3.1.0",
@@ -73,6 +97,7 @@ export const createApp = (deps: Deps) => {
 
   app.onError((err, c) => {
     if (err instanceof AppError) return c.json(errorBody(err.code, err.message), err.status);
+    if (err instanceof DomainError) return c.json(errorBody(err.code, err.message, err.details), err.status);
     if (err instanceof HTTPException) return c.json(errorBody("HTTP_ERROR", err.message), err.status);
     deps.logger.error({ err, requestId: c.var.requestId }, "erro não tratado");
     return c.json(errorBody("INTERNAL", "Erro inesperado. Tente novamente."), 500);

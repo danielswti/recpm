@@ -14,9 +14,11 @@ import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as ClienteRouteImport } from './routes/cliente'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
+import { Route as PlataformaRouteImport } from './routes/plataforma'
 import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as WorkspacesRouteImport } from './routes/workspaces'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppAssinaturaRouteImport } from './routes/_app/assinatura'
 import { Route as AppMembrosRouteImport } from './routes/_app/membros'
 import { Route as ConviteIdRouteImport } from './routes/convite.$id'
 import { Route as AppContaSegurancaRouteImport } from './routes/_app/conta.seguranca'
@@ -45,6 +47,11 @@ const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
   path: '/esqueci-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlataformaRoute = PlataformaRouteImport.update({
+  id: '/plataforma',
+  path: '/plataforma',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   id: '/redefinir-senha',
   path: '/redefinir-senha',
@@ -58,6 +65,11 @@ const WorkspacesRoute = WorkspacesRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAssinaturaRoute = AppAssinaturaRouteImport.update({
+  id: '/assinatura',
+  path: '/assinatura',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMembrosRoute = AppMembrosRouteImport.update({
@@ -82,8 +94,10 @@ export interface FileRoutesByFullPath {
   '/cliente': typeof ClienteRoute
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/plataforma': typeof PlataformaRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/workspaces': typeof WorkspacesRoute
+  '/assinatura': typeof AppAssinaturaRoute
   '/membros': typeof AppMembrosRoute
   '/convite/$id': typeof ConviteIdRoute
   '/conta/seguranca': typeof AppContaSegurancaRoute
@@ -93,8 +107,10 @@ export interface FileRoutesByTo {
   '/cliente': typeof ClienteRoute
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/plataforma': typeof PlataformaRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/workspaces': typeof WorkspacesRoute
+  '/assinatura': typeof AppAssinaturaRoute
   '/membros': typeof AppMembrosRoute
   '/convite/$id': typeof ConviteIdRoute
   '/': typeof AppIndexRoute
@@ -107,8 +123,10 @@ export interface FileRoutesById {
   '/cliente': typeof ClienteRoute
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
+  '/plataforma': typeof PlataformaRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/workspaces': typeof WorkspacesRoute
+  '/_app/assinatura': typeof AppAssinaturaRoute
   '/_app/membros': typeof AppMembrosRoute
   '/convite/$id': typeof ConviteIdRoute
   '/_app/': typeof AppIndexRoute
@@ -122,8 +140,10 @@ export interface FileRouteTypes {
     | '/cliente'
     | '/entrar'
     | '/esqueci-senha'
+    | '/plataforma'
     | '/redefinir-senha'
     | '/workspaces'
+    | '/assinatura'
     | '/membros'
     | '/convite/$id'
     | '/conta/seguranca'
@@ -133,8 +153,10 @@ export interface FileRouteTypes {
     | '/cliente'
     | '/entrar'
     | '/esqueci-senha'
+    | '/plataforma'
     | '/redefinir-senha'
     | '/workspaces'
+    | '/assinatura'
     | '/membros'
     | '/convite/$id'
     | '/'
@@ -146,8 +168,10 @@ export interface FileRouteTypes {
     | '/cliente'
     | '/entrar'
     | '/esqueci-senha'
+    | '/plataforma'
     | '/redefinir-senha'
     | '/workspaces'
+    | '/_app/assinatura'
     | '/_app/membros'
     | '/convite/$id'
     | '/_app/'
@@ -160,6 +184,7 @@ export interface RootRouteChildren {
   ClienteRoute: typeof ClienteRoute
   EntrarRoute: typeof EntrarRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
+  PlataformaRoute: typeof PlataformaRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   WorkspacesRoute: typeof WorkspacesRoute
   ConviteIdRoute: typeof ConviteIdRoute
@@ -202,6 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EsqueciSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plataforma': {
+      id: '/plataforma'
+      path: '/plataforma'
+      fullPath: '/plataforma'
+      preLoaderRoute: typeof PlataformaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/redefinir-senha': {
       id: '/redefinir-senha'
       path: '/redefinir-senha'
@@ -221,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/assinatura': {
+      id: '/_app/assinatura'
+      path: '/assinatura'
+      fullPath: '/assinatura'
+      preLoaderRoute: typeof AppAssinaturaRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/membros': {
@@ -248,12 +287,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAssinaturaRoute: typeof AppAssinaturaRoute
   AppMembrosRoute: typeof AppMembrosRoute
   AppIndexRoute: typeof AppIndexRoute
   AppContaSegurancaRoute: typeof AppContaSegurancaRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAssinaturaRoute: AppAssinaturaRoute,
   AppMembrosRoute: AppMembrosRoute,
   AppIndexRoute: AppIndexRoute,
   AppContaSegurancaRoute: AppContaSegurancaRoute,
@@ -267,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClienteRoute: ClienteRoute,
   EntrarRoute: EntrarRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
+  PlataformaRoute: PlataformaRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   WorkspacesRoute: WorkspacesRoute,
   ConviteIdRoute: ConviteIdRoute,

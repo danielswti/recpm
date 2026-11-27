@@ -6,6 +6,8 @@
  * autenticação). A criação de tenant NÃO passa pelo Better Auth: é feita pela rota
  * POST /api/v1/workspaces numa transação única com os padrões do tenant.
  */
+
+import { assertSeatAvailable, DomainError } from "@recpm/core";
 import { schema, withTenant } from "@recpm/db";
 import { INVITABLE_ROLES, isTenantRole } from "@recpm/shared";
 import { betterAuth } from "better-auth";
@@ -46,6 +48,26 @@ export const createAuth = (deps: Deps) => {
       .from(schema.memberships)
       .where(and(eq(schema.memberships.tenantId, tenantId), eq(schema.memberships.userId, userId)));
     return m?.role ?? null;
+  };
+
+  /** Workspace ativo (não somente leitura) e limite de usuários do plano (convites pendentes contam no convite). */
+  const seats = async (tenantId: string, role: string, includePending: boolean) => {
+    try {
+      await withTenant(dbs.appDb, { tenantId, actor: "system" }, async (tx) => {
+        const [t] = await tx.select({ status: schema.tenants.status }).from(schema.tenants);
+        if (t?.status !== "active")
+          throw new DomainError(403, "TENANT_READ_ONLY", "Workspace em modo somente leitura.");
+        await assertSeatAvailable(tx, role, { includePending });
+      });
+    } catch (e) {
+      if (e instanceof DomainError)
+        throw new APIError(e.status === 402 ? "PAYMENT_REQUIRED" : "FORBIDDEN", {
+          code: e.code,
+          message: e.message,
+          ...e.details,
+        });
+      throw e;
+    }
   };
 
   return betterAuth({
@@ -159,11 +181,24 @@ export const createAuth = (deps: Deps) => {
           });
         }
       }),
+      // Auditoria da personificação pelo super_admin (início e fim), com IP.
+      after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== "/admin/impersonate-user" && ctx.path !== "/admin/stop-impersonating") return;
+        if (ctx.context.returned instanceof Error) return;
+        const actorId = ctx.context.session?.session.impersonatedBy ?? ctx.context.session?.user.id ?? null;
+        await dbs.platformDb.insert(schema.platformAuditLogs).values({
+          actorId,
+          action: ctx.path === "/admin/impersonate-user" ? "user.impersonate.start" : "user.impersonate.stop",
+          details: { userId: ctx.body?.userId ?? ctx.context.session?.user.id ?? null },
+          ip: ctx.request?.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+        });
+      }),
     },
     plugins: [
       twoFactor({ issuer: "Rec PM", schema: { twoFactor: { modelName: "twoFactors" } } }),
       admin({
         defaultRole: "user",
+        impersonationSessionDuration: 60 * 60, // 1 h
         adminRoles: ["super_admin"],
         roles: { user: platformUserAc, super_admin: platformAdminAc },
       }),
@@ -207,6 +242,7 @@ export const createAuth = (deps: Deps) => {
                 message: "Você não pode convidar alguém com este papel.",
               });
             }
+            await seats(invitation.organizationId, invitation.role, true);
             const clientId = (invitation.clientId as string | undefined) ?? null;
             if ((invitation.role === "cliente") !== !!clientId) {
               throw new APIError("BAD_REQUEST", {
@@ -231,8 +267,9 @@ export const createAuth = (deps: Deps) => {
                 });
             }
           },
-          // Ao aceitar: o vínculo herda o cliente do convite (a CHECK do banco exige).
+          // Ao aceitar: respeita o limite de usuários do plano e herda o cliente do convite.
           beforeAddMember: async ({ member, user }) => {
+            await seats(member.organizationId, member.role, false);
             if (member.role !== "cliente") return;
             const [inv] = await dbs.authDb
               .select({ clientId: schema.invitations.clientId })

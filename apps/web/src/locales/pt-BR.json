@@ -44,7 +44,9 @@
     "collapse": "Recolher menu",
     "expand": "Expandir menu",
     "openMenu": "Abrir menu",
-    "userMenu": "Menu do usuário"
+    "userMenu": "Menu do usuário",
+    "billing": "Plano e cobrança",
+    "platform": "Plataforma"
   },
   "roles": {
     "admin": "Administrador",
@@ -73,7 +75,7 @@
   },
   "signup": {
     "title": "Criar sua conta",
-    "subtitle": "Seu workspace começa com 14 dias de teste do plano Pro.",
+    "subtitle": "Seu workspace começa com 14 dias de teste do plano Profissional.",
     "invitedSubtitle": "Crie sua conta para aceitar o convite.",
     "yourName": "Seu nome",
     "workspaceName": "Nome da agência",
@@ -118,17 +120,18 @@
     "empty": "Você ainda não participa de nenhum workspace.",
     "create": "Criar workspace",
     "createTitle": "Novo workspace",
-    "createDescription": "Um workspace por agência. Começa com 14 dias de teste do plano Pro."
+    "createDescription": "Um workspace por agência. Começa com 14 dias de teste do plano Profissional."
   },
   "dashboard": {
     "greeting": "Olá, {{name}}",
     "intro": "Este é o seu workspace {{workspace}}. Projetos, tarefas e relatórios chegam nas próximas fases.",
-    "trial": "Teste do plano Pro ativo.",
+    "trial": "Teste do plano Profissional ativo.",
     "nextSteps": "Próximos passos",
     "inviteTeam": "Convide sua equipe",
     "inviteTeamDesc": "Gestores e funcionários entram pelo link do convite.",
     "secureAccount": "Ative a verificação em duas etapas",
-    "secureAccountDesc": "Proteja sua conta com um app autenticador."
+    "secureAccountDesc": "Proteja sua conta com um app autenticador.",
+    "planUsage": "Uso do plano {{plan}}"
   },
   "members": {
     "title": "Usuários",
@@ -205,6 +208,203 @@
     "EMAIL_VERIFICATION_REQUIRED_BEFORE_ACCEPTING_OR_REJECTING_INVITATION": "Confirme seu e-mail para aceitar o convite.",
     "INVITATION_NOT_FOUND": "Convite não encontrado ou expirado.",
     "YOU_ARE_NOT_THE_RECIPIENT_OF_THE_INVITATION": "Este convite foi enviado para outro e-mail.",
-    "VALIDATION": "Confira os campos destacados."
+    "VALIDATION": "Confira os campos destacados.",
+    "PLAN_TASK_LIMIT_REACHED": "Limite de tarefas do plano atingido neste ciclo.",
+    "PLAN_USER_LIMIT_REACHED": "Limite de usuários do plano atingido.",
+    "FEATURE_NOT_IN_PLAN": "Recurso não incluído no seu plano.",
+    "TENANT_READ_ONLY": "Workspace em modo somente leitura. Regularize a assinatura.",
+    "BILLING_NOT_CONFIGURED": "Pagamento online ainda não configurado.",
+    "PLAN_REQUIRES_CONTACT": "Este plano é contratado com o comercial.",
+    "PLAN_UNCHANGED": "Você já está neste plano.",
+    "TRIAL_ENDS_ON_FREE": "Ao fim do teste o plano gratuito já é aplicado.",
+    "NO_PORTAL": "Ainda não há fatura ou assinatura paga.",
+    "INTERVAL_UNAVAILABLE": "Este plano não tem opção anual."
+  },
+  "billing": {
+    "title": "Plano e cobrança",
+    "subtitle": "Seu plano, o uso da cota de tarefas e as opções de upgrade.",
+    "usage": "{{used}} de {{limit}} tarefas neste ciclo",
+    "usageUnlimited": "{{used}} tarefas neste ciclo (ilimitado)",
+    "usageLabel": "Uso da cota de tarefas",
+    "cycleEnds": "Ciclo até {{date}}",
+    "plans": "Planos",
+    "free": "Grátis",
+    "from": "a partir de",
+    "perMonth": "/mês",
+    "currentPlan": "Plano atual",
+    "contactSales": "Fale com o comercial",
+    "scheduled": "Agendado",
+    "afterTrial": "Aplicado ao fim do teste",
+    "subscribe": "Assinar",
+    "upgradeTo": "Fazer upgrade",
+    "switch": "Mudar para este plano",
+    "portal": "Pagamento e faturas",
+    "notConfigured": "O pagamento online ainda não está configurado neste ambiente. O teste e o plano gratuito funcionam normalmente.",
+    "trialLine_one": "Teste gratuito: falta {{count}} dia (até {{date}}). Depois, o workspace passa para o Básico se não houver assinatura.",
+    "trialLine_other": "Teste gratuito: faltam {{count}} dias (até {{date}}). Depois, o workspace passa para o Básico se não houver assinatura.",
+    "pastDueLine": "Pagamento em atraso. Regularize até {{date}} para evitar o modo somente leitura.",
+    "freeLine": "Plano gratuito.",
+    "renewsLine": "Renova em {{date}}.",
+    "cancelScheduled": "A assinatura termina em {{date}}; depois o workspace volta ao Básico.",
+    "downgradeScheduled": "Mudança para o {{plan}} agendada para {{date}}.",
+    "undo": "Desfazer",
+    "undone": "Mudança agendada desfeita.",
+    "checkoutReturn": "Pagamento enviado. Seu plano é atualizado assim que o provedor confirmar.",
+    "confirmTitle": "Mudar para o {{plan}}?",
+    "confirmText": "Você continua no {{plan}} até {{date}}. A mudança vale a partir do próximo ciclo e nada é apagado.",
+    "confirm": "Confirmar mudança",
+    "changed": {
+      "upgrade": "Upgrade feito. O novo limite já vale.",
+      "downgrade": "Mudança agendada para o próximo ciclo.",
+      "cancel_at_period_end": "A assinatura termina no fim do ciclo.",
+      "schedule_free": "Mudança agendada para o próximo ciclo.",
+      "checkout": ""
+    },
+    "status": {
+      "trialing": "Em teste",
+      "active": "Ativo",
+      "past_due": "Pagamento em atraso",
+      "canceled": "Cancelado",
+      "readOnly": "Somente leitura"
+    },
+    "f": {
+      "tasks": "{{n}} tarefas por mês",
+      "tasksUnlimited": "Tarefas ilimitadas",
+      "users": "Até {{n}} usuários",
+      "usersUnlimited": "Usuários ilimitados",
+      "storage": "{{n}} GB de arquivos"
+    },
+    "feature": {
+      "clientPortal": "Portal do cliente",
+      "eSignature": "Assinatura eletrônica",
+      "aiAssistant": "Assistente de IA",
+      "publicApi": "API pública",
+      "advancedReports": "Relatórios avançados",
+      "customDomain": "Domínio próprio",
+      "sso": "Login único (SSO)"
+    },
+    "banner": {
+      "readOnly": "Workspace em modo somente leitura por falta de pagamento. Nada foi apagado.",
+      "pastDue": "Não conseguimos cobrar a assinatura. Regularize até {{date}} para não entrar em modo somente leitura.",
+      "nearLimit": "Vocês já usaram {{pct}}% das tarefas do plano neste ciclo.",
+      "limitReached": "O limite de tarefas do plano foi atingido neste ciclo.",
+      "trial_one": "Teste do {{plan}}: falta {{count}} dia.",
+      "trial_other": "Teste do {{plan}}: faltam {{count}} dias.",
+      "cta": "Ver planos"
+    },
+    "upgrade": {
+      "title": "Limite do plano",
+      "PLAN_TASK_LIMIT_REACHED": "O limite de tarefas do plano foi atingido neste ciclo.",
+      "PLAN_USER_LIMIT_REACHED": "O plano atual não comporta mais usuários.",
+      "FEATURE_NOT_IN_PLAN": "Este recurso não faz parte do plano atual.",
+      "admin": "Faça upgrade para continuar agora, ou aguarde a virada do ciclo.",
+      "member": "Peça a um administrador do workspace para fazer upgrade do plano.",
+      "cta": "Ver planos"
+    }
+  },
+  "platform": {
+    "title": "Plataforma",
+    "backToApp": "Voltar ao app",
+    "tabs": {
+      "tenants": "Workspaces",
+      "planos": "Planos"
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "paying": "Pagantes",
+      "total": "Workspaces",
+      "trialing": "Em teste",
+      "trials7d": "Testes acabando em 7 dias",
+      "pastDue": "Pagamento pendente",
+      "readOnly": "Somente leitura",
+      "suspended": "Suspensos"
+    },
+    "search": "Buscar por nome, slug ou e-mail",
+    "filter": "Filtrar por status",
+    "allStatuses": "Todos os status",
+    "status": {
+      "active": "Ativo",
+      "trialing": "Em teste",
+      "past_due": "Pagamento pendente",
+      "read_only": "Somente leitura",
+      "suspended": "Suspenso"
+    },
+    "cols": {
+      "tenant": "Workspace",
+      "plan": "Plano",
+      "usage": "Tarefas no ciclo",
+      "members": "Membros",
+      "status": "Status",
+      "created": "Criado em"
+    },
+    "actions": "Ações",
+    "actionsFor": "Ações de {{name}}",
+    "empty": "Nenhum workspace encontrado.",
+    "trialUntil": "teste até {{date}}",
+    "periodUntil": "ciclo até {{date}}",
+    "impersonate": "Entrar como admin",
+    "assignPlan": "Atribuir plano",
+    "suspend": "Suspender",
+    "reactivate": "Reativar",
+    "prev": "Anterior",
+    "next": "Próxima",
+    "pageOf": "Página {{page}} de {{pages}}",
+    "reason": "Motivo (fica registrado na auditoria)",
+    "plan": "Plano",
+    "months": "Meses",
+    "done": {
+      "reactivate": "Workspace reativado.",
+      "suspend": "Workspace suspenso.",
+      "plan": "Plano atualizado."
+    },
+    "dialog": {
+      "suspend": {
+        "title": "Suspender {{name}}",
+        "text": "Ninguém do workspace consegue usar o app até a reativação.",
+        "confirm": "Suspender"
+      },
+      "impersonate": {
+        "title": "Entrar como admin de {{name}}",
+        "text": "Você navega como o admin do workspace por até 1 hora. Início e fim ficam registrados.",
+        "confirm": "Entrar"
+      },
+      "plan": {
+        "title": "Atribuir plano a {{name}}",
+        "text": "Concede o plano sem cobrança pelo período escolhido (ex.: Enterprise fechado por vendas).",
+        "confirm": "Atribuir"
+      }
+    },
+    "hidden": "Oculto",
+    "inactive": "Inativo",
+    "editPlan": "Editar",
+    "editPlanTitle": "Editar plano {{name}}",
+    "editPlanText": "Mudanças valem para novas cobranças. Assinaturas em andamento mantêm o preço do provedor.",
+    "fields": {
+      "monthly": "Preço mensal (R$)",
+      "yearly": "Preço anual (R$)",
+      "blankNone": "Vazio = sem plano anual",
+      "tasks": "Tarefas por ciclo",
+      "users": "Usuários",
+      "portalUsers": "Usuários do portal",
+      "storage": "Armazenamento (GB)",
+      "blankUnlimited": "Vazio = ilimitado",
+      "stripeMonthly": "Stripe price id (mensal)",
+      "stripeYearly": "Stripe price id (anual)",
+      "features": "Recursos",
+      "startingAt": "Preço \"a partir de\"",
+      "isPublic": "Visível na página de planos",
+      "active": "Ativo"
+    },
+    "feature": {
+      "clientPortal": "Portal do cliente",
+      "eSignature": "Assinatura eletrônica",
+      "aiAssistant": "Assistente de IA",
+      "publicApi": "API pública",
+      "advancedReports": "Relatórios avançados",
+      "customDomain": "Domínio próprio",
+      "sso": "Login único (SSO)"
+    },
+    "impersonatingAs": "Você está navegando como {{name}} em {{tenant}}.",
+    "stopImpersonating": "Encerrar"
   }
 }

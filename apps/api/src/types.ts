@@ -9,6 +9,7 @@ export type TenantScope = {
   userId: string;
   role: TenantRole;
   clientId: string | null;
+  status: "active" | "read_only" | "suspended";
   /** Abre a transação com o contexto RLS deste request. */
   tx: <T>(fn: (tx: AppTx) => Promise<T>) => Promise<T>;
   context: TenantContext;

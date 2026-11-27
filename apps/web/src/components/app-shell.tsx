@@ -20,6 +20,7 @@ import {
   Building2,
   CalendarDays,
   CheckSquare,
+  CreditCard,
   FolderKanban,
   Gauge,
   Languages,
@@ -43,13 +44,15 @@ import { useTranslation } from "react-i18next";
 import { authClient } from "../lib/auth-client";
 import { LOCALES } from "../lib/i18n";
 import type { Me } from "../lib/queries";
+import { PlanBanner } from "./plan-banner";
 import { ThemeToggle } from "./theme-toggle";
+import { UpgradeDialog } from "./upgrade-dialog";
 
 type NavItem = {
   key: string;
   icon: LucideIcon;
   /** Rota já implementada; sem `to`, o item aparece desabilitado com a fase em que chega. */
-  to?: "/" | "/membros";
+  to?: "/" | "/membros" | "/assinatura";
   phase?: number;
   perm?: Permission;
 };
@@ -84,6 +87,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { key: "nav.catalogs", icon: BookOpen, phase: 3, perm: "catalogs.manage" },
       { key: "nav.settings", icon: Settings, phase: 3, perm: "tenant.settings" },
+      { key: "nav.billing", icon: CreditCard, to: "/assinatura", perm: "tenant.billing" },
     ],
   },
 ];
@@ -175,7 +179,10 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
             <NotificationsBell />
           </div>
         </header>
+        {me.impersonating && <ImpersonationBanner me={me} />}
+        <PlanBanner canManage={perms.has("tenant.billing")} />
         <main className="flex-1 p-4 md:p-8">{children}</main>
+        <UpgradeDialog canManage={perms.has("tenant.billing")} />
       </div>
     </div>
   );
@@ -259,6 +266,11 @@ function UserCard({ me, collapsed }: { me: Me; collapsed: boolean }) {
         <DropdownMenuItem onSelect={() => navigate({ to: "/workspaces" })}>
           <ArrowLeftRight /> {t("nav.switchWorkspace")}
         </DropdownMenuItem>
+        {me.user.platformRole === "super_admin" && !me.impersonating && (
+          <DropdownMenuItem onSelect={() => navigate({ to: "/plataforma" })}>
+            <Building2 /> {t("nav.platform")}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="flex items-center gap-2">
           <Languages className="size-3.5" /> {t("nav.language")}
@@ -276,6 +288,31 @@ function UserCard({ me, collapsed }: { me: Me; collapsed: boolean }) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+/** Faixa fixa enquanto o super_admin navega como outro usuário (sessão de 1 h, auditada). */
+function ImpersonationBanner({ me }: { me: Me }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const stop = async () => {
+    await authClient.admin.stopImpersonating();
+    qc.clear();
+    await navigate({ to: "/plataforma" });
+  };
+  return (
+    <div role="status" className="flex items-center gap-3 bg-amber-500 px-4 py-2 text-sm text-black">
+      <span>{t("platform.impersonatingAs", { name: me.user.name, tenant: me.tenant?.name ?? "" })}</span>
+      <Button
+        size="sm"
+        variant="outline"
+        className="ml-auto h-7 border-black/30 bg-transparent"
+        onClick={stop}
+      >
+        {t("platform.stopImpersonating")}
+      </Button>
+    </div>
   );
 }
 

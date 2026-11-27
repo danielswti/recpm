@@ -28,6 +28,7 @@ import { PageHeader } from "../../components/page-header";
 import { authClient, ba } from "../../lib/auth-client";
 import { errorMessage } from "../../lib/errors";
 import { membersQuery, meQuery } from "../../lib/queries";
+import { limitCodeOf } from "../../lib/upgrade-modal";
 
 export const Route = createFileRoute("/_app/membros")({
   beforeLoad: async ({ context }) => {
@@ -164,6 +165,10 @@ function InviteDialog({ role }: { role: TenantRole }) {
           role: newRole as never,
         }),
       ),
+    // Limite do plano: o modal de upgrade assume (aberto pelo MutationCache); este diálogo fecha.
+    onError: (e) => {
+      if (limitCodeOf(e)) setOpen(false);
+    },
     onSuccess: async () => {
       toast.success(t("members.inviteSent", { email }));
       setOpen(false);

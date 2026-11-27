@@ -10,7 +10,10 @@ import { applyBrand } from "../lib/theme";
 export const Route = createFileRoute("/_app")({
   beforeLoad: async ({ context, location }) => {
     const me = await requireUser(context.queryClient, location.href);
-    if (!me.tenant) throw redirect({ to: "/workspaces" });
+    if (!me.tenant)
+      throw redirect({
+        to: me.user.platformRole === "super_admin" && !me.impersonating ? "/plataforma" : "/workspaces",
+      });
     if (me.tenant.role === "cliente") throw redirect({ to: "/cliente" });
   },
   component: AppLayout,

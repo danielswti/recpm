@@ -1,9 +1,11 @@
-import { Card, CardDescription, CardHeader, CardTitle } from "@recpm/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@recpm/ui";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShieldCheck, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PageHeader } from "../../components/page-header";
+import { UsageMeter } from "../../components/usage-meter";
+import { useEntitlements } from "../../lib/plan-limits";
 import { meQuery } from "../../lib/queries";
 
 export const Route = createFileRoute("/_app/")({ component: Dashboard });
@@ -12,6 +14,7 @@ export const Route = createFileRoute("/_app/")({ component: Dashboard });
 function Dashboard() {
   const { t } = useTranslation();
   const { data: me } = useSuspenseQuery(meQuery);
+  const { data: ent } = useEntitlements();
   if (!me?.tenant) return null;
   const firstName = me.user.name.split(" ")[0];
   const canInvite = me.tenant.permissions.includes("members.invite");
@@ -22,6 +25,16 @@ function Dashboard() {
         title={t("dashboard.greeting", { name: firstName })}
         description={t("dashboard.intro", { workspace: me.tenant.name })}
       />
+      {ent && (
+        <Card className="mb-8 max-w-2xl">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">{t("dashboard.planUsage", { plan: ent.plan.name })}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <UsageMeter e={ent} />
+          </CardContent>
+        </Card>
+      )}
       <h2 className="mb-3 text-sm font-medium text-muted-foreground">{t("dashboard.nextSteps")}</h2>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {canInvite && (
