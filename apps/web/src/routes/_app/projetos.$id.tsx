@@ -34,6 +34,7 @@ import {
   FileUp,
   Folder,
   Link2,
+  MessageCircle,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -92,6 +93,11 @@ function ProjectPage() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const tab = search.tab ?? "tarefas";
 
+  const openChat = useMutation({
+    mutationFn: () => unwrap(api.chat.projects[":id"].$post({ param: { id } })),
+    onSuccess: (c) => void navigate({ to: "/chat", search: { c: c.id } }),
+    onError: (e) => toast.error(errorMessage(t, e)),
+  });
   const action = useMutation({
     mutationFn: (fn: () => Promise<unknown>) => fn(),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["projects"] }),
@@ -152,43 +158,53 @@ function ProjectPage() {
               {t("projects.archived")}
             </Badge>
           )}
-          {p.canManage && (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setEditing(true)}>
-                <Pencil /> {t("common.edit")}
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" aria-label={t("common.more")}>
-                    <MoreHorizontal />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onSelect={() => setDuplicating(true)}>
-                    <Copy /> {t("projects.duplicate")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() =>
-                      action.mutate(() =>
-                        unwrapVoid(
-                          api.projects[":id"].archive.$post({
-                            param: { id },
-                            json: { archived: !p.archived },
-                          }),
-                        ),
-                      )
-                    }
-                  >
-                    <Archive /> {p.archived ? t("projects.unarchive") : t("projects.archive")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive" onSelect={() => setConfirmDelete(true)}>
-                    <Trash2 /> {t("common.delete")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              disabled={openChat.isPending}
+              onClick={() => openChat.mutate()}
+              title={t("chat.projectChat")}
+            >
+              <MessageCircle /> <span className="max-sm:sr-only">{t("chat.projectChat")}</span>
+            </Button>
+            {p.canManage && (
+              <>
+                <Button variant="outline" onClick={() => setEditing(true)}>
+                  <Pencil /> {t("common.edit")}
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" aria-label={t("common.more")}>
+                      <MoreHorizontal />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => setDuplicating(true)}>
+                      <Copy /> {t("projects.duplicate")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() =>
+                        action.mutate(() =>
+                          unwrapVoid(
+                            api.projects[":id"].archive.$post({
+                              param: { id },
+                              json: { archived: !p.archived },
+                            }),
+                          ),
+                        )
+                      }
+                    >
+                      <Archive /> {p.archived ? t("projects.unarchive") : t("projects.archive")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-destructive" onSelect={() => setConfirmDelete(true)}>
+                      <Trash2 /> {t("common.delete")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
           <span className="flex items-center gap-2">

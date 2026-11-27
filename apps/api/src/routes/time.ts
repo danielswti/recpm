@@ -657,7 +657,7 @@ export const timeRoutes = (deps: Deps & { live?: LiveHub | null }) => {
     return streamSSE(c, async (stream) => {
       let dirty = true;
       let wake: (() => void) | null = null;
-      const unsubscribe = live().subscribe(tenantId, () => {
+      const unsubscribe = live().subscribe("recpm_time", tenantId, () => {
         dirty = true;
         wake?.();
       });

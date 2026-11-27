@@ -192,7 +192,7 @@ const Column = z
   .openapi("ProjectColumn");
 
 /** Funcionário só enxerga projetos dos quais é membro. */
-const visibleTo = (actor: Actor): SQL | undefined =>
+export const projectVisibleTo = (actor: Actor): SQL | undefined =>
   actor.can("projects.readAll") || !actor.userId
     ? undefined
     : exists(
@@ -288,7 +288,7 @@ async function list(tx: AppTx, where: SQL | undefined, page = 1, pageSize = 1000
 }
 
 async function detail(tx: AppTx, actor: Actor, id: string) {
-  const { data } = await list(tx, and(eq(s.projects.id, id), visibleTo(actor)));
+  const { data } = await list(tx, and(eq(s.projects.id, id), projectVisibleTo(actor)));
   const base = data[0];
   if (!base) throw notFound();
   const { _row: p, ...summary } = base;
@@ -560,7 +560,7 @@ export const projectRoutes = (deps: Deps) => {
           const actor = actorOf(c);
           const term = f.q ? `%${f.q.replace(/[%_\\]/g, "\\$&")}%` : null;
           const where = and(
-            visibleTo(actor),
+            projectVisibleTo(actor),
             eq(s.projects.archived, f.archived ?? false),
             f.status ? eq(s.projects.status, f.status) : undefined,
             f.clientId ? eq(s.projects.clientId, f.clientId) : undefined,

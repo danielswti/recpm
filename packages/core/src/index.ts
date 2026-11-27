@@ -14,7 +14,17 @@ export {
   type CycleReport,
   runBillingCycle,
 } from "./billing/subscription";
+export {
+  brasilApiHolidays,
+  copyHolidaysToTenant,
+  type Holiday,
+  type HolidayFetch,
+  nationalHolidays,
+  removeImportedHolidays,
+  runHolidayImport,
+} from "./calendar/holidays";
 export { DomainError } from "./errors";
+export { runDeadlineReminders, sendDeadlineReminders } from "./notifications/reminders";
 export { rankBetween } from "./tasks/rank";
 export { nextOccurrence } from "./tasks/recurrence";
 export {

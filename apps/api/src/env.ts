@@ -31,6 +31,14 @@ const schema = z.object({
   S3_FORCE_PATH_STYLE: z.stringbool().default(false),
   /** 32 bytes em base64 para criptografar segredos do tenant (chave da IA etc.). */
   SECRETS_KEY: z.string().optional(),
+  // Web push (VAPID). Sem as chaves, o push fica desligado (in-app e e-mail seguem).
+  VAPID_PUBLIC_KEY: z.string().optional(),
+  VAPID_PRIVATE_KEY: z.string().optional(),
+  VAPID_SUBJECT: z.string().default("mailto:suporte@recpm.app"),
+  // IA padrão da plataforma (o tenant pode usar o próprio provedor em Configurações).
+  AI_BASE_URL: z.string().default("https://api.openai.com/v1"),
+  AI_API_KEY: z.string().optional(),
+  AI_MODEL: z.string().default("gpt-4o-mini"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 

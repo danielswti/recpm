@@ -20,6 +20,8 @@ import { Route as WorkspacesRouteImport } from './routes/workspaces'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAprovacoesRouteImport } from './routes/_app/aprovacoes'
 import { Route as AppAssinaturaRouteImport } from './routes/_app/assinatura'
+import { Route as AppCalendarioRouteImport } from './routes/_app/calendario'
+import { Route as AppChatRouteImport } from './routes/_app/chat'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
 import { Route as AppMembrosRouteImport } from './routes/_app/membros'
 import { Route as AppTarefasRouteImport } from './routes/_app/tarefas'
@@ -28,6 +30,7 @@ import { Route as ConviteIdRouteImport } from './routes/convite.$id'
 import { Route as AppCadastrosIndexRouteImport } from './routes/_app/cadastros.index'
 import { Route as AppClientesIndexRouteImport } from './routes/_app/clientes.index'
 import { Route as AppClientesIdRouteImport } from './routes/_app/clientes.$id'
+import { Route as AppContaNotificacoesRouteImport } from './routes/_app/conta.notificacoes'
 import { Route as AppContaSegurancaRouteImport } from './routes/_app/conta.seguranca'
 import { Route as AppProjetosIndexRouteImport } from './routes/_app/projetos.index'
 import { Route as AppProjetosIdRouteImport } from './routes/_app/projetos.$id'
@@ -87,6 +90,16 @@ const AppAssinaturaRoute = AppAssinaturaRouteImport.update({
   path: '/assinatura',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCalendarioRoute = AppCalendarioRouteImport.update({
+  id: '/calendario',
+  path: '/calendario',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
@@ -127,6 +140,11 @@ const AppClientesIdRoute = AppClientesIdRouteImport.update({
   path: '/clientes/$id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppContaNotificacoesRoute = AppContaNotificacoesRouteImport.update({
+  id: '/conta/notificacoes',
+  path: '/conta/notificacoes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppContaSegurancaRoute = AppContaSegurancaRouteImport.update({
   id: '/conta/seguranca',
   path: '/conta/seguranca',
@@ -159,12 +177,15 @@ export interface FileRoutesByFullPath {
   '/workspaces': typeof WorkspacesRoute
   '/aprovacoes': typeof AppAprovacoesRoute
   '/assinatura': typeof AppAssinaturaRoute
+  '/calendario': typeof AppCalendarioRoute
+  '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/membros': typeof AppMembrosRoute
   '/tarefas': typeof AppTarefasRoute
   '/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
   '/convite/$id': typeof ConviteIdRoute
   '/clientes/$id': typeof AppClientesIdRoute
+  '/conta/notificacoes': typeof AppContaNotificacoesRoute
   '/conta/seguranca': typeof AppContaSegurancaRoute
   '/projetos/$id': typeof AppProjetosIdRoute
   '/cadastros/': typeof AppCadastrosIndexRoute
@@ -182,6 +203,8 @@ export interface FileRoutesByTo {
   '/workspaces': typeof WorkspacesRoute
   '/aprovacoes': typeof AppAprovacoesRoute
   '/assinatura': typeof AppAssinaturaRoute
+  '/calendario': typeof AppCalendarioRoute
+  '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/membros': typeof AppMembrosRoute
   '/tarefas': typeof AppTarefasRoute
@@ -189,6 +212,7 @@ export interface FileRoutesByTo {
   '/convite/$id': typeof ConviteIdRoute
   '/': typeof AppIndexRoute
   '/clientes/$id': typeof AppClientesIdRoute
+  '/conta/notificacoes': typeof AppContaNotificacoesRoute
   '/conta/seguranca': typeof AppContaSegurancaRoute
   '/projetos/$id': typeof AppProjetosIdRoute
   '/cadastros': typeof AppCadastrosIndexRoute
@@ -208,6 +232,8 @@ export interface FileRoutesById {
   '/workspaces': typeof WorkspacesRoute
   '/_app/aprovacoes': typeof AppAprovacoesRoute
   '/_app/assinatura': typeof AppAssinaturaRoute
+  '/_app/calendario': typeof AppCalendarioRoute
+  '/_app/chat': typeof AppChatRoute
   '/_app/configuracoes': typeof AppConfiguracoesRoute
   '/_app/membros': typeof AppMembrosRoute
   '/_app/tarefas': typeof AppTarefasRoute
@@ -215,6 +241,7 @@ export interface FileRoutesById {
   '/convite/$id': typeof ConviteIdRoute
   '/_app/': typeof AppIndexRoute
   '/_app/clientes/$id': typeof AppClientesIdRoute
+  '/_app/conta/notificacoes': typeof AppContaNotificacoesRoute
   '/_app/conta/seguranca': typeof AppContaSegurancaRoute
   '/_app/projetos/$id': typeof AppProjetosIdRoute
   '/_app/cadastros/': typeof AppCadastrosIndexRoute
@@ -235,12 +262,15 @@ export interface FileRouteTypes {
     | '/workspaces'
     | '/aprovacoes'
     | '/assinatura'
+    | '/calendario'
+    | '/chat'
     | '/configuracoes'
     | '/membros'
     | '/tarefas'
     | '/trabalhando-agora'
     | '/convite/$id'
     | '/clientes/$id'
+    | '/conta/notificacoes'
     | '/conta/seguranca'
     | '/projetos/$id'
     | '/cadastros/'
@@ -258,6 +288,8 @@ export interface FileRouteTypes {
     | '/workspaces'
     | '/aprovacoes'
     | '/assinatura'
+    | '/calendario'
+    | '/chat'
     | '/configuracoes'
     | '/membros'
     | '/tarefas'
@@ -265,6 +297,7 @@ export interface FileRouteTypes {
     | '/convite/$id'
     | '/'
     | '/clientes/$id'
+    | '/conta/notificacoes'
     | '/conta/seguranca'
     | '/projetos/$id'
     | '/cadastros'
@@ -283,6 +316,8 @@ export interface FileRouteTypes {
     | '/workspaces'
     | '/_app/aprovacoes'
     | '/_app/assinatura'
+    | '/_app/calendario'
+    | '/_app/chat'
     | '/_app/configuracoes'
     | '/_app/membros'
     | '/_app/tarefas'
@@ -290,6 +325,7 @@ export interface FileRouteTypes {
     | '/convite/$id'
     | '/_app/'
     | '/_app/clientes/$id'
+    | '/_app/conta/notificacoes'
     | '/_app/conta/seguranca'
     | '/_app/projetos/$id'
     | '/_app/cadastros/'
@@ -389,6 +425,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssinaturaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/calendario': {
+      id: '/_app/calendario'
+      path: '/calendario'
+      fullPath: '/calendario'
+      preLoaderRoute: typeof AppCalendarioRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/chat': {
+      id: '/_app/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/configuracoes': {
       id: '/_app/configuracoes'
       path: '/configuracoes'
@@ -445,6 +495,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientesIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/conta/notificacoes': {
+      id: '/_app/conta/notificacoes'
+      path: '/conta/notificacoes'
+      fullPath: '/conta/notificacoes'
+      preLoaderRoute: typeof AppContaNotificacoesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/conta/seguranca': {
       id: '/_app/conta/seguranca'
       path: '/conta/seguranca'
@@ -479,12 +536,15 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAprovacoesRoute: typeof AppAprovacoesRoute
   AppAssinaturaRoute: typeof AppAssinaturaRoute
+  AppCalendarioRoute: typeof AppCalendarioRoute
+  AppChatRoute: typeof AppChatRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppMembrosRoute: typeof AppMembrosRoute
   AppTarefasRoute: typeof AppTarefasRoute
   AppTrabalhandoAgoraRoute: typeof AppTrabalhandoAgoraRoute
   AppIndexRoute: typeof AppIndexRoute
   AppClientesIdRoute: typeof AppClientesIdRoute
+  AppContaNotificacoesRoute: typeof AppContaNotificacoesRoute
   AppContaSegurancaRoute: typeof AppContaSegurancaRoute
   AppProjetosIdRoute: typeof AppProjetosIdRoute
   AppCadastrosIndexRoute: typeof AppCadastrosIndexRoute
@@ -496,12 +556,15 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAprovacoesRoute: AppAprovacoesRoute,
   AppAssinaturaRoute: AppAssinaturaRoute,
+  AppCalendarioRoute: AppCalendarioRoute,
+  AppChatRoute: AppChatRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppMembrosRoute: AppMembrosRoute,
   AppTarefasRoute: AppTarefasRoute,
   AppTrabalhandoAgoraRoute: AppTrabalhandoAgoraRoute,
   AppIndexRoute: AppIndexRoute,
   AppClientesIdRoute: AppClientesIdRoute,
+  AppContaNotificacoesRoute: AppContaNotificacoesRoute,
   AppContaSegurancaRoute: AppContaSegurancaRoute,
   AppProjetosIdRoute: AppProjetosIdRoute,
   AppCadastrosIndexRoute: AppCadastrosIndexRoute,

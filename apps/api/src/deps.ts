@@ -5,6 +5,7 @@ import type { Env } from "./env";
 import type { LiveHub } from "./lib/live";
 import type { Logger } from "./lib/logger";
 import type { Mailer } from "./lib/mailer";
+import type { PushSender } from "./lib/push";
 import type { Storage } from "./lib/storage";
 
 export type Dbs = ReturnType<typeof createDbs>;
@@ -22,4 +23,8 @@ export type Deps = {
   storage?: Storage | null;
   /** Avisos em tempo real (LISTEN/NOTIFY); sem isso, abre sob demanda com DATABASE_URL_APP. */
   live?: LiveHub | null;
+  /** Envio de web push; sem isso, usa web-push com as chaves VAPID do ambiente. */
+  push?: PushSender | null;
+  /** fetch usado pela IA e pela BrasilAPI (os testes trocam por um falso). */
+  fetch?: typeof fetch;
 };
