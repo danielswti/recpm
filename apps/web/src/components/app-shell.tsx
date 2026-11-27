@@ -52,7 +52,7 @@ type NavItem = {
   key: string;
   icon: LucideIcon;
   /** Rota já implementada; sem `to`, o item aparece desabilitado com a fase em que chega. */
-  to?: "/" | "/membros" | "/assinatura";
+  to?: "/" | "/membros" | "/assinatura" | "/clientes" | "/cadastros";
   phase?: number;
   perm?: Permission;
 };
@@ -78,15 +78,15 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { key: "nav.productivity", icon: TrendingUp, phase: 8, perm: "productivity.team" },
       { key: "nav.contractedDelivered", icon: Scale, phase: 8, perm: "reports.read" },
       { key: "nav.deliveries", icon: ListChecks, phase: 8, perm: "reports.read" },
-      { key: "nav.clients", icon: Building2, phase: 3, perm: "clients.read" },
+      { key: "nav.clients", icon: Building2, to: "/clientes", perm: "clients.read" },
       { key: "nav.users", icon: Users, to: "/membros", perm: "members.read" },
     ],
   },
   {
     group: "nav.admin",
     items: [
-      { key: "nav.catalogs", icon: BookOpen, phase: 3, perm: "catalogs.manage" },
-      { key: "nav.settings", icon: Settings, phase: 3, perm: "tenant.settings" },
+      { key: "nav.catalogs", icon: BookOpen, to: "/cadastros", perm: "catalogs.manage" },
+      { key: "nav.settings", icon: Settings, phase: 5, perm: "tenant.settings" },
       { key: "nav.billing", icon: CreditCard, to: "/assinatura", perm: "tenant.billing" },
     ],
   },

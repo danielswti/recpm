@@ -13,15 +13,17 @@ export function Field({
   error,
   hint,
   children,
+  className,
 }: {
   id: string;
   label: string;
   error?: string;
   hint?: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="grid gap-1.5">
+    <div className={cn("grid gap-1.5", className)}>
       <Label htmlFor={id}>{label}</Label>
       {children}
       {error ? (

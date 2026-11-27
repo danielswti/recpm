@@ -12,7 +12,9 @@
     "comingSoon": "Em breve",
     "phase": "Fase {{n}}",
     "copy": "Copiar",
-    "copied": "Copiado"
+    "copied": "Copiado",
+    "edit": "Editar",
+    "delete": "Apagar"
   },
   "nav": {
     "main": "Principal",
@@ -150,8 +152,83 @@
     "cancelInvite": "Cancelar convite",
     "inviteSent": "Convite enviado para {{email}}.",
     "inviteCanceled": "Convite cancelado.",
-    "clientRoleLater": "Acesso de clientes ao portal fica disponível com o cadastro de clientes (Fase 3).",
-    "empty": "Só você por aqui. Convide sua equipe."
+    "empty": "Só você por aqui. Convide sua equipe.",
+    "tabs": {
+      "team": "Equipe",
+      "clients": "Portal do cliente"
+    },
+    "emptyPortal": "Ninguém do portal do cliente ainda. Convide pela página do cliente.",
+    "accountManager": "Atendimento",
+    "actionsFor": "Ações de {{name}}",
+    "editProfile": "Editar perfil",
+    "resetPassword": "Enviar redefinição de senha",
+    "deactivate": "Desativar",
+    "reactivate": "Reativar",
+    "saved": "Perfil salvo.",
+    "client": "Cliente",
+    "clientHint": "A pessoa verá só os projetos deste cliente.",
+    "ownRole": "Você não pode mudar o próprio perfil.",
+    "done": {
+      "deactivate": "{{name}} foi desativado.",
+      "reactivate": "{{name}} foi reativado.",
+      "reset": "E-mail de redefinição enviado para {{name}}."
+    },
+    "confirm": {
+      "deactivate": {
+        "title": "Desativar {{name}}?",
+        "text": "A pessoa perde o acesso a este workspace na hora. O histórico de trabalho continua.",
+        "confirm": "Desativar"
+      },
+      "reset": {
+        "title": "Enviar redefinição de senha para {{name}}?",
+        "text": "Um link de redefinição vai para {{email}}, válido por 1 hora.",
+        "confirm": "Enviar"
+      }
+    },
+    "fields": {
+      "jobTitle": "Cargo",
+      "sector": "Setor",
+      "defaultTaskRole": "Função padrão nas tarefas",
+      "level": "Nível",
+      "employmentType": "Vínculo",
+      "hourlyCost": "Custo por hora (R$)",
+      "hourlyCostHint": "Usado nos relatórios de custo. Só admins veem.",
+      "isAccountManager": "Faz atendimento (gerente de conta)",
+      "phone": "Telefone",
+      "birthday": "Aniversário",
+      "hireDate": "Admissão",
+      "timezone": "Fuso horário",
+      "timezoneHint": "Vazio = fuso do workspace."
+    },
+    "levels": {
+      "junior": "Júnior",
+      "pleno": "Pleno",
+      "senior": "Sênior"
+    },
+    "employment": {
+      "clt": "CLT",
+      "pj": "PJ",
+      "terceirizado": "Terceirizado"
+    },
+    "hours": {
+      "title": "Horário de trabalho",
+      "own": "Usar um horário próprio",
+      "inherit": "Segue o horário padrão do workspace. O tempo nas tarefas só conta dentro dele.",
+      "off": "folga",
+      "add": "Intervalo",
+      "remove": "Remover intervalo",
+      "start": "Início de {{day}}",
+      "end": "Fim de {{day}}",
+      "days": {
+        "0": "Dom",
+        "1": "Seg",
+        "2": "Ter",
+        "3": "Qua",
+        "4": "Qui",
+        "5": "Sex",
+        "6": "Sáb"
+      }
+    }
   },
   "security": {
     "title": "Segurança da conta",
@@ -218,7 +295,21 @@
     "PLAN_UNCHANGED": "Você já está neste plano.",
     "TRIAL_ENDS_ON_FREE": "Ao fim do teste o plano gratuito já é aplicado.",
     "NO_PORTAL": "Ainda não há fatura ou assinatura paga.",
-    "INTERVAL_UNAVAILABLE": "Este plano não tem opção anual."
+    "INTERVAL_UNAVAILABLE": "Este plano não tem opção anual.",
+    "DUPLICATE": "Já existe um item com esse nome.",
+    "CATALOG_IN_USE": "Este item está em uso. Desative em vez de apagar.",
+    "COLUMN_REQUIRED": "Esta coluna faz parte do fluxo e não pode sair.",
+    "COLUMN_HAS_TASKS": "Mova as tarefas desta coluna antes.",
+    "FINAL_REQUIRED": "Marque outra coluna como final em vez de desmarcar esta.",
+    "INVALID_REFERENCE": "Uma das opções escolhidas não existe mais.",
+    "CLIENT_CODE_TAKEN": "Já existe um cliente com esse código.",
+    "CLIENT_IN_USE": "O cliente tem projetos ou usuários do portal. Desative em vez de apagar.",
+    "LAST_ADMIN": "O workspace precisa de pelo menos um administrador ativo.",
+    "OWN_ROLE": "Você não pode mudar o próprio perfil.",
+    "OWN_ACCOUNT": "Você não pode desativar o próprio acesso.",
+    "PORTAL_ROLE_FIXED": "Usuários do portal não mudam de perfil.",
+    "MEMBER_INACTIVE": "Reative o usuário antes.",
+    "NOT_FOUND": "Não encontrado."
   },
   "billing": {
     "title": "Plano e cobrança",
@@ -406,5 +497,189 @@
     },
     "impersonatingAs": "Você está navegando como {{name}} em {{tenant}}.",
     "stopImpersonating": "Encerrar"
+  },
+  "sortable": {
+    "handle": "Reordenar {{name}} (arraste ou use as setas)",
+    "moved": "{{name}} movido para a posição {{position}} de {{total}}."
+  },
+  "catalogs": {
+    "title": "Cadastros",
+    "subtitle": "As listas que o workspace usa em projetos, tarefas e relatórios. Arraste para mudar a ordem.",
+    "section": "Seção",
+    "tabs": {
+      "task-types": "Tipos de tarefa",
+      "kanban-columns": "Colunas do Kanban",
+      "project-types": "Tipos de projeto",
+      "report-categories": "Categorias de relatório",
+      "adjustment-reasons": "Motivos de ajuste",
+      "tags": "Tags de tarefa",
+      "project-tags": "Tags de projeto",
+      "sectors": "Setores",
+      "task-roles": "Funções na tarefa",
+      "briefings": "Formulários de briefing"
+    },
+    "help": {
+      "task-types": "Cada tipo aplica horas estimadas e um checklist à tarefa, e define se conta como peça entregue.",
+      "kanban-columns": "As etapas do fluxo das tarefas. A chave de cada coluna não muda; nome, cor e ordem, sim.",
+      "project-types": "Ex.: Avulso, Mensal, Evento, Clipe.",
+      "report-categories": "Agrupam os tipos de tarefa nos relatórios (Artes, Vídeos…). Tipo sem categoria aparece como \"Outros\".",
+      "adjustment-reasons": "Motivos escolhidos quando uma tarefa volta para ajustes.",
+      "tags": "Marcadores livres para tarefas.",
+      "project-tags": "Marcadores para projetos.",
+      "sectors": "Times da agência, usados no placar de produtividade.",
+      "task-roles": "Papéis numa tarefa: editor, designer, videomaker, copywriter…",
+      "briefings": "Perguntas que a equipe ou o cliente respondem ao pedir um trabalho."
+    },
+    "add": "Adicionar",
+    "newTitle": "Novo item em {{kind}}",
+    "editTitle": "Editar",
+    "color": "Cor",
+    "noColor": "sem cor",
+    "clearColor": "Remover cor",
+    "inactive": "Inativo",
+    "activate": "Ativar",
+    "deactivate": "Desativar",
+    "actionsFor": "Ações de {{name}}",
+    "saved": "Salvo.",
+    "deleted": "Apagado.",
+    "deleteTitle": "Apagar {{name}}?",
+    "deleteText": "Só dá para apagar o que nunca foi usado. Se estiver em uso, desative.",
+    "empty": "Nada cadastrado ainda.",
+    "otherCategory": "Outros",
+    "taskType": {
+      "hours": "Horas estimadas",
+      "hoursShort": "{{h}} h",
+      "category": "Categoria de relatório",
+      "categoryHint": "Onde as entregas deste tipo somam nos relatórios.",
+      "flags": "Opções",
+      "countsAsPiece": "Conta como peça",
+      "countsAsPieceHint": "Entregas deste tipo somam em produtividade e em contratado × entregue.",
+      "sellable": "Pode ser vendido",
+      "sellableHint": "Aparece nos itens de contrato do projeto.",
+      "usableAsType": "Disponível ao criar tarefa",
+      "usableAsTypeHint": "Desmarque para tipos que só existem como item de contrato.",
+      "checklist": "Checklist padrão",
+      "checklistHint": "Um item por linha. É copiado para a tarefa quando o tipo é escolhido.",
+      "checklistCount_one": "{{count}} item no checklist",
+      "checklistCount_other": "{{count}} itens no checklist",
+      "piece": "Peça",
+      "sellable2": "Vendável",
+      "notUsable": "Só contrato"
+    },
+    "column": {
+      "add": "Nova coluna",
+      "emoji": "Emoji",
+      "tasks_one": "{{count}} tarefa",
+      "tasks_other": "{{count}} tarefas",
+      "approval": "Aprovação",
+      "final": "Final",
+      "system": "Do fluxo",
+      "isApproval": "Coluna de aprovação",
+      "isApprovalHint": "Ao entrar aqui, o aprovador da tarefa é avisado; aprovar avança, reprovar volta para ajustes.",
+      "isFinal": "Coluna final",
+      "isFinalHint": "Marca a tarefa como concluída. Só uma coluna pode ser final.",
+      "keyFixed": "Chave interna: {{key}} (não muda).",
+      "deleteText": "Só colunas vazias e fora das regras do fluxo podem ser apagadas."
+    },
+    "briefing": {
+      "new": "Novo formulário",
+      "edit": "Editar formulário",
+      "empty": "Nenhum formulário ainda.",
+      "fields_one": "{{count}} pergunta",
+      "fields_other": "{{count}} perguntas",
+      "updated": "atualizado em {{date}}",
+      "duplicate": "Duplicar",
+      "duplicated": "Cópia criada: {{name}}",
+      "deleteText": "As respostas já enviadas continuam guardadas.",
+      "active": "Ativo (aparece para a equipe e o cliente)",
+      "description": "Descrição",
+      "taskType": "Sugerir para o tipo de tarefa",
+      "projectType": "Sugerir para o tipo de projeto",
+      "suggestHint": "Opcional.",
+      "any": "Qualquer um",
+      "fieldsTitle": "Perguntas",
+      "question": "Pergunta",
+      "type": "Tipo de resposta",
+      "types": {
+        "texto": "Texto curto",
+        "paragrafo": "Parágrafo",
+        "escolha_unica": "Escolha única",
+        "caixas": "Caixas de seleção"
+      },
+      "options": "Opções",
+      "optionsHint": "Uma opção por linha (pelo menos duas).",
+      "help": "Ajuda (opcional)",
+      "required": "Obrigatória",
+      "allowOther": "Permitir \"Outro\"",
+      "addField": "Adicionar pergunta",
+      "moveUp": "Subir a pergunta {{n}}",
+      "moveDown": "Descer a pergunta {{n}}",
+      "removeField": "Remover a pergunta {{n}}",
+      "needName": "Dê um nome ao formulário.",
+      "badField": "Confira a pergunta {{n}}: ela precisa de texto e, se for de escolha, de pelo menos duas opções."
+    }
+  },
+  "clients": {
+    "title": "Clientes",
+    "subtitle": "Cadastro dos clientes, saldo de horas e acesso ao portal.",
+    "new": "Novo cliente",
+    "create": "Criar cliente",
+    "created": "Cliente {{name}} criado.",
+    "saved": "Cliente salvo.",
+    "deleted": "Cliente apagado.",
+    "search": "Buscar por nome, código, e-mail ou CPF/CNPJ",
+    "filter": "Situação",
+    "status": {
+      "active": "Ativos",
+      "inactive": "Inativos",
+      "all": "Todos"
+    },
+    "empty": "Nenhum cliente ainda",
+    "emptyText": "Cadastre o primeiro cliente para criar projetos para ele.",
+    "noResults": "Nenhum cliente encontrado.",
+    "inactive": "Inativo",
+    "cols": {
+      "client": "Cliente",
+      "contact": "Contato",
+      "projects": "Projetos ativos",
+      "hours": "Horas no mês",
+      "portal": "Portal"
+    },
+    "hoursLeft": "{{h}} h restantes",
+    "assets": "Materiais",
+    "data": "Dados do cliente",
+    "fields": {
+      "code": "Código",
+      "name": "Nome",
+      "email": "E-mail",
+      "phone": "Telefone",
+      "document": "CPF ou CNPJ",
+      "assetsLink": "Link dos materiais",
+      "notes": "Observações"
+    },
+    "stats": {
+      "projects": "Projetos ativos / total",
+      "contracted": "Horas contratadas no mês",
+      "invested": "Horas investidas no mês",
+      "remaining": "Saldo do mês"
+    },
+    "hoursHelp": "Contratadas = itens de contrato dos projetos ativos × horas estimadas do tipo. Investidas = horas úteis lançadas nas tarefas do cliente neste mês.",
+    "portal": {
+      "title": "Usuários do portal",
+      "text": "Pessoas do cliente que acompanham os projetos e pedem demandas.",
+      "empty": "Ninguém do cliente tem acesso ainda.",
+      "invite": "Convidar pessoa do cliente",
+      "pending": "convite pendente até {{date}}"
+    },
+    "danger": "Zona de perigo",
+    "activate": "Reativar cliente",
+    "deactivate": "Desativar cliente",
+    "delete": "Apagar cliente",
+    "deleteHelp": "Só dá para apagar um cliente sem projetos nem usuários do portal. Com histórico, desative.",
+    "activateTitle": "Reativar {{name}}?",
+    "deactivateTitle": "Desativar {{name}}?",
+    "deactivateText": "O cliente some das listas e não recebe novos projetos. Nada é apagado.",
+    "deleteTitle": "Apagar {{name}}?",
+    "deleteText": "Esta ação não pode ser desfeita."
   }
 }
