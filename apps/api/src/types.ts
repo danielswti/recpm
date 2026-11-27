@@ -22,5 +22,7 @@ export type AppEnv = {
     session: SessionData | null;
     tenant: TenantScope;
     permission?: Permission;
+    /** Pedido autenticado por chave de API (sem cookie). */
+    apiKeyId?: string;
   };
 };

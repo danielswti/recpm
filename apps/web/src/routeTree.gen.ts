@@ -20,10 +20,12 @@ import { Route as WorkspacesRouteImport } from './routes/workspaces'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAprovacoesRouteImport } from './routes/_app/aprovacoes'
 import { Route as AppAssinaturaRouteImport } from './routes/_app/assinatura'
+import { Route as AppAuditoriaRouteImport } from './routes/_app/auditoria'
 import { Route as AppCalendarioRouteImport } from './routes/_app/calendario'
 import { Route as AppChatRouteImport } from './routes/_app/chat'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
 import { Route as AppContratadoEntregueRouteImport } from './routes/_app/contratado-entregue'
+import { Route as AppDemandasRouteImport } from './routes/_app/demandas'
 import { Route as AppEntregasRouteImport } from './routes/_app/entregas'
 import { Route as AppFinanceiroRouteImport } from './routes/_app/financeiro'
 import { Route as AppMembrosRouteImport } from './routes/_app/membros'
@@ -34,6 +36,10 @@ import { Route as AppRelatoriosRouteImport } from './routes/_app/relatorios'
 import { Route as AppTarefasRouteImport } from './routes/_app/tarefas'
 import { Route as AppTrabalhandoAgoraRouteImport } from './routes/_app/trabalhando-agora'
 import { Route as AssinarTokenRouteImport } from './routes/assinar.$token'
+import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
+import { Route as ClienteDemandasRouteImport } from './routes/cliente.demandas'
+import { Route as ClienteDocumentosRouteImport } from './routes/cliente.documentos'
+import { Route as ClientePerfilRouteImport } from './routes/cliente.perfil'
 import { Route as ConviteIdRouteImport } from './routes/convite.$id'
 import { Route as RelatorioContratadoEntregueRouteImport } from './routes/relatorio.contratado-entregue'
 import { Route as VerificarCodeRouteImport } from './routes/verificar.$code'
@@ -44,6 +50,8 @@ import { Route as AppContaNotificacoesRouteImport } from './routes/_app/conta.no
 import { Route as AppContaSegurancaRouteImport } from './routes/_app/conta.seguranca'
 import { Route as AppProjetosIndexRouteImport } from './routes/_app/projetos.index'
 import { Route as AppProjetosIdRouteImport } from './routes/_app/projetos.$id'
+import { Route as ClienteProjetosIdRouteImport } from './routes/cliente.projetos.$id'
+import { Route as ClienteTarefasIdRouteImport } from './routes/cliente.tarefas.$id'
 import { Route as AppCadastrosBriefingsIdRouteImport } from './routes/_app/cadastros.briefings.$id'
 
 const AppRoute = AppRouteImport.update({
@@ -100,6 +108,11 @@ const AppAssinaturaRoute = AppAssinaturaRouteImport.update({
   path: '/assinatura',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAuditoriaRoute = AppAuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCalendarioRoute = AppCalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
@@ -118,6 +131,11 @@ const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
 const AppContratadoEntregueRoute = AppContratadoEntregueRouteImport.update({
   id: '/contratado-entregue',
   path: '/contratado-entregue',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDemandasRoute = AppDemandasRouteImport.update({
+  id: '/demandas',
+  path: '/demandas',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEntregasRoute = AppEntregasRouteImport.update({
@@ -170,6 +188,26 @@ const AssinarTokenRoute = AssinarTokenRouteImport.update({
   path: '/assinar/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClienteIndexRoute = ClienteIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteDemandasRoute = ClienteDemandasRouteImport.update({
+  id: '/demandas',
+  path: '/demandas',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteDocumentosRoute = ClienteDocumentosRouteImport.update({
+  id: '/documentos',
+  path: '/documentos',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClientePerfilRoute = ClientePerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => ClienteRoute,
+} as any)
 const ConviteIdRoute = ConviteIdRouteImport.update({
   id: '/convite/$id',
   path: '/convite/$id',
@@ -221,6 +259,16 @@ const AppProjetosIdRoute = AppProjetosIdRouteImport.update({
   path: '/projetos/$id',
   getParentRoute: () => AppRoute,
 } as any)
+const ClienteProjetosIdRoute = ClienteProjetosIdRouteImport.update({
+  id: '/projetos/$id',
+  path: '/projetos/$id',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteTarefasIdRoute = ClienteTarefasIdRouteImport.update({
+  id: '/tarefas/$id',
+  path: '/tarefas/$id',
+  getParentRoute: () => ClienteRoute,
+} as any)
 const AppCadastrosBriefingsIdRoute = AppCadastrosBriefingsIdRouteImport.update({
   id: '/cadastros/briefings/$id',
   path: '/cadastros/briefings/$id',
@@ -230,7 +278,7 @@ const AppCadastrosBriefingsIdRoute = AppCadastrosBriefingsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/cadastro': typeof CadastroRoute
-  '/cliente': typeof ClienteRoute
+  '/cliente': typeof ClienteRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/plataforma': typeof PlataformaRoute
@@ -238,10 +286,12 @@ export interface FileRoutesByFullPath {
   '/workspaces': typeof WorkspacesRoute
   '/aprovacoes': typeof AppAprovacoesRoute
   '/assinatura': typeof AppAssinaturaRoute
+  '/auditoria': typeof AppAuditoriaRoute
   '/calendario': typeof AppCalendarioRoute
   '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/contratado-entregue': typeof AppContratadoEntregueRoute
+  '/demandas': typeof AppDemandasRoute
   '/entregas': typeof AppEntregasRoute
   '/financeiro': typeof AppFinanceiroRoute
   '/membros': typeof AppMembrosRoute
@@ -252,13 +302,19 @@ export interface FileRoutesByFullPath {
   '/tarefas': typeof AppTarefasRoute
   '/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
   '/assinar/$token': typeof AssinarTokenRoute
+  '/cliente/demandas': typeof ClienteDemandasRoute
+  '/cliente/documentos': typeof ClienteDocumentosRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
   '/convite/$id': typeof ConviteIdRoute
   '/relatorio/contratado-entregue': typeof RelatorioContratadoEntregueRoute
   '/verificar/$code': typeof VerificarCodeRoute
+  '/cliente/': typeof ClienteIndexRoute
   '/clientes/$id': typeof AppClientesIdRoute
   '/conta/notificacoes': typeof AppContaNotificacoesRoute
   '/conta/seguranca': typeof AppContaSegurancaRoute
   '/projetos/$id': typeof AppProjetosIdRoute
+  '/cliente/projetos/$id': typeof ClienteProjetosIdRoute
+  '/cliente/tarefas/$id': typeof ClienteTarefasIdRoute
   '/cadastros/': typeof AppCadastrosIndexRoute
   '/clientes/': typeof AppClientesIndexRoute
   '/projetos/': typeof AppProjetosIndexRoute
@@ -266,7 +322,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/cadastro': typeof CadastroRoute
-  '/cliente': typeof ClienteRoute
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/plataforma': typeof PlataformaRoute
@@ -274,10 +329,12 @@ export interface FileRoutesByTo {
   '/workspaces': typeof WorkspacesRoute
   '/aprovacoes': typeof AppAprovacoesRoute
   '/assinatura': typeof AppAssinaturaRoute
+  '/auditoria': typeof AppAuditoriaRoute
   '/calendario': typeof AppCalendarioRoute
   '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
   '/contratado-entregue': typeof AppContratadoEntregueRoute
+  '/demandas': typeof AppDemandasRoute
   '/entregas': typeof AppEntregasRoute
   '/financeiro': typeof AppFinanceiroRoute
   '/membros': typeof AppMembrosRoute
@@ -288,14 +345,20 @@ export interface FileRoutesByTo {
   '/tarefas': typeof AppTarefasRoute
   '/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
   '/assinar/$token': typeof AssinarTokenRoute
+  '/cliente/demandas': typeof ClienteDemandasRoute
+  '/cliente/documentos': typeof ClienteDocumentosRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
   '/convite/$id': typeof ConviteIdRoute
   '/relatorio/contratado-entregue': typeof RelatorioContratadoEntregueRoute
   '/verificar/$code': typeof VerificarCodeRoute
   '/': typeof AppIndexRoute
+  '/cliente': typeof ClienteIndexRoute
   '/clientes/$id': typeof AppClientesIdRoute
   '/conta/notificacoes': typeof AppContaNotificacoesRoute
   '/conta/seguranca': typeof AppContaSegurancaRoute
   '/projetos/$id': typeof AppProjetosIdRoute
+  '/cliente/projetos/$id': typeof ClienteProjetosIdRoute
+  '/cliente/tarefas/$id': typeof ClienteTarefasIdRoute
   '/cadastros': typeof AppCadastrosIndexRoute
   '/clientes': typeof AppClientesIndexRoute
   '/projetos': typeof AppProjetosIndexRoute
@@ -305,7 +368,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
-  '/cliente': typeof ClienteRoute
+  '/cliente': typeof ClienteRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/esqueci-senha': typeof EsqueciSenhaRoute
   '/plataforma': typeof PlataformaRoute
@@ -313,10 +376,12 @@ export interface FileRoutesById {
   '/workspaces': typeof WorkspacesRoute
   '/_app/aprovacoes': typeof AppAprovacoesRoute
   '/_app/assinatura': typeof AppAssinaturaRoute
+  '/_app/auditoria': typeof AppAuditoriaRoute
   '/_app/calendario': typeof AppCalendarioRoute
   '/_app/chat': typeof AppChatRoute
   '/_app/configuracoes': typeof AppConfiguracoesRoute
   '/_app/contratado-entregue': typeof AppContratadoEntregueRoute
+  '/_app/demandas': typeof AppDemandasRoute
   '/_app/entregas': typeof AppEntregasRoute
   '/_app/financeiro': typeof AppFinanceiroRoute
   '/_app/membros': typeof AppMembrosRoute
@@ -327,14 +392,20 @@ export interface FileRoutesById {
   '/_app/tarefas': typeof AppTarefasRoute
   '/_app/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
   '/assinar/$token': typeof AssinarTokenRoute
+  '/cliente/demandas': typeof ClienteDemandasRoute
+  '/cliente/documentos': typeof ClienteDocumentosRoute
+  '/cliente/perfil': typeof ClientePerfilRoute
   '/convite/$id': typeof ConviteIdRoute
   '/relatorio/contratado-entregue': typeof RelatorioContratadoEntregueRoute
   '/verificar/$code': typeof VerificarCodeRoute
   '/_app/': typeof AppIndexRoute
+  '/cliente/': typeof ClienteIndexRoute
   '/_app/clientes/$id': typeof AppClientesIdRoute
   '/_app/conta/notificacoes': typeof AppContaNotificacoesRoute
   '/_app/conta/seguranca': typeof AppContaSegurancaRoute
   '/_app/projetos/$id': typeof AppProjetosIdRoute
+  '/cliente/projetos/$id': typeof ClienteProjetosIdRoute
+  '/cliente/tarefas/$id': typeof ClienteTarefasIdRoute
   '/_app/cadastros/': typeof AppCadastrosIndexRoute
   '/_app/clientes/': typeof AppClientesIndexRoute
   '/_app/projetos/': typeof AppProjetosIndexRoute
@@ -353,10 +424,12 @@ export interface FileRouteTypes {
     | '/workspaces'
     | '/aprovacoes'
     | '/assinatura'
+    | '/auditoria'
     | '/calendario'
     | '/chat'
     | '/configuracoes'
     | '/contratado-entregue'
+    | '/demandas'
     | '/entregas'
     | '/financeiro'
     | '/membros'
@@ -367,13 +440,19 @@ export interface FileRouteTypes {
     | '/tarefas'
     | '/trabalhando-agora'
     | '/assinar/$token'
+    | '/cliente/demandas'
+    | '/cliente/documentos'
+    | '/cliente/perfil'
     | '/convite/$id'
     | '/relatorio/contratado-entregue'
     | '/verificar/$code'
+    | '/cliente/'
     | '/clientes/$id'
     | '/conta/notificacoes'
     | '/conta/seguranca'
     | '/projetos/$id'
+    | '/cliente/projetos/$id'
+    | '/cliente/tarefas/$id'
     | '/cadastros/'
     | '/clientes/'
     | '/projetos/'
@@ -381,7 +460,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/cadastro'
-    | '/cliente'
     | '/entrar'
     | '/esqueci-senha'
     | '/plataforma'
@@ -389,10 +467,12 @@ export interface FileRouteTypes {
     | '/workspaces'
     | '/aprovacoes'
     | '/assinatura'
+    | '/auditoria'
     | '/calendario'
     | '/chat'
     | '/configuracoes'
     | '/contratado-entregue'
+    | '/demandas'
     | '/entregas'
     | '/financeiro'
     | '/membros'
@@ -403,14 +483,20 @@ export interface FileRouteTypes {
     | '/tarefas'
     | '/trabalhando-agora'
     | '/assinar/$token'
+    | '/cliente/demandas'
+    | '/cliente/documentos'
+    | '/cliente/perfil'
     | '/convite/$id'
     | '/relatorio/contratado-entregue'
     | '/verificar/$code'
     | '/'
+    | '/cliente'
     | '/clientes/$id'
     | '/conta/notificacoes'
     | '/conta/seguranca'
     | '/projetos/$id'
+    | '/cliente/projetos/$id'
+    | '/cliente/tarefas/$id'
     | '/cadastros'
     | '/clientes'
     | '/projetos'
@@ -427,10 +513,12 @@ export interface FileRouteTypes {
     | '/workspaces'
     | '/_app/aprovacoes'
     | '/_app/assinatura'
+    | '/_app/auditoria'
     | '/_app/calendario'
     | '/_app/chat'
     | '/_app/configuracoes'
     | '/_app/contratado-entregue'
+    | '/_app/demandas'
     | '/_app/entregas'
     | '/_app/financeiro'
     | '/_app/membros'
@@ -441,14 +529,20 @@ export interface FileRouteTypes {
     | '/_app/tarefas'
     | '/_app/trabalhando-agora'
     | '/assinar/$token'
+    | '/cliente/demandas'
+    | '/cliente/documentos'
+    | '/cliente/perfil'
     | '/convite/$id'
     | '/relatorio/contratado-entregue'
     | '/verificar/$code'
     | '/_app/'
+    | '/cliente/'
     | '/_app/clientes/$id'
     | '/_app/conta/notificacoes'
     | '/_app/conta/seguranca'
     | '/_app/projetos/$id'
+    | '/cliente/projetos/$id'
+    | '/cliente/tarefas/$id'
     | '/_app/cadastros/'
     | '/_app/clientes/'
     | '/_app/projetos/'
@@ -458,7 +552,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   CadastroRoute: typeof CadastroRoute
-  ClienteRoute: typeof ClienteRoute
+  ClienteRoute: typeof ClienteRouteWithChildren
   EntrarRoute: typeof EntrarRoute
   EsqueciSenhaRoute: typeof EsqueciSenhaRoute
   PlataformaRoute: typeof PlataformaRoute
@@ -549,6 +643,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssinaturaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/auditoria': {
+      id: '/_app/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AppAuditoriaRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/calendario': {
       id: '/_app/calendario'
       path: '/calendario'
@@ -575,6 +676,13 @@ declare module '@tanstack/react-router' {
       path: '/contratado-entregue'
       fullPath: '/contratado-entregue'
       preLoaderRoute: typeof AppContratadoEntregueRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/demandas': {
+      id: '/_app/demandas'
+      path: '/demandas'
+      fullPath: '/demandas'
+      preLoaderRoute: typeof AppDemandasRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/entregas': {
@@ -647,6 +755,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssinarTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cliente/': {
+      id: '/cliente/'
+      path: '/'
+      fullPath: '/cliente/'
+      preLoaderRoute: typeof ClienteIndexRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/demandas': {
+      id: '/cliente/demandas'
+      path: '/demandas'
+      fullPath: '/cliente/demandas'
+      preLoaderRoute: typeof ClienteDemandasRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/documentos': {
+      id: '/cliente/documentos'
+      path: '/documentos'
+      fullPath: '/cliente/documentos'
+      preLoaderRoute: typeof ClienteDocumentosRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/perfil': {
+      id: '/cliente/perfil'
+      path: '/perfil'
+      fullPath: '/cliente/perfil'
+      preLoaderRoute: typeof ClientePerfilRouteImport
+      parentRoute: typeof ClienteRoute
+    }
     '/convite/$id': {
       id: '/convite/$id'
       path: '/convite/$id'
@@ -717,6 +853,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjetosIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/cliente/projetos/$id': {
+      id: '/cliente/projetos/$id'
+      path: '/projetos/$id'
+      fullPath: '/cliente/projetos/$id'
+      preLoaderRoute: typeof ClienteProjetosIdRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/tarefas/$id': {
+      id: '/cliente/tarefas/$id'
+      path: '/tarefas/$id'
+      fullPath: '/cliente/tarefas/$id'
+      preLoaderRoute: typeof ClienteTarefasIdRouteImport
+      parentRoute: typeof ClienteRoute
+    }
     '/_app/cadastros/briefings/$id': {
       id: '/_app/cadastros/briefings/$id'
       path: '/cadastros/briefings/$id'
@@ -730,10 +880,12 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppAprovacoesRoute: typeof AppAprovacoesRoute
   AppAssinaturaRoute: typeof AppAssinaturaRoute
+  AppAuditoriaRoute: typeof AppAuditoriaRoute
   AppCalendarioRoute: typeof AppCalendarioRoute
   AppChatRoute: typeof AppChatRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppContratadoEntregueRoute: typeof AppContratadoEntregueRoute
+  AppDemandasRoute: typeof AppDemandasRoute
   AppEntregasRoute: typeof AppEntregasRoute
   AppFinanceiroRoute: typeof AppFinanceiroRoute
   AppMembrosRoute: typeof AppMembrosRoute
@@ -757,10 +909,12 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAprovacoesRoute: AppAprovacoesRoute,
   AppAssinaturaRoute: AppAssinaturaRoute,
+  AppAuditoriaRoute: AppAuditoriaRoute,
   AppCalendarioRoute: AppCalendarioRoute,
   AppChatRoute: AppChatRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppContratadoEntregueRoute: AppContratadoEntregueRoute,
+  AppDemandasRoute: AppDemandasRoute,
   AppEntregasRoute: AppEntregasRoute,
   AppFinanceiroRoute: AppFinanceiroRoute,
   AppMembrosRoute: AppMembrosRoute,
@@ -783,10 +937,31 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ClienteRouteChildren {
+  ClienteDemandasRoute: typeof ClienteDemandasRoute
+  ClienteDocumentosRoute: typeof ClienteDocumentosRoute
+  ClientePerfilRoute: typeof ClientePerfilRoute
+  ClienteIndexRoute: typeof ClienteIndexRoute
+  ClienteProjetosIdRoute: typeof ClienteProjetosIdRoute
+  ClienteTarefasIdRoute: typeof ClienteTarefasIdRoute
+}
+
+const ClienteRouteChildren: ClienteRouteChildren = {
+  ClienteDemandasRoute: ClienteDemandasRoute,
+  ClienteDocumentosRoute: ClienteDocumentosRoute,
+  ClientePerfilRoute: ClientePerfilRoute,
+  ClienteIndexRoute: ClienteIndexRoute,
+  ClienteProjetosIdRoute: ClienteProjetosIdRoute,
+  ClienteTarefasIdRoute: ClienteTarefasIdRoute,
+}
+
+const ClienteRouteWithChildren =
+  ClienteRoute._addFileChildren(ClienteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   CadastroRoute: CadastroRoute,
-  ClienteRoute: ClienteRoute,
+  ClienteRoute: ClienteRouteWithChildren,
   EntrarRoute: EntrarRoute,
   EsqueciSenhaRoute: EsqueciSenhaRoute,
   PlataformaRoute: PlataformaRoute,

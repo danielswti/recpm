@@ -5,12 +5,21 @@
  *   recpm_notify  "tenant:usuário"    (notificações novas)
  *   recpm_chat    "tenant:conversa"   (mensagens e participantes)
  *   recpm_typing  "tenant:conversa:usuário:nome" (publicado pela própria API)
+ *   recpm_webhooks "tenant"           (entregas de webhook na fila)
+ *   recpm_exports  "tenant"           (exportação de dados pedida)
  * Quem assina reconsulta com RLS, então nada vaza entre tenants.
  */
 import { Client } from "pg";
 import type { Logger } from "./logger";
 
-export const CHANNELS = ["recpm_time", "recpm_notify", "recpm_chat", "recpm_typing"] as const;
+export const CHANNELS = [
+  "recpm_time",
+  "recpm_notify",
+  "recpm_chat",
+  "recpm_typing",
+  "recpm_webhooks",
+  "recpm_exports",
+] as const;
 export type Channel = (typeof CHANNELS)[number];
 type Fn = (payload: string) => void;
 

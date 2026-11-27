@@ -8,9 +8,11 @@ import { secureHeaders } from "hono/secure-headers";
 import { createAuth } from "./auth/auth";
 import { createBillingProviders } from "./billing";
 import type { Deps } from "./deps";
+import { apiDescription } from "./lib/api-docs";
 import { AppError, errorBody } from "./lib/errors";
 import { createLiveHub } from "./lib/live";
 import { createPushSender } from "./lib/push";
+import { apiKeyAuth } from "./middleware/api-key";
 import { requireTrustedOrigin } from "./middleware/origin";
 import { loadSession } from "./middleware/session";
 import { billingRoutes } from "./routes/billing";
@@ -21,10 +23,12 @@ import { chatRoutes } from "./routes/chat";
 import { clientRoutes } from "./routes/clients";
 import { fileRoutes } from "./routes/files";
 import { financeRoutes } from "./routes/finance";
+import { integrationRoutes } from "./routes/integrations";
 import { meRoutes } from "./routes/me";
 import { memberRoutes } from "./routes/members";
 import { notificationRoutes } from "./routes/notifications";
 import { platformRoutes } from "./routes/platform";
+import { portalRoutes } from "./routes/portal";
 import { projectRoutes } from "./routes/projects";
 import { reportRoutes } from "./routes/reports";
 import { settingsRoutes } from "./routes/settings";
@@ -100,6 +104,7 @@ export const createApp = (deps: Deps) => {
 
   // Rotas da aplicação (cookie de sessão) — CSRF por Origin em métodos que alteram estado.
   app.use("/api/v1/*", requireTrustedOrigin([deps.env.WEB_URL, deps.env.API_URL]));
+  app.use("/api/v1/*", apiKeyAuth(deps));
   app.use("/api/v1/*", loadSession);
 
   const routes = app
@@ -121,11 +126,21 @@ export const createApp = (deps: Deps) => {
     .route("/api/v1", signatureRoutes(rt))
     .route("/api/v1", reportRoutes(rt))
     .route("/api/v1", settingsRoutes(deps))
+    .route("/api/v1", integrationRoutes(deps))
+    .route("/api/v1", portalRoutes(deps))
     .route("/api/v1", fileRoutes(deps));
 
+  app.openAPIRegistry.registerComponent("securitySchemes", "apiKey", {
+    type: "http",
+    scheme: "bearer",
+    bearerFormat: "pk_live_…",
+    description: "Chave de API criada em Configurações › Chaves de API.",
+  });
   app.doc31("/api/openapi.json", {
     openapi: "3.1.0",
-    info: { title: "Rec PM API", version: "0.1.0" },
+    info: { title: "Rec PM API", version: "1.0.0", description: apiDescription(deps.env.API_URL) },
+    servers: [{ url: deps.env.API_URL }],
+    security: [{ apiKey: [] }],
   });
 
   app.onError((err, c) => {

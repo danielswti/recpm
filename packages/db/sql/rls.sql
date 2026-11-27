@@ -489,6 +489,92 @@ DROP TRIGGER IF EXISTS conversation_participants_notify ON conversation_particip
 CREATE TRIGGER conversation_participants_notify AFTER INSERT OR UPDATE OR DELETE ON conversation_participants
   FOR EACH ROW EXECUTE FUNCTION app.notify_chat();
 
+-- ── Webhooks de saída (§6.13) ────────────────────────────────────────────────
+-- Os eventos nascem aqui, na mesma transação da mudança, venha ela da tela, da API, do portal ou
+-- dos jobs (recorrência). SECURITY DEFINER porque o portal não enxerga webhook_endpoints.
+-- Só enfileira quando há endpoint ativo para o evento e o plano inclui webhooks; a API entrega
+-- (LISTEN recpm_webhooks) com assinatura HMAC e novas tentativas.
+CREATE OR REPLACE FUNCTION app.enqueue_webhook(p_tenant uuid, p_event text, p_data jsonb) RETURNS void
+  LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public
+  AS $$
+  DECLARE n int;
+  BEGIN
+    IF NOT EXISTS (SELECT 1 FROM webhook_endpoints e
+                    WHERE e.tenant_id = p_tenant AND e.active AND p_event = ANY (e.events)) THEN
+      RETURN;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM tenant_subscriptions s JOIN plans p ON p.id = s.plan_id
+                    WHERE s.tenant_id = p_tenant AND (p.features->>'outgoingWebhooks')::boolean) THEN
+      RETURN;
+    END IF;
+    INSERT INTO webhook_deliveries (id, tenant_id, endpoint_id, event, payload, status, next_attempt_at)
+    SELECT gen_random_uuid(), p_tenant, e.id, p_event, p_data, 'pending', now()
+      FROM webhook_endpoints e
+     WHERE e.tenant_id = p_tenant AND e.active AND p_event = ANY (e.events);
+    GET DIAGNOSTICS n = ROW_COUNT;
+    IF n > 0 THEN PERFORM pg_notify('recpm_webhooks', p_tenant::text); END IF;
+  END $$;
+
+CREATE OR REPLACE FUNCTION app.task_webhook_data(t tasks) RETURNS jsonb
+  LANGUAGE sql STABLE SET search_path = pg_catalog, public
+  AS $$
+    SELECT jsonb_build_object(
+      'id', t.id, 'title', t.title, 'projectId', t.project_id, 'statusKey', t.status_key,
+      'assigneeId', t.assignee_id, 'taskTypeId', t.task_type_id, 'priority', t.priority,
+      'deadline', t.deadline, 'pieceQuantity', t.piece_quantity, 'source', t.source,
+      'visibleToClient', t.visible_to_client, 'completedAt', t.completed_at, 'createdAt', t.created_at)
+  $$;
+
+CREATE OR REPLACE FUNCTION app.tasks_webhooks() RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public
+  AS $$
+  BEGIN
+    IF TG_OP = 'INSERT' THEN
+      PERFORM app.enqueue_webhook(NEW.tenant_id, 'task.created', jsonb_build_object('task', app.task_webhook_data(NEW)));
+    ELSIF NEW.status_key IS DISTINCT FROM OLD.status_key THEN
+      PERFORM app.enqueue_webhook(NEW.tenant_id, 'task.status_changed',
+        jsonb_build_object('task', app.task_webhook_data(NEW), 'from', OLD.status_key, 'to', NEW.status_key));
+    END IF;
+    IF TG_OP = 'UPDATE' AND NEW.completed_at IS NOT NULL AND OLD.completed_at IS NULL THEN
+      PERFORM app.enqueue_webhook(NEW.tenant_id, 'task.completed', jsonb_build_object('task', app.task_webhook_data(NEW)));
+    END IF;
+    RETURN NULL;
+  END $$;
+DROP TRIGGER IF EXISTS tasks_webhooks ON tasks;
+CREATE TRIGGER tasks_webhooks AFTER INSERT OR UPDATE OF status_key, completed_at ON tasks
+  FOR EACH ROW EXECUTE FUNCTION app.tasks_webhooks();
+
+CREATE OR REPLACE FUNCTION app.projects_webhooks() RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public
+  AS $$
+  BEGIN
+    PERFORM app.enqueue_webhook(NEW.tenant_id, 'project.created', jsonb_build_object('project', jsonb_build_object(
+      'id', NEW.id, 'name', NEW.name, 'clientId', NEW.client_id, 'modality', NEW.modality,
+      'status', NEW.status, 'managerId', NEW.manager_id, 'startDate', NEW.start_date, 'createdAt', NEW.created_at)));
+    RETURN NULL;
+  END $$;
+DROP TRIGGER IF EXISTS projects_webhooks ON projects;
+CREATE TRIGGER projects_webhooks AFTER INSERT ON projects
+  FOR EACH ROW EXECUTE FUNCTION app.projects_webhooks();
+
+CREATE OR REPLACE FUNCTION app.installments_webhooks() RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public
+  AS $$
+  BEGIN
+    IF NEW.status = 'pago' AND OLD.status IS DISTINCT FROM 'pago' THEN
+      PERFORM app.enqueue_webhook(NEW.tenant_id, 'installment.paid', jsonb_build_object('installment', jsonb_build_object(
+        'id', NEW.id, 'number', NEW.number, 'contractId', NEW.contract_id,
+        'clientSubscriptionId', NEW.client_subscription_id, 'clientId', NEW.client_id,
+        'amountCents', NEW.amount_cents, 'dueDate', NEW.due_date, 'paidAt', NEW.paid_at,
+        'paidAmountCents', NEW.paid_amount_cents, 'method', NEW.method)));
+    END IF;
+    RETURN NULL;
+  END $$;
+DROP TRIGGER IF EXISTS installments_webhooks ON installments;
+CREATE TRIGGER installments_webhooks AFTER UPDATE OF status ON installments
+  FOR EACH ROW EXECUTE FUNCTION app.installments_webhooks();
+REVOKE ALL ON FUNCTION app.enqueue_webhook(uuid, text, jsonb) FROM PUBLIC, recpm_app;
+
 -- ── Verificação de cobertura (rodada no CI e no teste de isolamento) ─────────
 -- Falha se existir tabela com tenant_id sem RLS ou sem a política tenant_isolation.
 CREATE OR REPLACE FUNCTION app.assert_rls_coverage() RETURNS void

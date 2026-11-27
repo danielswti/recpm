@@ -53,6 +53,9 @@ importers:
       exceljs:
         specifier: 4.4.0
         version: 4.4.0
+      fflate:
+        specifier: 0.8.2
+        version: 0.8.2
       fractional-indexing:
         specifier: ^4.0.0
         version: 4.0.0
@@ -2969,6 +2972,9 @@ packages:
     peerDependenciesMeta:
       picomatch:
         optional: true
+
+  fflate@0.8.2:
+    resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
 
   find-up@4.1.0:
     resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}
@@ -6674,6 +6680,8 @@ snapshots:
   fdir@6.5.0(picomatch@4.0.7):
     optionalDependencies:
       picomatch: 4.0.7
+
+  fflate@0.8.2: {}
 
   find-up@4.1.0:
     dependencies:
