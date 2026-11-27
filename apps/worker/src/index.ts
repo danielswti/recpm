@@ -11,6 +11,8 @@
  *   deadline-reminders a cada 15 min: "prazo amanhã" (24 h antes) e "prazo vencido", uma vez por prazo.
  *   holidays       diário: importa os feriados nacionais do ano corrente e do próximo (BrasilAPI) para
  *                  os workspaces com a importação ligada.
+ *   finance        a cada 3 h: gera as cobranças das mensalidades e marca parcelas vencidas como
+ *                  atrasadas, avisando admin e gestores (idempotente; roda várias vezes ao dia por fuso).
  * (O envio de e-mail e push das notificações roda na API, que tem o mailer e as chaves VAPID.)
  */
 import {
@@ -18,6 +20,7 @@ import {
   runBillingCycle,
   runClientChaseSla,
   runDeadlineReminders,
+  runFinanceDaily,
   runHolidayImport,
   runRecurrence,
 } from "@recpm/core";
@@ -66,6 +69,12 @@ await queue.upsertJobScheduler(
   { name: "holidays", opts: { removeOnComplete: 30, removeOnFail: 100 } },
 );
 
+await queue.upsertJobScheduler(
+  "finance",
+  { every: 3 * 60 * 60_000 },
+  { name: "finance", opts: { removeOnComplete: 50, removeOnFail: 200 } },
+);
+
 const worker = new Worker(
   QUEUE,
   async (job) => {
@@ -93,6 +102,11 @@ const worker = new Worker(
     if (job.name === "holidays") {
       const report = await runHolidayImport({ platformDb, appDb: dbs.appDb }, brasilApiHolidays(fetch));
       logger.info({ job: job.name, ...report }, "feriados");
+      return report;
+    }
+    if (job.name === "finance") {
+      const report = await runFinanceDaily({ platformDb, appDb: dbs.appDb });
+      logger.info({ job: job.name, ...report }, "financeiro");
       return report;
     }
     logger.warn({ job: job.name }, "job desconhecido");

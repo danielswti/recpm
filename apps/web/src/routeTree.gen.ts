@@ -23,10 +23,14 @@ import { Route as AppAssinaturaRouteImport } from './routes/_app/assinatura'
 import { Route as AppCalendarioRouteImport } from './routes/_app/calendario'
 import { Route as AppChatRouteImport } from './routes/_app/chat'
 import { Route as AppConfiguracoesRouteImport } from './routes/_app/configuracoes'
+import { Route as AppFinanceiroRouteImport } from './routes/_app/financeiro'
 import { Route as AppMembrosRouteImport } from './routes/_app/membros'
+import { Route as AppMensalidadesRouteImport } from './routes/_app/mensalidades'
 import { Route as AppTarefasRouteImport } from './routes/_app/tarefas'
 import { Route as AppTrabalhandoAgoraRouteImport } from './routes/_app/trabalhando-agora'
+import { Route as AssinarTokenRouteImport } from './routes/assinar.$token'
 import { Route as ConviteIdRouteImport } from './routes/convite.$id'
+import { Route as VerificarCodeRouteImport } from './routes/verificar.$code'
 import { Route as AppCadastrosIndexRouteImport } from './routes/_app/cadastros.index'
 import { Route as AppClientesIndexRouteImport } from './routes/_app/clientes.index'
 import { Route as AppClientesIdRouteImport } from './routes/_app/clientes.$id'
@@ -105,9 +109,19 @@ const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
   path: '/configuracoes',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFinanceiroRoute = AppFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMembrosRoute = AppMembrosRouteImport.update({
   id: '/membros',
   path: '/membros',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMensalidadesRoute = AppMensalidadesRouteImport.update({
+  id: '/mensalidades',
+  path: '/mensalidades',
   getParentRoute: () => AppRoute,
 } as any)
 const AppTarefasRoute = AppTarefasRouteImport.update({
@@ -120,9 +134,19 @@ const AppTrabalhandoAgoraRoute = AppTrabalhandoAgoraRouteImport.update({
   path: '/trabalhando-agora',
   getParentRoute: () => AppRoute,
 } as any)
+const AssinarTokenRoute = AssinarTokenRouteImport.update({
+  id: '/assinar/$token',
+  path: '/assinar/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConviteIdRoute = ConviteIdRouteImport.update({
   id: '/convite/$id',
   path: '/convite/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerificarCodeRoute = VerificarCodeRouteImport.update({
+  id: '/verificar/$code',
+  path: '/verificar/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppCadastrosIndexRoute = AppCadastrosIndexRouteImport.update({
@@ -180,10 +204,14 @@ export interface FileRoutesByFullPath {
   '/calendario': typeof AppCalendarioRoute
   '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
+  '/financeiro': typeof AppFinanceiroRoute
   '/membros': typeof AppMembrosRoute
+  '/mensalidades': typeof AppMensalidadesRoute
   '/tarefas': typeof AppTarefasRoute
   '/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
+  '/assinar/$token': typeof AssinarTokenRoute
   '/convite/$id': typeof ConviteIdRoute
+  '/verificar/$code': typeof VerificarCodeRoute
   '/clientes/$id': typeof AppClientesIdRoute
   '/conta/notificacoes': typeof AppContaNotificacoesRoute
   '/conta/seguranca': typeof AppContaSegurancaRoute
@@ -206,10 +234,14 @@ export interface FileRoutesByTo {
   '/calendario': typeof AppCalendarioRoute
   '/chat': typeof AppChatRoute
   '/configuracoes': typeof AppConfiguracoesRoute
+  '/financeiro': typeof AppFinanceiroRoute
   '/membros': typeof AppMembrosRoute
+  '/mensalidades': typeof AppMensalidadesRoute
   '/tarefas': typeof AppTarefasRoute
   '/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
+  '/assinar/$token': typeof AssinarTokenRoute
   '/convite/$id': typeof ConviteIdRoute
+  '/verificar/$code': typeof VerificarCodeRoute
   '/': typeof AppIndexRoute
   '/clientes/$id': typeof AppClientesIdRoute
   '/conta/notificacoes': typeof AppContaNotificacoesRoute
@@ -235,10 +267,14 @@ export interface FileRoutesById {
   '/_app/calendario': typeof AppCalendarioRoute
   '/_app/chat': typeof AppChatRoute
   '/_app/configuracoes': typeof AppConfiguracoesRoute
+  '/_app/financeiro': typeof AppFinanceiroRoute
   '/_app/membros': typeof AppMembrosRoute
+  '/_app/mensalidades': typeof AppMensalidadesRoute
   '/_app/tarefas': typeof AppTarefasRoute
   '/_app/trabalhando-agora': typeof AppTrabalhandoAgoraRoute
+  '/assinar/$token': typeof AssinarTokenRoute
   '/convite/$id': typeof ConviteIdRoute
+  '/verificar/$code': typeof VerificarCodeRoute
   '/_app/': typeof AppIndexRoute
   '/_app/clientes/$id': typeof AppClientesIdRoute
   '/_app/conta/notificacoes': typeof AppContaNotificacoesRoute
@@ -265,10 +301,14 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/chat'
     | '/configuracoes'
+    | '/financeiro'
     | '/membros'
+    | '/mensalidades'
     | '/tarefas'
     | '/trabalhando-agora'
+    | '/assinar/$token'
     | '/convite/$id'
+    | '/verificar/$code'
     | '/clientes/$id'
     | '/conta/notificacoes'
     | '/conta/seguranca'
@@ -291,10 +331,14 @@ export interface FileRouteTypes {
     | '/calendario'
     | '/chat'
     | '/configuracoes'
+    | '/financeiro'
     | '/membros'
+    | '/mensalidades'
     | '/tarefas'
     | '/trabalhando-agora'
+    | '/assinar/$token'
     | '/convite/$id'
+    | '/verificar/$code'
     | '/'
     | '/clientes/$id'
     | '/conta/notificacoes'
@@ -319,10 +363,14 @@ export interface FileRouteTypes {
     | '/_app/calendario'
     | '/_app/chat'
     | '/_app/configuracoes'
+    | '/_app/financeiro'
     | '/_app/membros'
+    | '/_app/mensalidades'
     | '/_app/tarefas'
     | '/_app/trabalhando-agora'
+    | '/assinar/$token'
     | '/convite/$id'
+    | '/verificar/$code'
     | '/_app/'
     | '/_app/clientes/$id'
     | '/_app/conta/notificacoes'
@@ -343,7 +391,9 @@ export interface RootRouteChildren {
   PlataformaRoute: typeof PlataformaRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   WorkspacesRoute: typeof WorkspacesRoute
+  AssinarTokenRoute: typeof AssinarTokenRoute
   ConviteIdRoute: typeof ConviteIdRoute
+  VerificarCodeRoute: typeof VerificarCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -446,11 +496,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppConfiguracoesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/financeiro': {
+      id: '/_app/financeiro'
+      path: '/financeiro'
+      fullPath: '/financeiro'
+      preLoaderRoute: typeof AppFinanceiroRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/membros': {
       id: '/_app/membros'
       path: '/membros'
       fullPath: '/membros'
       preLoaderRoute: typeof AppMembrosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/mensalidades': {
+      id: '/_app/mensalidades'
+      path: '/mensalidades'
+      fullPath: '/mensalidades'
+      preLoaderRoute: typeof AppMensalidadesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/tarefas': {
@@ -467,11 +531,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTrabalhandoAgoraRouteImport
       parentRoute: typeof AppRoute
     }
+    '/assinar/$token': {
+      id: '/assinar/$token'
+      path: '/assinar/$token'
+      fullPath: '/assinar/$token'
+      preLoaderRoute: typeof AssinarTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/convite/$id': {
       id: '/convite/$id'
       path: '/convite/$id'
       fullPath: '/convite/$id'
       preLoaderRoute: typeof ConviteIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verificar/$code': {
+      id: '/verificar/$code'
+      path: '/verificar/$code'
+      fullPath: '/verificar/$code'
+      preLoaderRoute: typeof VerificarCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/cadastros/': {
@@ -539,7 +617,9 @@ interface AppRouteChildren {
   AppCalendarioRoute: typeof AppCalendarioRoute
   AppChatRoute: typeof AppChatRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
+  AppFinanceiroRoute: typeof AppFinanceiroRoute
   AppMembrosRoute: typeof AppMembrosRoute
+  AppMensalidadesRoute: typeof AppMensalidadesRoute
   AppTarefasRoute: typeof AppTarefasRoute
   AppTrabalhandoAgoraRoute: typeof AppTrabalhandoAgoraRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -559,7 +639,9 @@ const AppRouteChildren: AppRouteChildren = {
   AppCalendarioRoute: AppCalendarioRoute,
   AppChatRoute: AppChatRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
+  AppFinanceiroRoute: AppFinanceiroRoute,
   AppMembrosRoute: AppMembrosRoute,
+  AppMensalidadesRoute: AppMensalidadesRoute,
   AppTarefasRoute: AppTarefasRoute,
   AppTrabalhandoAgoraRoute: AppTrabalhandoAgoraRoute,
   AppIndexRoute: AppIndexRoute,
@@ -584,7 +666,9 @@ const rootRouteChildren: RootRouteChildren = {
   PlataformaRoute: PlataformaRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   WorkspacesRoute: WorkspacesRoute,
+  AssinarTokenRoute: AssinarTokenRoute,
   ConviteIdRoute: ConviteIdRoute,
+  VerificarCodeRoute: VerificarCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

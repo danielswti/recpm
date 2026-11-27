@@ -20,12 +20,14 @@ import { catalogRoutes } from "./routes/catalogs";
 import { chatRoutes } from "./routes/chat";
 import { clientRoutes } from "./routes/clients";
 import { fileRoutes } from "./routes/files";
+import { financeRoutes } from "./routes/finance";
 import { meRoutes } from "./routes/me";
 import { memberRoutes } from "./routes/members";
 import { notificationRoutes } from "./routes/notifications";
 import { platformRoutes } from "./routes/platform";
 import { projectRoutes } from "./routes/projects";
 import { settingsRoutes } from "./routes/settings";
+import { signatureRoutes } from "./routes/signatures";
 import { taskRoutes } from "./routes/tasks";
 import { timeRoutes } from "./routes/time";
 import { webhookRoutes } from "./routes/webhooks";
@@ -114,6 +116,8 @@ export const createApp = (deps: Deps) => {
     .route("/api/v1", notificationRoutes(rt))
     .route("/api/v1", calendarRoutes(rt))
     .route("/api/v1", chatRoutes(rt))
+    .route("/api/v1", financeRoutes(rt))
+    .route("/api/v1", signatureRoutes(rt))
     .route("/api/v1", settingsRoutes(deps))
     .route("/api/v1", fileRoutes(deps));
 

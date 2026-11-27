@@ -184,7 +184,7 @@ export function TaskBoard({
           setLanes(lanesOf(columns, tasks));
         }}
       >
-        <section className="flex gap-3 overflow-x-auto pb-4" aria-label={t("tasks.board")}>
+        <section className="relative flex gap-3 overflow-x-auto pb-4" aria-label={t("tasks.board")}>
           {visible.map((col) => (
             <Lane key={col.key} col={col} ids={lanes[col.key] ?? []}>
               {(lanes[col.key] ?? []).map((id) => {

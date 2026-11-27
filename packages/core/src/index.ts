@@ -24,6 +24,19 @@ export {
   runHolidayImport,
 } from "./calendar/holidays";
 export { DomainError } from "./errors";
+export {
+  addMonthsYmd,
+  flagOverdueInstallments,
+  generateSubscriptionCharges,
+  type PaymentInput,
+  payInstallment,
+  regenerateInstallments,
+  reverseInstallment,
+  runFinanceDaily,
+  splitCents,
+  syncContractStatus,
+  todayIn,
+} from "./finance/service";
 export { runDeadlineReminders, sendDeadlineReminders } from "./notifications/reminders";
 export { rankBetween } from "./tasks/rank";
 export { nextOccurrence } from "./tasks/recurrence";
