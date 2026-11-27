@@ -16,7 +16,7 @@ import {
   Activity,
   ArrowLeftRight,
   BarChart3,
-  Bell,
+  BellRing,
   BookOpen,
   Building2,
   CalendarDays,
@@ -31,6 +31,7 @@ import {
   LogOut,
   type LucideIcon,
   Menu,
+  MessageCircle,
   PanelLeftClose,
   PanelLeftOpen,
   Repeat,
@@ -41,11 +42,15 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { authClient } from "../lib/auth-client";
+import { useUserStream } from "../lib/comms";
 import { LOCALES } from "../lib/i18n";
+import { pushSupported, registerServiceWorker } from "../lib/push";
 import type { Me } from "../lib/queries";
+import { ChatWidget } from "./chat/chat-widget";
+import { NotificationsBell } from "./notifications/bell";
 import { PlanBanner } from "./plan-banner";
 import { ThemeToggle } from "./theme-toggle";
 import { CurrentTimer } from "./time/timer";
@@ -63,6 +68,8 @@ type NavItem = {
     | "/cadastros"
     | "/projetos"
     | "/tarefas"
+    | "/calendario"
+    | "/chat"
     | "/trabalhando-agora"
     | "/aprovacoes"
     | "/configuracoes";
@@ -78,7 +85,8 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { key: "nav.dashboard", icon: LayoutDashboard, to: "/" },
       { key: "nav.projects", icon: FolderKanban, to: "/projetos", perm: "projects.read" },
       { key: "nav.tasks", icon: CheckSquare, to: "/tarefas", perm: "tasks.read" },
-      { key: "nav.calendar", icon: CalendarDays, phase: 6, perm: "calendar.read" },
+      { key: "nav.calendar", icon: CalendarDays, to: "/calendario", perm: "calendar.read" },
+      { key: "nav.chat", icon: MessageCircle, to: "/chat", perm: "chat.use" },
       { key: "nav.myProductivity", icon: Gauge, phase: 8, perm: "productivity.own" },
     ],
   },
@@ -112,6 +120,11 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const perms = new Set(me.tenant?.permissions ?? []);
+  useUserStream(!!me.tenant);
+  useEffect(() => {
+    // registra o service worker (push e "instalar app"); a inscrição de push é opcional, em Conta > Notificações
+    if (pushSupported()) void registerServiceWorker();
+  }, []);
 
   const sidebar = (
     <nav aria-label={t("nav.main")} className="flex h-full flex-col gap-4 overflow-y-auto p-3">
@@ -197,7 +210,8 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
         </header>
         {me.impersonating && <ImpersonationBanner me={me} />}
         <PlanBanner canManage={perms.has("tenant.billing")} />
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+        <main className="flex-1 p-4 pb-20 md:p-8 md:pb-24">{children}</main>
+        {perms.has("chat.use") && <ChatWidget />}
         <UpgradeDialog canManage={perms.has("tenant.billing")} />
       </div>
     </div>
@@ -279,6 +293,9 @@ function UserCard({ me, collapsed }: { me: Me; collapsed: boolean }) {
         <DropdownMenuItem onSelect={() => navigate({ to: "/conta/seguranca" })}>
           <ShieldCheck /> {t("nav.security")}
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => navigate({ to: "/conta/notificacoes" })}>
+          <BellRing /> {t("nav.notificationSettings")}
+        </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => navigate({ to: "/workspaces" })}>
           <ArrowLeftRight /> {t("nav.switchWorkspace")}
         </DropdownMenuItem>
@@ -329,23 +346,5 @@ function ImpersonationBanner({ me }: { me: Me }) {
         {t("platform.stopImpersonating")}
       </Button>
     </div>
-  );
-}
-
-/** Sino de notificações — a central real (SSE/WebSocket) chega na Fase 6. */
-function NotificationsBell() {
-  const { t } = useTranslation();
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={t("nav.notifications")}>
-          <Bell />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72">
-        <DropdownMenuLabel>{t("nav.notifications")}</DropdownMenuLabel>
-        <p className="px-2 py-6 text-center text-sm text-muted-foreground">{t("nav.noNotifications")}</p>
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
