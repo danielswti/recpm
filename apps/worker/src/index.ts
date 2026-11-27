@@ -6,9 +6,11 @@
  *                  (zera a cota, aplica downgrade/cancelamento agendado) e carência vencida → somente leitura.
  *   recurrence     a cada 5 min: gera as instâncias vencidas das tarefas recorrentes (cada uma consome
  *                  cota; com a cota esgotada a série espera o próximo ciclo).
+ *   client-chase   a cada 10 min: cards em "aguardando cliente" além do SLA (horas úteis) avisam o
+ *                  atendimento do projeto, uma vez por espera.
  * As próximas fases acrescentam aqui: recorrência de tarefas, e-mails, notificações, backups.
  */
-import { runBillingCycle, runRecurrence } from "@recpm/core";
+import { runBillingCycle, runClientChaseSla, runRecurrence } from "@recpm/core";
 import { createDbs } from "@recpm/db";
 import { Queue, Worker } from "bullmq";
 import { Redis } from "ioredis";
@@ -36,6 +38,12 @@ await queue.upsertJobScheduler(
   { name: "recurrence", opts: { removeOnComplete: 100, removeOnFail: 500 } },
 );
 
+await queue.upsertJobScheduler(
+  "client-chase",
+  { every: 10 * 60_000 },
+  { name: "client-chase", opts: { removeOnComplete: 100, removeOnFail: 500 } },
+);
+
 const worker = new Worker(
   QUEUE,
   async (job) => {
@@ -48,6 +56,11 @@ const worker = new Worker(
       if (!dbs.appDb) throw new Error("DATABASE_URL_APP não configurada");
       const report = await runRecurrence({ platformDb, appDb: dbs.appDb });
       if (report.created || report.blocked) logger.info({ job: job.name, ...report }, "recorrência");
+      return report;
+    }
+    if (job.name === "client-chase") {
+      const report = await runClientChaseSla({ platformDb, appDb: dbs.appDb });
+      if (report.notified) logger.info({ job: job.name, ...report }, "SLA de cobrança");
       return report;
     }
     logger.warn({ job: job.name }, "job desconhecido");

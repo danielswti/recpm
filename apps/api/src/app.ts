@@ -20,7 +20,9 @@ import { meRoutes } from "./routes/me";
 import { memberRoutes } from "./routes/members";
 import { platformRoutes } from "./routes/platform";
 import { projectRoutes } from "./routes/projects";
+import { settingsRoutes } from "./routes/settings";
 import { taskRoutes } from "./routes/tasks";
+import { timeRoutes } from "./routes/time";
 import { webhookRoutes } from "./routes/webhooks";
 import { workspaceRoutes } from "./routes/workspaces";
 import type { AppEnv } from "./types";
@@ -100,6 +102,8 @@ export const createApp = (deps: Deps) => {
     .route("/api/v1", clientRoutes(deps))
     .route("/api/v1", projectRoutes(deps))
     .route("/api/v1", taskRoutes(deps))
+    .route("/api/v1", timeRoutes(deps))
+    .route("/api/v1", settingsRoutes(deps))
     .route("/api/v1", fileRoutes(deps));
 
   app.doc31("/api/openapi.json", {

@@ -19,6 +19,7 @@ import {
   nextOccurrence,
   notify,
   rejectTask,
+  stopTaskTimers,
 } from "@recpm/core";
 import { type AppTx, schema } from "@recpm/db";
 import {
@@ -816,6 +817,7 @@ export const taskRoutes = (deps: Deps) => {
                       .update(s.tasks)
                       .set({ archived: true, archivedAt: now, archivedBy: actor.userId, updatedAt: now })
                       .where(eq(s.tasks.id, id));
+                    await stopTaskTimers(sp as AppTx, id, now);
                     await history(sp, actor, id, "archive", undefined, task.title);
                   }
                 });
@@ -1024,6 +1026,7 @@ export const taskRoutes = (deps: Deps) => {
             if (!actor.can("tasks.manage") && task.createdById !== actor.userId)
               throw new AppError(403, "FORBIDDEN", "Só quem criou (ou um gestor) pode excluir.");
             await t.update(s.tasks).set({ deletedAt: new Date() }).where(eq(s.tasks.id, id));
+            await stopTaskTimers(t, id);
             await history(t, actor, id, "delete", undefined, task.title);
           });
           return c.body(null, 204);
@@ -1237,6 +1240,7 @@ export const taskRoutes = (deps: Deps) => {
                     },
               )
               .where(eq(s.tasks.id, id));
+            if (approve) await stopTaskTimers(t, id, now);
             await history(
               t,
               actor,
@@ -1294,6 +1298,7 @@ export const taskRoutes = (deps: Deps) => {
                     },
               )
               .where(eq(s.tasks.id, id));
+            if (archived) await stopTaskTimers(t, id, now);
             await history(t, actor, id, archived ? "archive" : "unarchive", undefined, task.title);
           });
           return c.body(null, 204);

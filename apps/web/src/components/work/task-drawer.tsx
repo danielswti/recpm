@@ -43,6 +43,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { api, unwrap, unwrapVoid } from "../../lib/api";
 import { errorMessage } from "../../lib/errors";
+import { meQuery } from "../../lib/queries";
 import {
   calendarDate,
   downloadUrl,
@@ -55,6 +56,8 @@ import {
   uploadFile,
 } from "../../lib/work";
 import { ConfirmDialog, textareaClass } from "../confirm-dialog";
+import { TaskDeliveries, TaskTime } from "../time/task-time";
+import { TimerButton } from "../time/timer";
 import { AdjustmentDialog } from "./adjustment-dialog";
 import { useLookups } from "./lookups";
 import { isEmptyDoc, RichTextInput, RichTextView } from "./rich-text";
@@ -78,6 +81,8 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
   const qc = useQueryClient();
   const q = useQuery(taskQuery(id));
   const lk = useLookups({ projects: false });
+  const me = useQuery(meQuery).data;
+  const canTrack = !!me?.tenant?.permissions.includes("time.track");
   const [adjust, setAdjust] = useState<null | "move" | "reject">(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [archiveReason, setArchiveReason] = useState<string | null>(null);
@@ -85,6 +90,7 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["tasks"] });
     void qc.invalidateQueries({ queryKey: ["projects"] });
+    void qc.invalidateQueries({ queryKey: ["time"] });
   };
   const onErr = (e: unknown) => toast.error(errorMessage(t, e));
 
@@ -162,6 +168,7 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
               </option>
             ))}
           </Select>
+          {canTrack && !task.archived && !task.completedAt && <TimerButton taskId={id} />}
           {col?.isApproval && task.can.approve && !task.archived && (
             <>
               <Button
@@ -452,7 +459,7 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
           {!lk.tags.length && <span className="text-xs text-muted-foreground">—</span>}
         </dd>
         <dt className="text-muted-foreground">{t("tasks.fields.pieces")}</dt>
-        <dd className="flex items-center gap-3">
+        <dd className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <Input
             aria-label={t("tasks.fields.pieces")}
             type="number"
@@ -540,6 +547,8 @@ function DrawerBody({ id, onClose }: { id: string; onClose: () => void }) {
       <Description task={task} editable={editable} onSave={(description) => patch.mutate({ description })} />
       <Checklist task={task} editable={editable} />
       <Attachments task={task} editable={editable} />
+      <TaskDeliveries taskId={id} pieceQuantity={task.pieceQuantity} editable={editable} />
+      <TaskTime taskId={id} meId={me?.user.id ?? ""} canTrack={canTrack} />
 
       {task.adjustments.length > 0 && (
         <section className="grid gap-2">
@@ -1061,5 +1070,9 @@ function historyText(t: TFunction, action: string, d: Record<string, unknown> | 
     return t("tasks.history.update", { fields });
   }
   if (action === "create") return t("tasks.history.create", { to: String(d?.toLabel ?? "") });
-  return t(`tasks.history.${action}`, { defaultValue: action, name: String(d?.name ?? "") });
+  return t(`tasks.history.${action}`, {
+    defaultValue: action,
+    name: String(d?.name ?? ""),
+    quantity: String(d?.quantity ?? ""),
+  });
 }

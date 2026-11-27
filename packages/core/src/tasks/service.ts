@@ -11,6 +11,7 @@ import type { AdjustmentInput, Permission, RecurrenceRuleInput } from "@recpm/sh
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { consumeTaskQuota, type QuotaResult } from "../billing/quota";
 import { DomainError } from "../errors";
+import { stopTaskTimers } from "../time/service";
 import { rankBetween } from "./rank";
 import { nextOccurrence } from "./recurrence";
 
@@ -425,6 +426,9 @@ export async function moveTask(
       updatedAt: now,
     })
     .where(eq(s.tasks.id, t.id));
+
+  // Concluir para os timers ("Estou nessa") da tarefa.
+  if (changed && to.isFinal) await stopTaskTimers(tx, t.id, now);
 
   if (changed) {
     await audit(tx, actor, {

@@ -53,7 +53,9 @@
     "openMenu": "Open menu",
     "userMenu": "User menu",
     "billing": "Plan & billing",
-    "platform": "Platform"
+    "platform": "Platform",
+    "workingNow": "Working now",
+    "approvals": "Time adjustments"
   },
   "roles": {
     "admin": "Admin",
@@ -341,7 +343,20 @@
     "PLAN_STORAGE_LIMIT_REACHED": "The plan storage is full.",
     "FILE_TYPE_BLOCKED": "This file type is not accepted.",
     "UPLOAD_NOT_FOUND": "The upload did not finish. Try again.",
-    "FILE_NOT_AVAILABLE": "File still being scanned."
+    "FILE_NOT_AVAILABLE": "File still being scanned.",
+    "TASK_COMPLETED": "This task is already done.",
+    "TIMER_CONFLICT": "Another timer was just started. Refresh the page.",
+    "INVALID_TIME_ADJUSTMENT": "Invalid adjustment. Check the times and minutes.",
+    "TIME_ADJUSTMENT_PENDING": "There is already a pending request for this entry.",
+    "TIME_ENTRY_NOT_FOUND": "Time entry not found.",
+    "TIMER_RUNNING": "Stop the timer before requesting an adjustment.",
+    "TIME_ADJUSTMENT_NOT_FOUND": "Request not found.",
+    "ALREADY_REVIEWED": "This request was already reviewed.",
+    "SELF_REVIEW": "Someone else must approve your own adjustment.",
+    "INVALID_TIMEZONE": "Invalid time zone.",
+    "INVALID_IMAGE": "Upload an image (PNG, JPG, SVG or WebP).",
+    "INVALID_EXPIRY": "Expiry must be a future date.",
+    "SECRETS_KEY_MISSING": "Secret encryption isn't configured on the server."
   },
   "billing": {
     "title": "Plan & billing",
@@ -1054,7 +1069,203 @@
       "client_chase": "recorded a client chase",
       "attachment_add": "attached {{name}}",
       "attachment_delete": "removed attachment {{name}}",
-      "delete": "deleted the task"
+      "delete": "deleted the task",
+      "delivery": "delivered {{quantity}} piece(s)",
+      "delivery_removed": "undid a delivery of {{quantity}} piece(s)"
+    }
+  },
+  "time": {
+    "start": "I'm on it",
+    "stop": "Stop",
+    "stopTask": "Stop the timer for {{title}}",
+    "title": "Time",
+    "running": "running",
+    "none": "Nobody has tracked time on this task yet.",
+    "entries_one": "{{count}} entry",
+    "entries_other": "{{count}} entries",
+    "rework": "rework {{time}}",
+    "reworkShort": "rework",
+    "reworkHelp": "Time tracked while the task was in Adjustments.",
+    "pendingCount_one": "{{count}} pending adjustment",
+    "pendingCount_other": "{{count}} pending adjustments",
+    "requestAdjustment": "Request time adjustment",
+    "fixEntry": "Fix this entry",
+    "adjustmentHelp": "The adjustment only counts in reports after a manager approves it.",
+    "startedAt": "Start",
+    "endedAt": "End",
+    "direction": "Adjustment",
+    "add": "Add",
+    "remove": "Subtract",
+    "minutes": "Minutes",
+    "reason": "Reason",
+    "sendForApproval": "Send for approval",
+    "adjustmentSent": "Request sent for approval."
+  },
+  "deliveries": {
+    "title": "Deliveries",
+    "progress": "{{done}} of {{total}} pieces",
+    "done": "Done",
+    "quantity": "Pieces delivered",
+    "note": "Note (optional)",
+    "saved": "Delivery recorded.",
+    "pieces_one": "{{count}} piece",
+    "pieces_other": "{{count}} pieces",
+    "undo": "Undo delivery"
+  },
+  "workingNow": {
+    "title": "Working now",
+    "subtitle": "Who is on which task right now, in business hours.",
+    "tabs": {
+      "now": "Now",
+      "history": "History"
+    },
+    "live": "Live",
+    "polling": "Refreshing every 30 seconds",
+    "count_one": "{{count}} person working",
+    "count_other": "{{count}} people working",
+    "empty": "Nobody has an active task right now",
+    "emptyText": "When someone clicks “I'm on it”, they show up here instantly.",
+    "person": "Person",
+    "task": "Task",
+    "elapsed": "Business time",
+    "started": "Started",
+    "idle_one": "No active task ({{count}})",
+    "idle_other": "No active task ({{count}})",
+    "lastSeen": "last activity {{when}}",
+    "never": "no entries",
+    "from": "From",
+    "to": "To",
+    "total": "Total in period:",
+    "noHistory": "No time entries in this period.",
+    "when": "When",
+    "business": "Business hours",
+    "adjustmentsLink": "See time adjustment requests"
+  },
+  "approvals": {
+    "title": "Time adjustments",
+    "subtitle": "Team requests to fix tracked time. They only count in reports once approved.",
+    "subtitleMine": "Your requests to fix tracked time. Request one from the task drawer, in the Time section.",
+    "tabs": {
+      "pending": "Pending",
+      "reviewed": "Reviewed",
+      "mine": "My requests"
+    },
+    "empty": {
+      "pending": "No pending requests",
+      "reviewed": "No reviewed requests yet",
+      "mine": "You haven't requested adjustments yet"
+    },
+    "emptyMineText": "Open a task and use “Request time adjustment” in the Time section.",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "reviewedBy": "Reviewed by {{name}} on {{when}}",
+    "note": "Note",
+    "notePlaceholder": "Note (optional)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approved": "Adjustment approved.",
+    "rejected": "Adjustment rejected."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Workspace rules: hours, productivity, branding, AI and integrations.",
+    "section": "Section",
+    "catalogsLink": "Catalogs (types, columns, reasons…) →",
+    "saved": "Settings saved.",
+    "tabs": {
+      "operation": "Operation",
+      "productivity": "Productivity",
+      "branding": "Branding",
+      "ai": "AI assistant",
+      "api-keys": "API keys"
+    },
+    "help": {
+      "operation": "Time zone, default business hours and the deadlines that trigger alerts.",
+      "productivity": "Scoring weights for the team and highlight of the month.",
+      "branding": "Colors and logo used in the app and the client portal.",
+      "ai": "OpenAI-compatible provider for the chat assistant.",
+      "api-keys": "Keys for the public API (/api/v1). Each key acts with its creator's permissions."
+    },
+    "operation": {
+      "timezone": "Time zone",
+      "sla": "Client chase SLA (business h)",
+      "slaHint": "A card in “Waiting for client” longer than this alerts the account manager.",
+      "idle": "Idle card (hours)",
+      "idleHint": "Used in the account management penalty.",
+      "hours": "Default business hours",
+      "hoursHint": "Applies to anyone without their own hours. “I'm on it” time only counts inside them, excluding holidays and days off."
+    },
+    "productivity": {
+      "production": "Production",
+      "accountManagement": "Account management",
+      "note": "Scores appear in the productivity reports (Phase 8).",
+      "fields": {
+        "production": {
+          "perPiece": "Per piece delivered",
+          "perBusinessHour": "Per business hour",
+          "onTimeBonus": "On-time bonus",
+          "reworkPenalty": "Rework penalty"
+        },
+        "accountManagement": {
+          "perClientChase": "Per client chase",
+          "perShootBooked": "Per shoot booked",
+          "perPiece": "Per piece delivered",
+          "perIdleCard": "Per idle card",
+          "idleCardPenaltyCap": "Idle card penalty cap"
+        }
+      }
+    },
+    "branding": {
+      "primaryColor": "Primary color",
+      "secondaryColor": "Secondary color",
+      "chatColor": "Chat color",
+      "logo": "Logo",
+      "favicon": "Icon (favicon)",
+      "upload": "Upload image",
+      "imageOnly": "Upload an image (PNG, JPG, SVG or WebP).",
+      "note": "The primary color updates the app right away for the whole team."
+    },
+    "ai": {
+      "enabled": "Enable the AI assistant",
+      "name": "Assistant name",
+      "model": "Model",
+      "modelHint": "e.g. gpt-4o-mini",
+      "baseUrl": "Base URL (optional)",
+      "baseUrlHint": "Empty = platform default provider.",
+      "key": "API key",
+      "keySet": "Key configured. Leave empty to keep it.",
+      "keyMissing": "No key configured.",
+      "clearKey": "Delete the saved key",
+      "note": "The key is stored encrypted and is never shown again. AI chat arrives in Phase 6."
+    },
+    "apiKeys": {
+      "new": "New key",
+      "newHelp": "Give it a name that reminds you where it's used (e.g. Zapier).",
+      "name": "Name",
+      "prefix": "Prefix",
+      "createdBy": "Created by",
+      "lastUsed": "Last used",
+      "expires": "Expires",
+      "expiresOptional": "Expires (optional)",
+      "noExpiry": "no expiry",
+      "never": "never",
+      "create": "Create key",
+      "createdTitle": "Copy your key now",
+      "createdHelp": "For security it won't be shown again. If you lose it, revoke it and create another.",
+      "copy": "Copy",
+      "copied": "Key copied.",
+      "done": "Done",
+      "empty": "No API keys",
+      "emptyText": "Create a key to integrate Rec PM with other tools.",
+      "note": "Send it in the header Authorization: Bearer pk_live_…. The full public API (docs and webhooks) arrives in Phase 9.",
+      "revoke": "Revoke {{name}}",
+      "revokeTitle": "Revoke key?",
+      "revokeText": "Integrations using “{{name}}” stop working immediately.",
+      "revokeConfirm": "Revoke",
+      "revoked": "Key revoked."
     }
   }
 }
