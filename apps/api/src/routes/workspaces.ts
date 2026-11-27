@@ -1,15 +1,17 @@
 /**
- * Workspaces (tenants): criação no cadastro e dados do workspace ativo.
+ * Workspaces (tenants): criação no cadastro, dados do workspace ativo e exclusão (LGPD).
  * A criação é UMA transação: tenant + vínculo admin + catálogos padrão + trial + contador de uso.
+ * A exclusão apaga o tenant (todas as tabelas com tenant_id caem em cascata) e os arquivos do bucket.
  */
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { schema, withTenant } from "@recpm/db";
 import { seedTenantDefaults, TRIAL_PLAN_SLUG } from "@recpm/db/seed";
 import { createWorkspaceSchema, TRIAL_DAYS } from "@recpm/shared";
-import { eq } from "drizzle-orm";
+import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { uuidv7 } from "uuidv7";
 import type { Deps } from "../deps";
 import { AppError, isUniqueViolation } from "../lib/errors";
+import { createStorage } from "../lib/storage";
 import { requireSession } from "../middleware/session";
 import { requireTenant } from "../middleware/tenant";
 import type { AppEnv } from "../types";
@@ -56,6 +58,27 @@ const currentWorkspace = createRoute({
   tags: ["Workspaces"],
   summary: "Workspace ativo da sessão",
   responses: { 200: { description: "OK", content: { "application/json": { schema: Workspace } } } },
+});
+
+const deleteWorkspace = createRoute({
+  method: "delete",
+  path: "/workspace",
+  tags: ["Workspaces"],
+  summary: "Exclui o workspace ativo e todos os dados dele (só admin; irreversível)",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({ confirmSlug: z.string().min(1) }).openapi("DeleteWorkspace"),
+        },
+      },
+      required: true,
+    },
+  },
+  responses: {
+    204: { description: "Excluído" },
+    409: { description: "Assinatura paga ativa", content: { "application/json": { schema: ErrorBody } } },
+  },
 });
 
 export const workspaceRoutes = (deps: Deps) => {
@@ -135,5 +158,60 @@ export const workspaceRoutes = (deps: Deps) => {
         },
         200,
       );
+    })
+    .openapi(deleteWorkspace, async (c) => {
+      const { tenantId, userId, role } = c.var.tenant;
+      if (role !== "admin")
+        throw new AppError(403, "FORBIDDEN", "Só o administrador pode excluir o workspace.");
+      const db = deps.dbs.platformDb;
+      const [t] = await db.select().from(schema.tenants).where(eq(schema.tenants.id, tenantId));
+      if (!t) throw new AppError(404, "NOT_FOUND", "Workspace não encontrado.");
+      if (c.req.valid("json").confirmSlug.trim().toLowerCase() !== t.slug)
+        throw new AppError(400, "CONFIRMATION_MISMATCH", "Digite o endereço do workspace para confirmar.");
+      const [sub] = await db
+        .select()
+        .from(schema.tenantSubscriptions)
+        .where(
+          and(
+            eq(schema.tenantSubscriptions.tenantId, tenantId),
+            isNotNull(schema.tenantSubscriptions.providerSubscriptionId),
+            inArray(schema.tenantSubscriptions.status, ["active", "past_due"]),
+          ),
+        );
+      if (sub)
+        throw new AppError(
+          409,
+          "SUBSCRIPTION_ACTIVE",
+          "Cancele a assinatura em Configurações › Plano antes de excluir o workspace.",
+        );
+      const keys = (
+        await db
+          .select({ key: schema.files.storageKey })
+          .from(schema.files)
+          .where(eq(schema.files.tenantId, tenantId))
+      ).map((f) => f.key);
+      await db.transaction(async (tx) => {
+        await tx.insert(schema.platformAuditLogs).values({
+          actorId: userId,
+          action: "tenant.delete",
+          details: { tenantId, name: t.name, slug: t.slug, files: keys.length },
+          ip: c.req.header("x-forwarded-for")?.split(",")[0]?.trim() || null,
+        });
+        await tx.delete(schema.tenants).where(eq(schema.tenants.id, tenantId));
+      });
+      // Arquivos: depois do banco (se algo falhar aqui, o dado já não é acessível; o log registra)
+      const storage = deps.storage === undefined ? createStorage(deps.env) : deps.storage;
+      if (storage && keys.length) {
+        const queue = [...keys];
+        const worker = async () => {
+          for (let k = queue.pop(); k; k = queue.pop())
+            await storage
+              .remove(k)
+              .catch((err) => deps.logger.error({ err, key: k }, "falha ao apagar arquivo"));
+        };
+        await Promise.all(Array.from({ length: 8 }, worker));
+      }
+      deps.logger.info({ tenantId, files: keys.length }, "workspace excluído");
+      return c.body(null, 204);
     });
 };

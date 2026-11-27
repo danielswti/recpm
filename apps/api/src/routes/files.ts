@@ -2,8 +2,10 @@
  * Upload de arquivos (§6.2 aba Arquivos, anexos de tarefa): URL pré-assinada → o navegador envia
  * direto ao bucket → `complete` confirma. Só arquivos `clean` podem ser baixados.
  *
- * Antivírus: o ClamAV no worker entra com a fila de varredura; enquanto não há scanner configurado,
- * o arquivo confirmado é marcado `clean` na hora.
+ * Antivírus: com CLAMAV_HOST, o `complete` passa o objeto pelo ClamAV antes de liberar. Infectado →
+ * apaga do bucket e marca `infected`; clamd fora do ar → `error` (o usuário pode tentar de novo).
+ * Arquivos acima de 512 MB (vídeos brutos) e instalações sem ClamAV ficam `clean` sem varredura;
+ * a lista de extensões bloqueadas vale sempre.
  */
 import { createRoute, z } from "@hono/zod-openapi";
 import { schema } from "@recpm/db";
@@ -12,6 +14,7 @@ import { and, eq, isNull, sql } from "drizzle-orm";
 import { uuidv7 } from "uuidv7";
 import type { Deps } from "../deps";
 import { teamOnly } from "../lib/actor";
+import { createClamdScanner, noScanner } from "../lib/antivirus";
 import { AppError } from "../lib/errors";
 import { router } from "../lib/router";
 import { createStorage, type Storage } from "../lib/storage";
@@ -37,7 +40,10 @@ const FileInfo = z
   .openapi("FileInfo");
 
 /** Tipos que nunca aceitamos (executáveis e scripts). */
-const BLOCKED = /\.(exe|bat|cmd|com|msi|scr|ps1|vbs|js|jar|sh|dll|apk)$/i;
+export const BLOCKED_FILE =
+  /\.(exe|bat|cmd|com|msi|msp|scr|pif|cpl|hta|ps1|psm1|vbs|vbe|wsf|wsh|js|jse|jar|sh|dll|apk|lnk|reg)$/i;
+const BLOCKED_MIME =
+  /^application\/(x-msdownload|x-msdos-program|x-sh|java-archive|vnd\.android\.package-archive)$/i;
 
 export const fileRoutes = (deps: Deps) => {
   const r = router();
@@ -49,6 +55,10 @@ export const fileRoutes = (deps: Deps) => {
       throw new AppError(503, "STORAGE_DISABLED", "Upload de arquivos não configurado. Use um link externo.");
     return storage;
   };
+
+  const scanner =
+    deps.scanner ??
+    (deps.env.CLAMAV_HOST ? createClamdScanner(deps.env.CLAMAV_HOST, deps.env.CLAMAV_PORT) : noScanner);
 
   return r
     .openapi(
@@ -72,7 +82,7 @@ export const fileRoutes = (deps: Deps) => {
       }),
       async (c) => {
         const b = c.req.valid("json");
-        if (BLOCKED.test(b.name))
+        if (BLOCKED_FILE.test(b.name) || BLOCKED_MIME.test(b.mimeType))
           throw new AppError(400, "FILE_TYPE_BLOCKED", "Este tipo de arquivo não é aceito.");
         const st = store();
         const { tenantId, userId } = c.var.tenant;
@@ -133,13 +143,42 @@ export const fileRoutes = (deps: Deps) => {
         });
         const head = await st.head(file.storageKey);
         if (!head) throw new AppError(409, "UPLOAD_NOT_FOUND", "O envio do arquivo não terminou.");
+        if (head.sizeBytes > file.sizeBytes)
+          throw new AppError(409, "UPLOAD_SIZE_MISMATCH", "O arquivo enviado é maior que o informado.");
+        let scanStatus: "clean" | "infected" | "error" = "clean";
+        if (file.scanStatus !== "clean" && head.sizeBytes <= scanner.maxBytes) {
+          try {
+            const body = await st.stream(file.storageKey);
+            const r = body ? await scanner.scan(body) : { status: "skipped" as const, reason: "vazio" };
+            if (r.status === "infected") {
+              scanStatus = "infected";
+              deps.logger.warn({ fileId: id, signature: r.signature }, "upload infectado removido");
+              await st.remove(file.storageKey);
+            }
+          } catch (err) {
+            deps.logger.error({ err, fileId: id }, "antivírus indisponível");
+            scanStatus = "error";
+          }
+        }
         const [f] = await c.var.tenant.tx((tx) =>
           tx
             .update(s.files)
-            .set({ sizeBytes: head.sizeBytes, scanStatus: "clean" })
+            .set({ sizeBytes: head.sizeBytes, scanStatus })
             .where(eq(s.files.id, id))
             .returning(),
         );
+        if (scanStatus === "infected")
+          throw new AppError(
+            422,
+            "FILE_INFECTED",
+            "O antivírus encontrou uma ameaça neste arquivo. Ele foi descartado.",
+          );
+        if (scanStatus === "error")
+          throw new AppError(
+            503,
+            "SCAN_UNAVAILABLE",
+            "Não foi possível verificar o arquivo agora. Tente de novo em instantes.",
+          );
         return c.json(
           {
             id: f!.id,

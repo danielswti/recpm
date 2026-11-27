@@ -3,10 +3,12 @@ import { Button, cn } from "@recpm/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Maximize2, MessageCircle, X } from "lucide-react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { badgeCount, conversationsQuery } from "../../lib/comms";
-import { ChatPanel } from "./chat-panel";
+
+// O painel só carrega quando o chat abre (fora do JS inicial das páginas)
+const ChatPanel = lazy(() => import("./chat-panel").then((m) => ({ default: m.ChatPanel })));
 
 export function ChatWidget() {
   const { t } = useTranslation();
@@ -46,7 +48,9 @@ export function ChatWidget() {
             </Button>
           </div>
           <div className="min-h-0 flex-1">
-            <ChatPanel compact activeId={active} onSelect={setActive} />
+            <Suspense fallback={null}>
+              <ChatPanel compact activeId={active} onSelect={setActive} />
+            </Suspense>
           </div>
         </section>
       )}

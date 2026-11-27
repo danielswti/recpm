@@ -1353,7 +1353,7 @@
       "ai": "Assistente de IA",
       "api-keys": "Chaves de API",
       "webhooks": "Webhooks",
-      "exports": "Exportação e backup"
+      "exports": "Exportação e LGPD"
     },
     "help": {
       "operation": "Fuso, horário comercial padrão e prazos que disparam avisos.",
@@ -1362,7 +1362,7 @@
       "ai": "Provedor compatível com OpenAI para o assistente do chat.",
       "api-keys": "Chaves para a API pública (/api/v1). Cada chave age com as permissões de quem a criou.",
       "webhooks": "Avise outros sistemas quando algo acontece no Rec PM (plano Enterprise).",
-      "exports": "Baixe todos os dados do workspace em JSON ou CSV, agora ou com agenda."
+      "exports": "Baixe todos os dados do workspace em JSON ou CSV, agora ou com agenda, ou exclua o workspace."
     },
     "operation": {
       "timezone": "Fuso horário",
@@ -1510,7 +1510,14 @@
         "running": "Gerando",
         "succeeded": "Pronta",
         "failed": "Falhou"
-      }
+      },
+      "deleteTitle": "Excluir o workspace",
+      "deleteHelp": "Apaga para sempre todos os projetos, tarefas, clientes, arquivos e o financeiro deste workspace (LGPD). Exporte os dados antes. As contas das pessoas continuam existindo.",
+      "deleteButton": "Excluir workspace",
+      "deleteConfirmTitle": "Excluir {{name}} para sempre?",
+      "deleteConfirmText": "Não dá para desfazer. Digite {{slug}} para confirmar.",
+      "deleteSlug": "Endereço do workspace",
+      "deleted": "Workspace excluído."
     }
   },
   "notifications": {

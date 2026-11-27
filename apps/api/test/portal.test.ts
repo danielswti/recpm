@@ -16,6 +16,8 @@ const storage: Storage = {
   head: async (key) => (objects.has(key) ? { sizeBytes: objects.get(key)!.byteLength } : null),
   get: async (key) => objects.get(key) ?? null,
   put: async (key, body) => void objects.set(key, body),
+  stream: async () => null,
+  remove: async () => {},
 };
 const { app, mailer, urls } = setupApp({ storage });
 const owner = new Pool({ connectionString: urls.owner });

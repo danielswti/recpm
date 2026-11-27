@@ -842,11 +842,13 @@ export const portalRoutes = (deps: Deps) => {
           if (!storage) throw new AppError(503, "STORAGE_UNAVAILABLE", "Armazenamento indisponível.");
           const [f] = await mine(c, (tx) =>
             tx
-              .select({ key: s.files.storageKey, name: s.files.originalName })
+              .select({ key: s.files.storageKey, name: s.files.originalName, scan: s.files.scanStatus })
               .from(s.files)
               .where(and(eq(s.files.id, id), isNull(s.files.deletedAt))),
           );
           if (!f) throw new AppError(404, "FILE_NOT_FOUND", "Arquivo não encontrado.");
+          if (f.scan !== "clean")
+            throw new AppError(409, "FILE_NOT_READY", "Este arquivo não está disponível para download.");
           return c.redirect(await storage.presignDownload(f.key, f.name), 302);
         },
       )

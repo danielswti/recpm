@@ -160,3 +160,10 @@ vite.config.ts.timestamp-*
 !.env.example
 *.tsbuildinfo
 dump.rdb
+
+# Fase 10
+apps/e2e/test-results/
+apps/e2e/playwright-report/
+infra/prod/.env
+infra/prod/backups/
+*.dump

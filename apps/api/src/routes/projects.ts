@@ -200,26 +200,8 @@ export const projectVisibleTo = (actor: Actor): SQL | undefined =>
       );
 
 async function list(tx: AppTx, where: SQL | undefined, page = 1, pageSize = 1000) {
-  const stats = tx
-    .select({
-      projectId: s.tasks.projectId,
-      total: sql<number>`count(*)`.as("ts_total"),
-      done: sql<number>`count(*) filter (where ${s.tasks.completedAt} is not null)`.as("ts_done"),
-      overdue:
-        sql<number>`count(*) filter (where ${s.tasks.completedAt} is null and ${s.tasks.deadline} < now())`.as(
-          "ts_overdue",
-        ),
-    })
-    .from(s.tasks)
-    .where(and(isNull(s.tasks.deletedAt), eq(s.tasks.archived, false)))
-    .groupBy(s.tasks.projectId)
-    .as("ts");
-  const members = tx
-    .select({ projectId: s.projectMembers.projectId, n: sql<number>`count(*)`.as("pm_n") })
-    .from(s.projectMembers)
-    .groupBy(s.projectMembers.projectId)
-    .as("pmc");
-
+  // Página primeiro; contagens de tarefas e membros só para os projetos da página.
+  const cond = and(isNull(s.projects.deletedAt), where);
   const rows = await tx
     .select({
       p: s.projects,
@@ -228,40 +210,64 @@ async function list(tx: AppTx, where: SQL | undefined, page = 1, pageSize = 1000
       typeLabel: s.projectTypes.label,
       managerName: s.users.name,
       managerImage: s.users.image,
-      total: stats.total,
-      done: stats.done,
-      overdue: stats.overdue,
-      memberCount: members.n,
-      count: sql<number>`count(*) over ()`,
     })
     .from(s.projects)
     .leftJoin(s.clients, eq(s.clients.id, s.projects.clientId))
     .leftJoin(s.projectTypes, eq(s.projectTypes.id, s.projects.typeId))
     .leftJoin(s.users, eq(s.users.id, s.projects.managerId))
-    .leftJoin(stats, eq(stats.projectId, s.projects.id))
-    .leftJoin(members, eq(members.projectId, s.projects.id))
-    .where(and(isNull(s.projects.deletedAt), where))
+    .where(cond)
     .orderBy(sql`${s.projects.deliveryDeadline} asc nulls last`, asc(s.projects.name))
     .limit(pageSize)
     .offset((page - 1) * pageSize);
 
   const ids = rows.map((r) => r.p.id);
-  const tagRows = ids.length
-    ? await tx
-        .select({
-          projectId: s.projectTagLinks.projectId,
-          id: s.projectTags.id,
-          name: s.projectTags.name,
-          color: s.projectTags.color,
-        })
-        .from(s.projectTagLinks)
-        .innerJoin(s.projectTags, eq(s.projectTags.id, s.projectTagLinks.projectTagId))
-        .where(inArray(s.projectTagLinks.projectId, ids))
-        .orderBy(asc(s.projectTags.position))
-    : [];
+  const total =
+    rows.length < pageSize && (page === 1 || rows.length > 0)
+      ? (page - 1) * pageSize + rows.length
+      : Number(
+          (
+            await tx
+              .select({ n: sql<number>`count(*)` })
+              .from(s.projects)
+              .leftJoin(s.clients, eq(s.clients.id, s.projects.clientId))
+              .where(cond)
+          )[0]?.n ?? 0,
+        );
+  const [tagRows, statRows, memberRows] = ids.length
+    ? await Promise.all([
+        tx
+          .select({
+            projectId: s.projectTagLinks.projectId,
+            id: s.projectTags.id,
+            name: s.projectTags.name,
+            color: s.projectTags.color,
+          })
+          .from(s.projectTagLinks)
+          .innerJoin(s.projectTags, eq(s.projectTags.id, s.projectTagLinks.projectTagId))
+          .where(inArray(s.projectTagLinks.projectId, ids))
+          .orderBy(asc(s.projectTags.position)),
+        tx
+          .select({
+            projectId: s.tasks.projectId,
+            total: sql<number>`count(*)`,
+            done: sql<number>`count(*) filter (where ${s.tasks.completedAt} is not null)`,
+            overdue: sql<number>`count(*) filter (where ${s.tasks.completedAt} is null and ${s.tasks.deadline} < now())`,
+          })
+          .from(s.tasks)
+          .where(and(inArray(s.tasks.projectId, ids), isNull(s.tasks.deletedAt), eq(s.tasks.archived, false)))
+          .groupBy(s.tasks.projectId),
+        tx
+          .select({ projectId: s.projectMembers.projectId, n: sql<number>`count(*)` })
+          .from(s.projectMembers)
+          .where(inArray(s.projectMembers.projectId, ids))
+          .groupBy(s.projectMembers.projectId),
+      ])
+    : [[], [], []];
+  const stats = new Map(statRows.map((x) => [x.projectId, x]));
+  const memberCount = new Map(memberRows.map((x) => [x.projectId, Number(x.n)]));
 
   return {
-    total: Number(rows[0]?.count ?? 0),
+    total,
     data: rows.map(({ p, ...r }) => ({
       id: p.id,
       name: p.name,
@@ -278,8 +284,12 @@ async function list(tx: AppTx, where: SQL | undefined, page = 1, pageSize = 1000
       clientDeliveryDate: p.clientDeliveryDate,
       manager: p.managerId ? { id: p.managerId, name: r.managerName ?? "", image: r.managerImage } : null,
       tags: tagRows.filter((t) => t.projectId === p.id).map(({ projectId: _, ...t }) => t),
-      memberCount: Number(r.memberCount ?? 0),
-      tasks: { total: Number(r.total ?? 0), done: Number(r.done ?? 0), overdue: Number(r.overdue ?? 0) },
+      memberCount: memberCount.get(p.id) ?? 0,
+      tasks: {
+        total: Number(stats.get(p.id)?.total ?? 0),
+        done: Number(stats.get(p.id)?.done ?? 0),
+        overdue: Number(stats.get(p.id)?.overdue ?? 0),
+      },
       archived: p.archived,
       createdAt: p.createdAt.toISOString(),
       _row: p,

@@ -20,6 +20,7 @@ import { defaultStatements } from "better-auth/plugins/organization/access";
 import { and, desc, eq } from "drizzle-orm";
 import { uuidv7 } from "uuidv7";
 import type { Deps } from "../deps";
+import { createLockout } from "../lib/lockout";
 import { hashPassword, verifyPassword } from "../lib/password";
 import { redisSecondaryStorage } from "../lib/redis";
 import { invitationEmail, resetPasswordEmail, verifyEmailEmail } from "./emails";
@@ -41,6 +42,7 @@ export const orgRoles = {
 
 export const createAuth = (deps: Deps) => {
   const { env, dbs, mailer, redis } = deps;
+  const lockout = createLockout(redis);
 
   const roleOf = async (tenantId: string, userId: string) => {
     const [m] = await dbs.authDb
@@ -94,6 +96,9 @@ export const createAuth = (deps: Deps) => {
       database: { generateId: () => uuidv7() },
       cookiePrefix: "recpm",
       useSecureCookies: env.NODE_ENV === "production",
+      // Atrás do Caddy: ele sobrescreve o X-Forwarded-For com o IP real (não confia no que vem do
+      // cliente), então o limite de tentativas de login vale por IP.
+      ipAddress: { ipAddressHeaders: ["x-forwarded-for"] },
     },
     user: {
       modelName: "users",
@@ -174,6 +179,14 @@ export const createAuth = (deps: Deps) => {
     },
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path === "/sign-in/email" && typeof ctx.body?.email === "string") {
+          const wait = await lockout.lockedFor(ctx.body.email);
+          if (wait > 0)
+            throw new APIError("TOO_MANY_REQUESTS", {
+              code: "ACCOUNT_LOCKED",
+              message: `Muitas tentativas de login. Tente de novo em ${Math.ceil(wait / 60)} min ou redefina a senha.`,
+            });
+        }
         if (ctx.path === "/sign-up/email" && ctx.body?.acceptTerms !== true) {
           throw new APIError("BAD_REQUEST", {
             code: "TERMS_NOT_ACCEPTED",
@@ -181,8 +194,14 @@ export const createAuth = (deps: Deps) => {
           });
         }
       }),
-      // Auditoria da personificação pelo super_admin (início e fim), com IP.
+      // Contador do bloqueio por conta e auditoria da personificação pelo super_admin (com IP).
       after: createAuthMiddleware(async (ctx) => {
+        if (ctx.path === "/sign-in/email" && typeof ctx.body?.email === "string") {
+          const r = ctx.context.returned;
+          if (r instanceof APIError && r.statusCode === 401) await lockout.fail(ctx.body.email);
+          else if (!(r instanceof Error)) await lockout.reset(ctx.body.email);
+          return;
+        }
         if (ctx.path !== "/admin/impersonate-user" && ctx.path !== "/admin/stop-impersonating") return;
         if (ctx.context.returned instanceof Error) return;
         const actorId = ctx.context.session?.session.impersonatedBy ?? ctx.context.session?.user.id ?? null;

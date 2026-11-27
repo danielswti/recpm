@@ -14,6 +14,8 @@ const fakeStorage: Storage = {
   head: async (key) => (objects.has(key) ? { sizeBytes: objects.get(key)! } : null),
   get: async () => null,
   put: async () => {},
+  stream: async () => null,
+  remove: async () => {},
 };
 
 const { app, mailer, urls, dbs } = setupApp({ storage: fakeStorage });

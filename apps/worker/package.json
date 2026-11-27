@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
-    "build": "tsup src/index.ts --format esm --target node22 --out-dir dist",
+    "build": "tsup",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@recpm/core": "workspace:*",
     "@recpm/db": "workspace:*",
+    "@sentry/node": "^10.78.0",
     "bullmq": "^6.7.10",
     "ioredis": "^6.1.0",
     "pino": "^10.4.0"

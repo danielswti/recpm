@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { authClient, ba } from "../lib/auth-client";
 import { errorMessage } from "../lib/errors";
-import { LOCALES } from "../lib/i18n";
+import { LOCALES, setLanguage } from "../lib/i18n";
 import { portalHomeQuery } from "../lib/portal";
 
 export const Route = createFileRoute("/cliente/perfil")({ component: PortalProfile });
@@ -117,7 +117,7 @@ function PortalProfile() {
               variant="outline"
               size="sm"
               className={cn(i18n.language === l.code && "border-primary text-primary")}
-              onClick={() => i18n.changeLanguage(l.code)}
+              onClick={() => void setLanguage(l.code)}
             >
               {l.label}
             </Button>

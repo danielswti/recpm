@@ -1,6 +1,7 @@
 /**
  * Abas de Configurações da Fase 9: webhooks de saída (§6.13, plano Enterprise) e exportação de
- * dados (§6.14: exportar agora, agenda a cada N dias, lista de downloads e aviso por webhook).
+ * dados (§6.14: exportar agora, agenda a cada N dias, lista de downloads e aviso por webhook) e
+ * exclusão do workspace (LGPD, só admin).
  */
 import {
   Badge,
@@ -26,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { api, unwrap, unwrapVoid } from "../../lib/api";
 import { errorMessage } from "../../lib/errors";
+import { meQuery, workspaceQuery } from "../../lib/queries";
 import { useUpgradeModal } from "../../lib/upgrade-modal";
 import { ConfirmDialog } from "../confirm-dialog";
 
@@ -476,7 +478,74 @@ export function ExportsTab() {
           </Card>
         )}
       </section>
+      <DeleteWorkspace />
     </div>
+  );
+}
+
+function DeleteWorkspace() {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const me = useQuery(meQuery).data;
+  const ws = useQuery(workspaceQuery).data;
+  const [open, setOpen] = useState(false);
+  const [slug, setSlug] = useState("");
+  const del = useMutation({
+    mutationFn: () => unwrapVoid(api.workspace.$delete({ json: { confirmSlug: slug } })),
+    onSuccess: () => {
+      toast.success(t("settings.exports.deleted"));
+      qc.clear();
+      window.location.assign("/");
+    },
+    onError: (e) => toast.error(errorMessage(t, e)),
+  });
+  if (me?.tenant?.role !== "admin" || !ws) return null;
+  return (
+    <Card className="grid gap-3 border-destructive/40 p-4">
+      <h3 className="font-semibold text-destructive">{t("settings.exports.deleteTitle")}</h3>
+      <p className="text-sm text-muted-foreground">{t("settings.exports.deleteHelp")}</p>
+      <Button variant="destructive" className="w-fit" onClick={() => setOpen(true)}>
+        <Trash2 /> {t("settings.exports.deleteButton")}
+      </Button>
+      <Dialog open={open} onOpenChange={(o) => !o && setOpen(false)}>
+        <DialogContent closeLabel={t("common.cancel")}>
+          <form
+            className="grid gap-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              del.mutate();
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>{t("settings.exports.deleteConfirmTitle", { name: ws.name })}</DialogTitle>
+              <DialogDescription>
+                {t("settings.exports.deleteConfirmText", { slug: ws.slug })}
+              </DialogDescription>
+            </DialogHeader>
+            <Field id="del-slug" label={t("settings.exports.deleteSlug")}>
+              <Input
+                id="del-slug"
+                autoComplete="off"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+              />
+            </Field>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+                {t("common.cancel")}
+              </Button>
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={slug.trim().toLowerCase() !== ws.slug || del.isPending}
+              >
+                {t("settings.exports.deleteButton")}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 }
 

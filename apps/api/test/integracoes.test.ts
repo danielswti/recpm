@@ -19,6 +19,8 @@ const storage: Storage = {
   head: async (key) => (objects.has(key) ? { sizeBytes: objects.get(key)!.byteLength } : null),
   get: async (key) => objects.get(key) ?? null,
   put: async (key, body) => void objects.set(key, body),
+  stream: async () => null,
+  remove: async () => {},
 };
 
 type Sent = { url: string; headers: Record<string, string>; body: string };

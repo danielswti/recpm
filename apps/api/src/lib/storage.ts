@@ -2,7 +2,13 @@
  * Armazenamento de arquivos (S3 compatível: R2 em produção, MinIO em dev). O binário vai direto do
  * navegador para o bucket por URL pré-assinada; a API só guarda metadados (tabela `files`).
  */
-import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { Env } from "../env";
 
@@ -21,6 +27,10 @@ export type Storage = {
   get(key: string): Promise<Uint8Array | null>;
   /** Grava um objeto gerado pela própria API (ex.: PDF assinado com certificado). */
   put(key: string, body: Uint8Array, mimeType: string): Promise<void>;
+  /** Lê o objeto em partes (antivírus; não carrega o arquivo inteiro na memória). */
+  stream(key: string): Promise<AsyncIterable<Uint8Array> | null>;
+  /** Apaga o objeto (arquivo infectado). */
+  remove(key: string): Promise<void>;
 };
 
 export const createStorage = (env: Env): Storage | null => {
@@ -66,6 +76,18 @@ export const createStorage = (env: Env): Storage | null => {
       await client.send(
         new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: mimeType }),
       );
+    },
+    async stream(key) {
+      try {
+        const r = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+        return (r.Body as AsyncIterable<Uint8Array> | undefined) ?? null;
+      } catch (e) {
+        if ((e as { name?: string }).name === "NoSuchKey") return null;
+        throw e;
+      }
+    },
+    async remove(key) {
+      await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
     },
     async head(key) {
       try {

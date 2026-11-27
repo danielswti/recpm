@@ -48,7 +48,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { authClient } from "../lib/auth-client";
 import { useUserStream } from "../lib/comms";
-import { LOCALES } from "../lib/i18n";
+import { LOCALES, setLanguage } from "../lib/i18n";
 import { pushSupported, registerServiceWorker } from "../lib/push";
 import type { Me } from "../lib/queries";
 import { ChatWidget } from "./chat/chat-widget";
@@ -322,7 +322,7 @@ function UserCard({ me, collapsed }: { me: Me; collapsed: boolean }) {
           <Languages className="size-3.5" /> {t("nav.language")}
         </DropdownMenuLabel>
         {LOCALES.map((l) => (
-          <DropdownMenuItem key={l.code} onSelect={() => i18n.changeLanguage(l.code)}>
+          <DropdownMenuItem key={l.code} onSelect={() => void setLanguage(l.code)}>
             <span className={cn("ml-6", i18n.language === l.code && "font-semibold text-primary")}>
               {l.label}
             </span>

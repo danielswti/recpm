@@ -1,0 +1,152 @@
+# Rec PM em produção (uma VPS). Uso: infra/prod/deploy.sh (ver infra/prod/README.md).
+# Só o Caddy publica portas (80/443). Banco, Valkey e API ficam na rede interna.
+name: recpm
+
+x-app-env: &app-env
+  NODE_ENV: production
+  API_URL: https://app.${SITE_DOMAIN}
+  WEB_URL: https://app.${SITE_DOMAIN}
+  DATABASE_URL_APP: postgres://recpm_app:${RECPM_APP_PASSWORD}@postgres:5432/recpm
+  DATABASE_URL_AUTH: postgres://recpm_auth:${RECPM_AUTH_PASSWORD}@postgres:5432/recpm
+  DATABASE_URL_PLATFORM: postgres://recpm_platform:${RECPM_PLATFORM_PASSWORD}@postgres:5432/recpm
+  REDIS_URL: redis://valkey:6379
+
+x-logging: &logging
+  driver: json-file
+  options: { max-size: "20m", max-file: "5" }
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina no .env}
+      POSTGRES_DB: recpm
+      RECPM_OWNER_PASSWORD: ${RECPM_OWNER_PASSWORD:?}
+      RECPM_APP_PASSWORD: ${RECPM_APP_PASSWORD:?}
+      RECPM_AUTH_PASSWORD: ${RECPM_AUTH_PASSWORD:?}
+      RECPM_PLATFORM_PASSWORD: ${RECPM_PLATFORM_PASSWORD:?}
+    # Ajustes para 4 vCPU / 8 GB (a VPS divide a memória com API, worker e Valkey)
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - shared_buffers=2GB
+      - -c
+      - effective_cache_size=5GB
+      - -c
+      - work_mem=16MB
+      - -c
+      - maintenance_work_mem=256MB
+      - -c
+      - max_connections=200
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - wal_compression=on
+      - -c
+      - log_min_duration_statement=500
+    shm_size: 1g
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d recpm"]
+      interval: 5s
+      retries: 20
+    logging: *logging
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    restart: unless-stopped
+    command:
+      ["valkey-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - valkeydata:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+    logging: *logging
+
+  # Job único: migra o schema, reaplica o RLS e garante os planos. O deploy roda antes da API.
+  migrate:
+    image: recpm-api:${RELEASE:-latest}
+    command: ["node", "dist/migrate.js"]
+    environment:
+      DATABASE_URL_OWNER: postgres://recpm_owner:${RECPM_OWNER_PASSWORD}@postgres:5432/recpm
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+    profiles: ["migrate"]
+    logging: *logging
+
+  api:
+    image: recpm-api:${RELEASE:-latest}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      <<: *app-env
+      SENTRY_RELEASE: ${RELEASE:-latest}
+      # processos da API (node:cluster); 3 em 4 vCPU deixa folga para o Postgres
+      API_WORKERS: ${API_WORKERS:-3}
+    depends_on:
+      postgres: { condition: service_healthy }
+      valkey: { condition: service_healthy }
+    logging: *logging
+
+  worker:
+    image: recpm-worker:${RELEASE:-latest}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      <<: *app-env
+      SENTRY_RELEASE: ${RELEASE:-latest}
+    depends_on:
+      postgres: { condition: service_healthy }
+      valkey: { condition: service_healthy }
+    logging: *logging
+
+  web:
+    image: recpm-web:${RELEASE:-latest}
+    restart: unless-stopped
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?defina no .env}
+      ACME_EMAIL: ${ACME_EMAIL:?defina no .env}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes:
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      api: { condition: service_healthy }
+    logging: *logging
+
+  # Antivírus dos uploads (opcional; usa ~1,5 GB de RAM). Ligue com CLAMAV_HOST=clamav no .env.
+  clamav:
+    image: clamav/clamav:1.4
+    restart: unless-stopped
+    environment:
+      CLAMD_CONF_StreamMaxLength: 520M
+    volumes:
+      - clamdata:/var/lib/clamav
+    profiles: ["antivirus"]
+    logging: *logging
+
+  # Monitor de disponibilidade opcional (UI em https://status.<domínio> se você publicar; ver README)
+  uptime:
+    image: louislam/uptime-kuma:1
+    restart: unless-stopped
+    volumes:
+      - uptimedata:/app/data
+    ports: ["127.0.0.1:3001:3001"]
+    profiles: ["monitoring"]
+    logging: *logging
+
+volumes:
+  pgdata:
+  valkeydata:
+  caddydata:
+  caddyconfig:
+  uptimedata:
+  clamdata:
