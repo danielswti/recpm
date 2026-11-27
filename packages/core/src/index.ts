@@ -38,6 +38,20 @@ export {
   todayIn,
 } from "./finance/service";
 export { runDeadlineReminders, sendDeadlineReminders } from "./notifications/reminders";
+export {
+  adjustmentsReport,
+  contractedDelivered,
+  DRILL_METRICS,
+  type DrillMetric,
+  deliveriesReport,
+  deliveryRows,
+  financialReport,
+  monthPeriod,
+  type Period,
+  periodBounds,
+  productivityDrill,
+  productivityReport,
+} from "./reports/service";
 export { rankBetween } from "./tasks/rank";
 export { nextOccurrence } from "./tasks/recurrence";
 export {

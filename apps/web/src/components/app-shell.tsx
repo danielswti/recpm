@@ -74,7 +74,12 @@ type NavItem = {
     | "/mensalidades"
     | "/trabalhando-agora"
     | "/aprovacoes"
-    | "/configuracoes";
+    | "/configuracoes"
+    | "/minha-produtividade"
+    | "/relatorios"
+    | "/produtividade"
+    | "/contratado-entregue"
+    | "/entregas";
   phase?: number;
   perm?: Permission;
 };
@@ -89,7 +94,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { key: "nav.tasks", icon: CheckSquare, to: "/tarefas", perm: "tasks.read" },
       { key: "nav.calendar", icon: CalendarDays, to: "/calendario", perm: "calendar.read" },
       { key: "nav.chat", icon: MessageCircle, to: "/chat", perm: "chat.use" },
-      { key: "nav.myProductivity", icon: Gauge, phase: 8, perm: "productivity.own" },
+      { key: "nav.myProductivity", icon: Gauge, to: "/minha-produtividade", perm: "productivity.own" },
     ],
   },
   {
@@ -97,10 +102,10 @@ const NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { key: "nav.finance", icon: Wallet, to: "/financeiro", perm: "finance.read" },
       { key: "nav.subscriptions", icon: Repeat, to: "/mensalidades", perm: "finance.read" },
-      { key: "nav.reports", icon: BarChart3, phase: 8, perm: "reports.read" },
-      { key: "nav.productivity", icon: TrendingUp, phase: 8, perm: "productivity.team" },
-      { key: "nav.contractedDelivered", icon: Scale, phase: 8, perm: "reports.read" },
-      { key: "nav.deliveries", icon: ListChecks, phase: 8, perm: "reports.read" },
+      { key: "nav.reports", icon: BarChart3, to: "/relatorios", perm: "reports.read" },
+      { key: "nav.productivity", icon: TrendingUp, to: "/produtividade", perm: "productivity.team" },
+      { key: "nav.contractedDelivered", icon: Scale, to: "/contratado-entregue", perm: "reports.read" },
+      { key: "nav.deliveries", icon: ListChecks, to: "/entregas", perm: "reports.read" },
       { key: "nav.clients", icon: Building2, to: "/clientes", perm: "clients.read" },
       { key: "nav.users", icon: Users, to: "/membros", perm: "members.read" },
       { key: "nav.workingNow", icon: Activity, to: "/trabalhando-agora", perm: "workingNow.view" },

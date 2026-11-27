@@ -26,6 +26,7 @@ import { memberRoutes } from "./routes/members";
 import { notificationRoutes } from "./routes/notifications";
 import { platformRoutes } from "./routes/platform";
 import { projectRoutes } from "./routes/projects";
+import { reportRoutes } from "./routes/reports";
 import { settingsRoutes } from "./routes/settings";
 import { signatureRoutes } from "./routes/signatures";
 import { taskRoutes } from "./routes/tasks";
@@ -118,6 +119,7 @@ export const createApp = (deps: Deps) => {
     .route("/api/v1", chatRoutes(rt))
     .route("/api/v1", financeRoutes(rt))
     .route("/api/v1", signatureRoutes(rt))
+    .route("/api/v1", reportRoutes(rt))
     .route("/api/v1", settingsRoutes(deps))
     .route("/api/v1", fileRoutes(deps));
 
