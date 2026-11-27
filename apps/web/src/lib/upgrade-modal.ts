@@ -5,6 +5,7 @@ import { AuthError } from "./auth-client";
 export const LIMIT_CODES = [
   "PLAN_TASK_LIMIT_REACHED",
   "PLAN_USER_LIMIT_REACHED",
+  "PLAN_STORAGE_LIMIT_REACHED",
   "FEATURE_NOT_IN_PLAN",
 ] as const;
 export type LimitCode = (typeof LIMIT_CODES)[number];
