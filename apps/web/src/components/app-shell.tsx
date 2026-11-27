@@ -70,6 +70,8 @@ type NavItem = {
     | "/tarefas"
     | "/calendario"
     | "/chat"
+    | "/financeiro"
+    | "/mensalidades"
     | "/trabalhando-agora"
     | "/aprovacoes"
     | "/configuracoes";
@@ -93,8 +95,8 @@ const NAV: { group: string; items: NavItem[] }[] = [
   {
     group: "nav.manage",
     items: [
-      { key: "nav.finance", icon: Wallet, phase: 7, perm: "finance.read" },
-      { key: "nav.subscriptions", icon: Repeat, phase: 7, perm: "finance.read" },
+      { key: "nav.finance", icon: Wallet, to: "/financeiro", perm: "finance.read" },
+      { key: "nav.subscriptions", icon: Repeat, to: "/mensalidades", perm: "finance.read" },
       { key: "nav.reports", icon: BarChart3, phase: 8, perm: "reports.read" },
       { key: "nav.productivity", icon: TrendingUp, phase: 8, perm: "productivity.team" },
       { key: "nav.contractedDelivered", icon: Scale, phase: 8, perm: "reports.read" },
@@ -210,7 +212,7 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
         </header>
         {me.impersonating && <ImpersonationBanner me={me} />}
         <PlanBanner canManage={perms.has("tenant.billing")} />
-        <main className="flex-1 p-4 pb-20 md:p-8 md:pb-24">{children}</main>
+        <main className="min-w-0 flex-1 p-4 pb-20 md:p-8 md:pb-24">{children}</main>
         {perms.has("chat.use") && <ChatWidget />}
         <UpgradeDialog canManage={perms.has("tenant.billing")} />
       </div>

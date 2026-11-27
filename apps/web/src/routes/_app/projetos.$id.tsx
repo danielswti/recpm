@@ -46,6 +46,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import { ConfirmDialog, textareaClass } from "../../components/confirm-dialog";
+import { ContractsTab } from "../../components/finance/contracts-tab";
+import { SignaturesTab } from "../../components/signatures/signatures-tab";
 import { ProjectFormDialog } from "../../components/work/project-form-dialog";
 import { isEmptyDoc, RichTextInput, RichTextView } from "../../components/work/rich-text";
 import { TaskBoard } from "../../components/work/task-board";
@@ -56,7 +58,7 @@ import { api, unwrap, unwrapVoid } from "../../lib/api";
 import { taskTypesQuery } from "../../lib/catalogs";
 import { errorMessage } from "../../lib/errors";
 import { money } from "../../lib/format";
-import { workspaceQuery } from "../../lib/queries";
+import { meQuery, workspaceQuery } from "../../lib/queries";
 import {
   calendarDate,
   downloadUrl,
@@ -70,7 +72,16 @@ import {
   uploadFile,
 } from "../../lib/work";
 
-const TABS = ["tarefas", "visao-geral", "comentarios", "fases", "marcos", "arquivos"] as const;
+const TABS = [
+  "tarefas",
+  "visao-geral",
+  "comentarios",
+  "fases",
+  "marcos",
+  "arquivos",
+  "financeiro",
+  "assinaturas",
+] as const;
 
 export const Route = createFileRoute("/_app/projetos/$id")({
   validateSearch: z.object({
@@ -88,6 +99,8 @@ function ProjectPage() {
   const navigate = useNavigate({ from: "/projetos/$id" });
   const qc = useQueryClient();
   const q = useQuery(projectQuery(id));
+  const { data: me } = useQuery(meQuery);
+  const canFinance = !!me?.tenant?.permissions.includes("finance.read");
   const [editing, setEditing] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -136,7 +149,7 @@ function ProjectPage() {
           <ArrowLeft className="size-4" /> {t("projects.title")}
         </Link>
         <div className="flex flex-wrap items-start gap-3">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-60 flex-1">
             <p className="text-sm text-muted-foreground">
               {p.client ? (
                 <Link to="/clientes/$id" params={{ id: p.client.id }} className="hover:underline">
@@ -234,7 +247,7 @@ function ProjectPage() {
       </div>
 
       <div role="tablist" className="mb-4 flex gap-1 overflow-x-auto border-b">
-        {TABS.map((k) => (
+        {TABS.filter((k) => k !== "financeiro" || canFinance).map((k) => (
           <Link
             key={k}
             role="tab"
@@ -260,6 +273,8 @@ function ProjectPage() {
       {tab === "fases" && <PhasesTab project={p} />}
       {tab === "marcos" && <MilestonesTab project={p} />}
       {tab === "arquivos" && <FilesTab projectId={id} />}
+      {tab === "financeiro" && canFinance && <ContractsTab projectId={id} hasClient={!!p.client} />}
+      {tab === "assinaturas" && <SignaturesTab projectId={id} />}
 
       <TaskDrawer
         taskId={search.task ?? null}
@@ -295,7 +310,7 @@ function TasksTab({ project, view }: { project: Project; view: "board" | "list" 
   const columns = useQuery(projectColumnsQuery(project.id));
   const open = (task: string) => void navigate({ search: (s) => ({ ...s, task }) });
   return (
-    <div className="grid gap-3">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
       <div className="flex flex-wrap items-center gap-2">
         {/* biome-ignore lint/a11y/useSemanticElements: grupo de botões de alternância */}
         <div className="flex rounded-md border p-0.5" role="group" aria-label={t("tasks.view")}>

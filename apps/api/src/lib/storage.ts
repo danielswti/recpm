@@ -17,6 +17,10 @@ export type Storage = {
   presignDownload(key: string, fileName: string): Promise<string>;
   /** Tamanho do objeto no bucket, ou null se ainda não existe. */
   head(key: string): Promise<{ sizeBytes: number } | null>;
+  /** Lê o objeto inteiro (usado para o hash e o PDF assinado; arquivos pequenos). */
+  get(key: string): Promise<Uint8Array | null>;
+  /** Grava um objeto gerado pela própria API (ex.: PDF assinado com certificado). */
+  put(key: string, body: Uint8Array, mimeType: string): Promise<void>;
 };
 
 export const createStorage = (env: Env): Storage | null => {
@@ -47,6 +51,20 @@ export const createStorage = (env: Env): Storage | null => {
           ResponseContentDisposition: `attachment; filename*=UTF-8''${safe}`,
         }),
         { expiresIn: 300 },
+      );
+    },
+    async get(key) {
+      try {
+        const r = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+        return r.Body ? new Uint8Array(await r.Body.transformToByteArray()) : null;
+      } catch (e) {
+        if ((e as { name?: string }).name === "NoSuchKey") return null;
+        throw e;
+      }
+    },
+    async put(key, body, mimeType) {
+      await client.send(
+        new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: mimeType }),
       );
     },
     async head(key) {

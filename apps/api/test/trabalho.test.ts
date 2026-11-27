@@ -12,6 +12,8 @@ const fakeStorage: Storage = {
   presignUpload: async (key) => ({ url: `https://bucket.test/${key}?sig=1`, headers: {} }),
   presignDownload: async (key) => `https://bucket.test/${key}?download=1`,
   head: async (key) => (objects.has(key) ? { sizeBytes: objects.get(key)! } : null),
+  get: async () => null,
+  put: async () => {},
 };
 
 const { app, mailer, urls, dbs } = setupApp({ storage: fakeStorage });

@@ -18,6 +18,9 @@ export const NOTIFICATION_TYPES = {
   ajuste_tempo_recusado: { email: false, push: true },
   mencao: { email: true, push: true },
   chat_mensagem: { email: false, push: true },
+  parcela_atrasada: { email: true, push: true },
+  assinatura_concluida: { email: true, push: true },
+  assinatura_recusada: { email: true, push: true },
 } as const satisfies Record<string, { email: boolean; push: boolean }>;
 export type NotificationType = keyof typeof NOTIFICATION_TYPES;
 export const NOTIFICATION_TYPE_KEYS = Object.keys(NOTIFICATION_TYPES) as NotificationType[];
@@ -117,6 +120,10 @@ export function notificationPath(referenceType: string | null, referenceId: stri
       return "/aprovacoes";
     case "conversation":
       return `/chat?c=${referenceId}`;
+    case "finance":
+      return "/financeiro";
+    case "signature":
+      return `/projetos/${referenceId}?tab=assinaturas`;
     default:
       return "/";
   }
