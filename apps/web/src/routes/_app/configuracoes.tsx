@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { ColorInput, ConfirmDialog } from "../../components/confirm-dialog";
 import { PageHeader } from "../../components/page-header";
+import { ExportsTab, WebhooksTab } from "../../components/settings/integrations";
 import { DAYS, type Week, WeekHoursEditor } from "../../components/week-hours";
 import { api, unwrap, unwrapVoid } from "../../lib/api";
 import { errorMessage } from "../../lib/errors";
@@ -35,7 +36,7 @@ import { meQuery } from "../../lib/queries";
 import { apiKeysQuery, settingsQuery, type WorkspaceSettings } from "../../lib/time";
 import { downloadUrl, uploadFile } from "../../lib/work";
 
-const TABS = ["operation", "productivity", "branding", "ai", "api-keys"] as const;
+const TABS = ["operation", "productivity", "branding", "ai", "api-keys", "webhooks", "exports"] as const;
 type Tab = (typeof TABS)[number];
 
 export const Route = createFileRoute("/_app/configuracoes")({
@@ -109,8 +110,12 @@ function Settings() {
             <Branding s={q.data} />
           ) : tab === "ai" ? (
             <Ai s={q.data} />
-          ) : (
+          ) : tab === "api-keys" ? (
             <ApiKeys />
+          ) : tab === "webhooks" ? (
+            <WebhooksTab />
+          ) : (
+            <ExportsTab />
           )}
         </section>
       </div>

@@ -76,6 +76,7 @@ export {
   type TaskRow,
   tenantTimezone,
 } from "./tasks/service";
+export { zonedToUtc } from "./tasks/zoned";
 export {
   businessMsBetween,
   isWithinBusinessHours,

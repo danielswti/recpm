@@ -21,6 +21,10 @@ export const NOTIFICATION_TYPES = {
   parcela_atrasada: { email: true, push: true },
   assinatura_concluida: { email: true, push: true },
   assinatura_recusada: { email: true, push: true },
+  demanda_nova: { email: true, push: true },
+  demanda_respondida: { email: true, push: true },
+  aprovacao_cliente: { email: true, push: true },
+  comentario_cliente: { email: false, push: true },
 } as const satisfies Record<string, { email: boolean; push: boolean }>;
 export type NotificationType = keyof typeof NOTIFICATION_TYPES;
 export const NOTIFICATION_TYPE_KEYS = Object.keys(NOTIFICATION_TYPES) as NotificationType[];
@@ -124,6 +128,16 @@ export function notificationPath(referenceType: string | null, referenceId: stri
       return "/financeiro";
     case "signature":
       return `/projetos/${referenceId}?tab=assinaturas`;
+    case "demand":
+      return `/demandas?d=${referenceId}`;
+    case "portal_task":
+      return `/cliente/tarefas/${referenceId}`;
+    case "portal_project":
+      return `/cliente/projetos/${referenceId}`;
+    case "portal_demand":
+      return "/cliente/demandas";
+    case "portal_signature":
+      return "/cliente/documentos";
     default:
       return "/";
   }

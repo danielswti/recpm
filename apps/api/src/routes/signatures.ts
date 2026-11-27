@@ -23,6 +23,7 @@ import { type AppTx, schema, withTenant } from "@recpm/db";
 import { refuseInput, signatureRequestInput, signInput } from "@recpm/shared";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { Context } from "hono";
+import { createMiddleware } from "hono/factory";
 import { uuidv7 } from "uuidv7";
 import type { Deps } from "../deps";
 import { actorOf, teamOnly } from "../lib/actor";
@@ -32,6 +33,7 @@ import { createStorage, type Storage } from "../lib/storage";
 import { requirePermission } from "../middleware/rbac";
 import { requireTenant } from "../middleware/tenant";
 import { buildSignedPdf, newSignerToken, newVerificationCode, sha256Hex } from "../services/signature-pdf";
+import type { AppEnv } from "../types";
 
 const s = schema;
 const tags = ["Assinaturas"];
@@ -89,6 +91,24 @@ const signerOut = (x: typeof s.signers.$inferSelect) => ({
   refusedAt: x.refusedAt?.toISOString() ?? null,
   refuseReason: x.refuseReason,
 });
+
+const PortalDoc = z
+  .object({
+    id: z.uuid().openapi({ description: "Id do meu lugar de signatário" }),
+    requestId: z.uuid(),
+    title: z.string(),
+    message: z.string().nullable(),
+    project: z.string().nullable(),
+    status: z.enum(STATUSES),
+    myStatus: z.enum(["pendente", "visualizou", "assinou", "recusou"]),
+    signerName: z.string(),
+    documentName: z.string(),
+    verificationCode: z.string(),
+    hasSignedCopy: z.boolean(),
+    sentAt: z.string().nullable(),
+    completedAt: z.string().nullable(),
+  })
+  .openapi("PortalDocument");
 
 async function requestsOut(tx: AppTx, rows: (typeof s.signatureRequests.$inferSelect)[]) {
   if (!rows.length) return [];
@@ -288,6 +308,129 @@ export const signatureRoutes = (deps: Deps) => {
           html: `<p>Todas as assinaturas de <strong>${info.req.title.replace(/[&<>"']/g, "")}</strong> foram concluídas.</p><p>Baixe a via assinada pelo seu link pessoal, que continua valendo.</p><p>Código de verificação: <strong>${info.req.verificationCode}</strong><br><a href="${web}/verificar/${info.req.verificationCode}">Conferir a autenticidade</a></p>`,
         })
         .catch((err) => deps.logger.warn({ err }, "falha ao avisar signatário"));
+  };
+
+  type SignerRef = { tenant_id: string; signer_id: string; request_id: string };
+  /** Assina como o signatário (link público ou portal do cliente). */
+  const signAs = async (ref: SignerRef, typedName: string, ip: string | null, ua: string | null) => {
+    const allSigned = await withTenant(
+      deps.dbs.appDb,
+      { tenantId: ref.tenant_id, actor: "system" },
+      async (tx) => {
+        const req = await load(tx, ref.request_id);
+        if (req.status !== "enviado")
+          throw new AppError(409, "SIGNATURE_CLOSED", "Este pedido não está mais aberto para assinatura.");
+        const [me] = await tx.select().from(s.signers).where(eq(s.signers.id, ref.signer_id)).for("update");
+        if (me!.signedAt || me!.refusedAt)
+          throw new AppError(409, "ALREADY_ANSWERED", "Você já respondeu a este pedido.");
+        if (normName(typedName) !== normName(me!.name))
+          throw new AppError(400, "NAME_MISMATCH", "Digite seu nome exatamente como aparece no pedido.");
+        const now = new Date();
+        await tx
+          .update(s.signers)
+          .set({ signedAt: now, viewedAt: me!.viewedAt ?? now, ip, userAgent: ua, updatedAt: now })
+          .where(eq(s.signers.id, me!.id));
+        await audit(
+          tx,
+          { ...systemActor(ref.tenant_id), name: me!.name, ip },
+          {
+            entity: "signature_request",
+            entityId: req.id,
+            entityLabel: req.title,
+            action: "signature.signed",
+            details: { signer: me!.email },
+          },
+        );
+        const [left] = await tx
+          .select({ n: sql<number>`count(*)::int` })
+          .from(s.signers)
+          .where(and(eq(s.signers.requestId, req.id), isNull(s.signers.signedAt)));
+        return !left?.n;
+      },
+    );
+    if (allSigned) await complete(ref.tenant_id, ref.request_id);
+  };
+  /** Recusa como o signatário (encerra o pedido). */
+  const refuseAs = async (ref: SignerRef, reason: string, ip: string | null, ua: string | null) => {
+    await withTenant(deps.dbs.appDb, { tenantId: ref.tenant_id, actor: "system" }, async (tx) => {
+      const req = await load(tx, ref.request_id);
+      if (req.status !== "enviado")
+        throw new AppError(409, "SIGNATURE_CLOSED", "Este pedido não está mais aberto para assinatura.");
+      const [me] = await tx.select().from(s.signers).where(eq(s.signers.id, ref.signer_id)).for("update");
+      if (me!.signedAt || me!.refusedAt)
+        throw new AppError(409, "ALREADY_ANSWERED", "Você já respondeu a este pedido.");
+      const now = new Date();
+      await tx
+        .update(s.signers)
+        .set({
+          refusedAt: now,
+          refuseReason: reason,
+          viewedAt: me!.viewedAt ?? now,
+          ip,
+          userAgent: ua,
+          updatedAt: now,
+        })
+        .where(eq(s.signers.id, me!.id));
+      await tx
+        .update(s.signatureRequests)
+        .set({ status: "recusado", completedAt: now, updatedAt: now })
+        .where(eq(s.signatureRequests.id, req.id));
+      if (req.createdBy)
+        await notify(tx, ref.tenant_id, [req.createdBy], {
+          type: "assinatura_recusada",
+          title: `${me!.name} recusou: ${req.title}`,
+          message: reason,
+          referenceType: req.projectId ? "signature" : undefined,
+          referenceId: req.projectId ?? undefined,
+        });
+      await audit(
+        tx,
+        { ...systemActor(ref.tenant_id), name: me!.name, ip },
+        {
+          entity: "signature_request",
+          entityId: req.id,
+          entityLabel: req.title,
+          action: "signature.refused",
+          details: { signer: me!.email, reason: reason },
+        },
+      );
+    });
+  };
+
+  // Portal: o cliente assina pelo próprio login, sem o link do e-mail (signatário = meu usuário ou meu e-mail).
+  const portalGuard = createMiddleware<AppEnv>(async (c, next) => {
+    const t = c.var.tenant;
+    if (t.role !== "cliente" || !t.clientId)
+      throw new AppError(403, "PORTAL_ONLY", "Esta área é do portal do cliente.");
+    await withTenant(deps.dbs.appDb, { tenantId: t.tenantId, userId: t.userId }, async (tx) =>
+      assertFeature(await loadEntitlements(tx), "clientPortal"),
+    );
+    await next();
+  });
+  r.use("/portal/documents", requireTenant(deps.dbs), portalGuard);
+  r.use("/portal/documents/*", requireTenant(deps.dbs), portalGuard);
+  const portalTx = <T>(c: Context<AppEnv>, fn: (tx: AppTx, email: string) => Promise<T>) =>
+    c.var.tenant.tx(async (tx) => {
+      const [u] = await tx
+        .select({ email: s.users.email })
+        .from(s.users)
+        .where(eq(s.users.id, c.var.tenant.userId));
+      return fn(tx, u?.email ?? "");
+    });
+  const mySigner = async (c: Context<AppEnv>, signerId: string) => {
+    const [x] = await portalTx(c, (tx, email) =>
+      tx
+        .select({ request_id: s.signers.requestId })
+        .from(s.signers)
+        .where(
+          and(
+            eq(s.signers.id, signerId),
+            sql`(${s.signers.userId} = ${c.var.tenant.userId} OR lower(${s.signers.email}) = lower(${email}))`,
+          ),
+        ),
+    );
+    if (!x) throw new AppError(404, "SIGNATURE_NOT_FOUND", "Documento não encontrado.");
+    return { tenant_id: c.var.tenant.tenantId, signer_id: signerId, request_id: x.request_id };
   };
 
   const PublicView = z.object({
@@ -608,6 +751,129 @@ export const signatureRoutes = (deps: Deps) => {
           return c.redirect(await store().presignDownload(f.storageKey, f.originalName), 302);
         },
       )
+      // ── portal do cliente ───────────────────────────────────────────────
+      .openapi(
+        createRoute({
+          method: "get",
+          path: "/portal/documents",
+          tags: ["Portal do cliente"],
+          summary: "Documentos para eu assinar (e os que já respondi)",
+          responses: { 200: ok(z.object({ data: z.array(PortalDoc) })) },
+        }),
+        async (c) => {
+          const rows = await portalTx(c, async (tx, email) =>
+            tx
+              .select({
+                r: s.signatureRequests,
+                sg: s.signers,
+                doc: s.files.originalName,
+                project: s.projects.name,
+              })
+              .from(s.signers)
+              .innerJoin(s.signatureRequests, eq(s.signatureRequests.id, s.signers.requestId))
+              .innerJoin(s.files, eq(s.files.id, s.signatureRequests.documentFileId))
+              .leftJoin(s.projects, eq(s.projects.id, s.signatureRequests.projectId))
+              .where(
+                and(
+                  inArray(s.signatureRequests.status, ["enviado", "assinado", "recusado"]),
+                  sql`(${s.signers.userId} = ${c.var.tenant.userId} OR lower(${s.signers.email}) = lower(${email}))`,
+                ),
+              )
+              .orderBy(desc(s.signatureRequests.sentAt)),
+          );
+          return c.json(
+            {
+              data: rows.map((x) => ({
+                id: x.sg.id,
+                requestId: x.r.id,
+                title: x.r.title,
+                message: x.r.message,
+                project: x.project,
+                status: x.r.status,
+                myStatus: signerStatus(x.sg) as "pendente",
+                signerName: x.sg.name,
+                documentName: x.doc,
+                verificationCode: x.r.verificationCode,
+                hasSignedCopy: !!x.r.signedFileId,
+                sentAt: x.r.sentAt?.toISOString() ?? null,
+                completedAt: x.r.completedAt?.toISOString() ?? null,
+              })),
+            },
+            200,
+          );
+        },
+      )
+      .openapi(
+        createRoute({
+          method: "get",
+          path: "/portal/documents/{id}/download",
+          tags: ["Portal do cliente"],
+          summary: "Baixar o documento (a via assinada, quando houver)",
+          request: { params: IdParam },
+          responses: { 302: { description: "Redireciona para o arquivo" } },
+        }),
+        async (c) => {
+          const ref = await mySigner(c, c.req.valid("param").id);
+          const f = await withTenant(
+            deps.dbs.appDb,
+            { tenantId: ref.tenant_id, actor: "system" },
+            async (tx) => {
+              const [req] = await tx
+                .select()
+                .from(s.signatureRequests)
+                .where(eq(s.signatureRequests.id, ref.request_id));
+              if (req!.status === "cancelado")
+                throw new AppError(410, "SIGNATURE_CLOSED", "Este pedido foi cancelado.");
+              const [f] = await tx
+                .select()
+                .from(s.files)
+                .where(eq(s.files.id, req!.signedFileId ?? req!.documentFileId));
+              return f!;
+            },
+          );
+          return c.redirect(await store().presignDownload(f.storageKey, f.originalName), 302);
+        },
+      )
+      .openapi(
+        createRoute({
+          method: "post",
+          path: "/portal/documents/{id}/sign",
+          tags: ["Portal do cliente"],
+          summary: "Assinar (digitando o próprio nome)",
+          request: { params: IdParam, ...body(signInput) },
+          responses: noContent,
+        }),
+        async (c) => {
+          const ref = await mySigner(c, c.req.valid("param").id);
+          await signAs(
+            ref,
+            c.req.valid("json").typedName,
+            clientIp(c),
+            c.req.header("user-agent")?.slice(0, 400) ?? null,
+          );
+          return c.body(null, 204);
+        },
+      )
+      .openapi(
+        createRoute({
+          method: "post",
+          path: "/portal/documents/{id}/refuse",
+          tags: ["Portal do cliente"],
+          summary: "Recusar (encerra o pedido)",
+          request: { params: IdParam, ...body(refuseInput) },
+          responses: noContent,
+        }),
+        async (c) => {
+          const ref = await mySigner(c, c.req.valid("param").id);
+          await refuseAs(
+            ref,
+            c.req.valid("json").reason,
+            clientIp(c),
+            c.req.header("user-agent")?.slice(0, 400) ?? null,
+          );
+          return c.body(null, 204);
+        },
+      )
       // ── público ─────────────────────────────────────────────────────────
       .openapi(
         createRoute({
@@ -657,54 +923,7 @@ export const signatureRoutes = (deps: Deps) => {
           const ref = await resolveToken(token);
           const ip = clientIp(c);
           const ua = c.req.header("user-agent")?.slice(0, 400) ?? null;
-          const allSigned = await withTenant(
-            deps.dbs.appDb,
-            { tenantId: ref.tenant_id, actor: "system" },
-            async (tx) => {
-              const req = await load(tx, ref.request_id);
-              if (req.status !== "enviado")
-                throw new AppError(
-                  409,
-                  "SIGNATURE_CLOSED",
-                  "Este pedido não está mais aberto para assinatura.",
-                );
-              const [me] = await tx
-                .select()
-                .from(s.signers)
-                .where(eq(s.signers.id, ref.signer_id))
-                .for("update");
-              if (me!.signedAt || me!.refusedAt)
-                throw new AppError(409, "ALREADY_ANSWERED", "Você já respondeu a este pedido.");
-              if (normName(b.typedName) !== normName(me!.name))
-                throw new AppError(
-                  400,
-                  "NAME_MISMATCH",
-                  "Digite seu nome exatamente como aparece no pedido.",
-                );
-              const now = new Date();
-              await tx
-                .update(s.signers)
-                .set({ signedAt: now, viewedAt: me!.viewedAt ?? now, ip, userAgent: ua, updatedAt: now })
-                .where(eq(s.signers.id, me!.id));
-              await audit(
-                tx,
-                { ...systemActor(ref.tenant_id), name: me!.name, ip },
-                {
-                  entity: "signature_request",
-                  entityId: req.id,
-                  entityLabel: req.title,
-                  action: "signature.signed",
-                  details: { signer: me!.email },
-                },
-              );
-              const [left] = await tx
-                .select({ n: sql<number>`count(*)::int` })
-                .from(s.signers)
-                .where(and(eq(s.signers.requestId, req.id), isNull(s.signers.signedAt)));
-              return !left?.n;
-            },
-          );
-          if (allSigned) await complete(ref.tenant_id, ref.request_id);
+          await signAs(ref, b.typedName, ip, ua);
           return c.json((await publicView(token, false)).view, 200);
         },
       )
@@ -722,57 +941,7 @@ export const signatureRoutes = (deps: Deps) => {
           const b = c.req.valid("json");
           const ref = await resolveToken(token);
           const ip = clientIp(c);
-          await withTenant(deps.dbs.appDb, { tenantId: ref.tenant_id, actor: "system" }, async (tx) => {
-            const req = await load(tx, ref.request_id);
-            if (req.status !== "enviado")
-              throw new AppError(
-                409,
-                "SIGNATURE_CLOSED",
-                "Este pedido não está mais aberto para assinatura.",
-              );
-            const [me] = await tx
-              .select()
-              .from(s.signers)
-              .where(eq(s.signers.id, ref.signer_id))
-              .for("update");
-            if (me!.signedAt || me!.refusedAt)
-              throw new AppError(409, "ALREADY_ANSWERED", "Você já respondeu a este pedido.");
-            const now = new Date();
-            await tx
-              .update(s.signers)
-              .set({
-                refusedAt: now,
-                refuseReason: b.reason,
-                viewedAt: me!.viewedAt ?? now,
-                ip,
-                userAgent: c.req.header("user-agent")?.slice(0, 400) ?? null,
-                updatedAt: now,
-              })
-              .where(eq(s.signers.id, me!.id));
-            await tx
-              .update(s.signatureRequests)
-              .set({ status: "recusado", completedAt: now, updatedAt: now })
-              .where(eq(s.signatureRequests.id, req.id));
-            if (req.createdBy)
-              await notify(tx, ref.tenant_id, [req.createdBy], {
-                type: "assinatura_recusada",
-                title: `${me!.name} recusou: ${req.title}`,
-                message: b.reason,
-                referenceType: req.projectId ? "signature" : undefined,
-                referenceId: req.projectId ?? undefined,
-              });
-            await audit(
-              tx,
-              { ...systemActor(ref.tenant_id), name: me!.name, ip },
-              {
-                entity: "signature_request",
-                entityId: req.id,
-                entityLabel: req.title,
-                action: "signature.refused",
-                details: { signer: me!.email, reason: b.reason },
-              },
-            );
-          });
+          await refuseAs(ref, b.reason, ip, c.req.header("user-agent")?.slice(0, 400) ?? null);
           return c.json((await publicView(token, false)).view, 200);
         },
       )

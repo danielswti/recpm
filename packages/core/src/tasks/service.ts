@@ -444,6 +444,37 @@ export async function moveTask(
         ...(move.adjustment && to.key === "ajustes" ? { adjustment: move.adjustment } : {}),
       },
     });
+    // Entrega esperando o cliente: avisa os usuários do portal daquele cliente.
+    if (to.key === "aguardando_cliente" && t.visibleToClient && t.projectId) {
+      const [p] = await tx
+        .select({ clientId: s.projects.clientId })
+        .from(s.projects)
+        .where(eq(s.projects.id, t.projectId));
+      if (p?.clientId) {
+        const portal = await tx
+          .select({ u: s.memberships.userId })
+          .from(s.memberships)
+          .where(
+            and(
+              eq(s.memberships.role, "cliente"),
+              eq(s.memberships.clientId, p.clientId),
+              eq(s.memberships.active, true),
+            ),
+          );
+        await notify(
+          tx,
+          actor.tenantId,
+          portal.map((x) => x.u),
+          {
+            type: "aprovacao_cliente",
+            title: `Para sua aprovação: ${t.title}`,
+            referenceType: "portal_task",
+            referenceId: t.id,
+          },
+          actor.userId,
+        );
+      }
+    }
     if (to.isApproval) {
       let targets: string[] = t.approverId ? [t.approverId] : [];
       if (!targets.length && t.projectId) {

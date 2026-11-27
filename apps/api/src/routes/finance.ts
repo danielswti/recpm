@@ -239,6 +239,7 @@ export const financeRoutes = (deps: Deps) => {
   const guard = [requireTenant(deps.dbs), teamOnly, requirePermission("finance.read")] as const;
   r.use("/finance/*", ...guard);
   r.use("/contracts/*", ...guard);
+  r.use("/installments", ...guard);
   r.use("/installments/*", ...guard);
   r.use("/projects/:id/contracts", ...guard);
   r.on(
@@ -531,6 +532,87 @@ export const financeRoutes = (deps: Deps) => {
           await tx.delete(s.contracts).where(eq(s.contracts.id, id));
         });
         return c.body(null, 204);
+      },
+    )
+    .openapi(
+      createRoute({
+        method: "get",
+        path: "/installments",
+        tags,
+        summary: "Listar parcelas (ex.: as pendentes e atrasadas)",
+        description:
+          "Sem `status`, traz as em aberto (pendente e atrasado). Ordem: vencimento mais antigo primeiro.",
+        request: {
+          query: z.object({
+            status: z
+              .string()
+              .optional()
+              .openapi({ example: "pendente,atrasado", description: "Lista separada por vírgula" }),
+            clientId: z.uuid().optional(),
+            dueFrom: z.iso.date().optional(),
+            dueTo: z.iso.date().optional(),
+            limit: z.coerce.number().int().min(1).max(500).default(100),
+          }),
+        },
+        responses: {
+          200: ok(
+            z
+              .object({
+                data: z.array(
+                  Installment.extend({
+                    contractId: z.uuid().nullable(),
+                    clientSubscriptionId: z.uuid().nullable(),
+                    client: z.object({ id: z.uuid(), code: z.string(), name: z.string() }).nullable(),
+                    project: z.object({ id: z.uuid(), name: z.string() }).nullable(),
+                  }),
+                ),
+              })
+              .openapi("InstallmentList"),
+          ),
+        },
+      }),
+      async (c) => {
+        const q = c.req.valid("query");
+        const STATUSES = ["pendente", "pago", "atrasado", "estornado"] as const;
+        const wanted = (q.status ?? "pendente,atrasado")
+          .split(",")
+          .map((x) => x.trim())
+          .filter((x): x is (typeof STATUSES)[number] => (STATUSES as readonly string[]).includes(x));
+        if (!wanted.length) throw new AppError(400, "INVALID_STATUS", "Status inválido.");
+        const rows = await c.var.tenant.tx((tx) =>
+          tx
+            .select({
+              i: s.installments,
+              client: { id: s.clients.id, code: s.clients.code, name: s.clients.name },
+              project: { id: s.projects.id, name: s.projects.name },
+            })
+            .from(s.installments)
+            .leftJoin(s.clients, eq(s.clients.id, s.installments.clientId))
+            .leftJoin(s.contracts, eq(s.contracts.id, s.installments.contractId))
+            .leftJoin(s.projects, eq(s.projects.id, s.contracts.projectId))
+            .where(
+              and(
+                inArray(s.installments.status, wanted),
+                q.clientId ? eq(s.installments.clientId, q.clientId) : undefined,
+                q.dueFrom ? sql`${s.installments.dueDate} >= ${q.dueFrom}` : undefined,
+                q.dueTo ? sql`${s.installments.dueDate} <= ${q.dueTo}` : undefined,
+              ),
+            )
+            .orderBy(asc(s.installments.dueDate), asc(s.installments.number))
+            .limit(q.limit),
+        );
+        return c.json(
+          {
+            data: rows.map((r) => ({
+              ...instOut(r.i),
+              contractId: r.i.contractId,
+              clientSubscriptionId: r.i.clientSubscriptionId,
+              client: r.client?.id ? r.client : null,
+              project: r.project?.id ? r.project : null,
+            })),
+          },
+          200,
+        );
       },
     )
     .openapi(

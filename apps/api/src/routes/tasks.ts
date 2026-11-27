@@ -874,7 +874,7 @@ export const taskRoutes = (deps: Deps) => {
               const created = await createTask(t, actor, {
                 ...b,
                 descriptionText: b.description ? richTextToPlain(b.description) : null,
-                source: "ui",
+                source: c.var.apiKeyId ? "api" : "ui",
               });
               return { task: await taskDetail(t, actor, created.id), quota: created.quota };
             });

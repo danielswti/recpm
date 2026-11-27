@@ -4,6 +4,11 @@ import type { AppEnv } from "../types";
 
 /** Carrega a sessão do Better Auth (cookie httpOnly) para todo request da API. */
 export const loadSession = createMiddleware<AppEnv>(async (c, next) => {
+  // a chave de API já montou a sessão (middleware api-key)
+  if (c.var.apiKeyId) {
+    await next();
+    return;
+  }
   const session = await c.var.auth.api.getSession({ headers: c.req.raw.headers });
   c.set("session", session);
   await next();

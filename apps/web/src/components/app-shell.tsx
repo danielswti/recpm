@@ -25,6 +25,7 @@ import {
   CreditCard,
   FolderKanban,
   Gauge,
+  Inbox,
   Languages,
   LayoutDashboard,
   ListChecks,
@@ -36,6 +37,7 @@ import {
   PanelLeftOpen,
   Repeat,
   Scale,
+  ScrollText,
   Settings,
   ShieldCheck,
   TrendingUp,
@@ -79,7 +81,9 @@ type NavItem = {
     | "/relatorios"
     | "/produtividade"
     | "/contratado-entregue"
-    | "/entregas";
+    | "/entregas"
+    | "/demandas"
+    | "/auditoria";
   phase?: number;
   perm?: Permission;
 };
@@ -110,6 +114,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { key: "nav.users", icon: Users, to: "/membros", perm: "members.read" },
       { key: "nav.workingNow", icon: Activity, to: "/trabalhando-agora", perm: "workingNow.view" },
       { key: "nav.approvals", icon: ClipboardCheck, to: "/aprovacoes", perm: "time.track" },
+      { key: "nav.demands", icon: Inbox, to: "/demandas", perm: "tasks.create" },
     ],
   },
   {
@@ -118,6 +123,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { key: "nav.catalogs", icon: BookOpen, to: "/cadastros", perm: "catalogs.manage" },
       { key: "nav.settings", icon: Settings, to: "/configuracoes", perm: "tenant.settings" },
       { key: "nav.billing", icon: CreditCard, to: "/assinatura", perm: "tenant.billing" },
+      { key: "nav.audit", icon: ScrollText, to: "/auditoria", perm: "tenant.audit" },
     ],
   },
 ];
