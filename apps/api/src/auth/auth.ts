@@ -267,21 +267,13 @@ export const createAuth = (deps: Deps) => {
                 });
             }
           },
-          // Ao aceitar: respeita o limite de usuários do plano e herda o cliente do convite.
-          beforeAddMember: async ({ member, user }) => {
+          // Ao aceitar: respeita o limite de usuários do plano. (O cliente do convite é copiado para o
+          // vínculo por um gatilho no banco: o Better Auth não repassa campos extras na criação.)
+          beforeAcceptInvitation: async ({ invitation }) => {
+            await seats(invitation.organizationId, invitation.role, false);
+          },
+          beforeAddMember: async ({ member }) => {
             await seats(member.organizationId, member.role, false);
-            if (member.role !== "cliente") return;
-            const [inv] = await dbs.authDb
-              .select({ clientId: schema.invitations.clientId })
-              .from(schema.invitations)
-              .where(
-                and(
-                  eq(schema.invitations.tenantId, member.organizationId),
-                  eq(schema.invitations.email, user.email.toLowerCase()),
-                  eq(schema.invitations.status, "pending"),
-                ),
-              );
-            return { data: { ...member, clientId: inv?.clientId ?? null } };
           },
         },
       }),
